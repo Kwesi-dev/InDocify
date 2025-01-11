@@ -127,7 +127,7 @@ export default function AnimatedBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 w-full h-full opacity-30"
+      className="fixed inset-0 w-full h-full opacity-30 pointer-events-none"
       aria-hidden="true"
     />
   );

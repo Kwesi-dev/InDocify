@@ -1,5 +1,6 @@
 "use client";
 
+import { scrollToSection } from "@/utils";
 import { Logo } from "@workspace/ui/components/Logo";
 import Link from "next/link";
 
@@ -14,32 +15,44 @@ export function NavBar() {
           </Link>
         </div>
 
-        <div className="flex items-center gap-8">
-          <Link
-            href="/features"
-            className="text-white/90 hover:text-white transition-colors"
+        <ul className="flex items-center gap-8">
+          <li
+            onClick={() => scrollToSection("features")}
+            className="text-white/90 hover:text-white transition-colors cursor-pointer"
           >
             FEATURES
-          </Link>
-          <Link
-            href="/pricing"
-            className="text-white/90 hover:text-white transition-colors"
+          </li>
+          <li
+            onClick={() => scrollToSection("pricing")}
+            className="text-white/90 hover:text-white transition-colors cursor-pointer"
           >
             PRICING
-          </Link>
-          <Link
-            href="/docs"
-            className="text-white/90 hover:text-white transition-colors"
-          >
-            DOCS
-          </Link>
-          <Link
-            href="/demo"
-            className="bg-[#CCFF00] text-black px-6 py-2 rounded-full hover:bg-[#CCFF00]/90 transition-colors"
-          >
-            REQUEST A DEMO
-          </Link>
-        </div>
+          </li>
+          <li>
+            <Link
+              href="/docs"
+              className="text-white/90 hover:text-white transition-colors cursor-pointer"
+            >
+              DOCS
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/login"
+              className="bg-white/10 text-white px-6 py-2 rounded-full hover:bg-white/20 transition-colors font-medium"
+            >
+              LOGIN
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/demo"
+              className="bg-[#CCFF00] text-black px-6 py-2 rounded-full hover:bg-[#CCFF00]/90 transition-colors"
+            >
+              REQUEST A DEMO
+            </Link>
+          </li>
+        </ul>
       </div>
     </nav>
   );

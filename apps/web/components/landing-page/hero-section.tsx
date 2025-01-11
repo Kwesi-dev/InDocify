@@ -1,6 +1,7 @@
 import { NavBar } from "./nav-bar";
 import AnimatedBackground from "./animated-background";
 import { AnimatedStripes } from "./animated-stripes";
+import ActionsButton from "./actions-button";
 
 export default function HeroSection() {
   return (
@@ -24,6 +25,7 @@ export default function HeroSection() {
               Onboarding Made Effortless with Smarter,{" "}
               <span className="text-[#CCFF00]">AI-Driven</span> Documentation
             </h1>
+            <ActionsButton />
           </div>
 
           <div className="lg:w-1/2 space-y-8 self-end mb-5">
