@@ -4,10 +4,11 @@ import Link from "next/link";
 import { useState } from "react";
 import { Github } from "lucide-react";
 import IndocifyLogo from "@/components/indocify-logo";
+import GoogleIcon from "@/components/google-icon";
+import { signIn } from "@/auth";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,14 +19,16 @@ export default function LoginPage() {
     <div className="min-h-screen bg-[#1a1f1a] flex flex-col">
       <div className="flex-1 flex flex-col items-center justify-center px-6">
         <div className="w-full max-w-sm">
-          <IndocifyLogo />
-          <h1 className="text-3xl font-bold text-white mb-2">Welcome back</h1>
-          <p className="text-white/70 mb-8">
-            New to inDocify?{" "}
-            <Link href="/signup" className="text-[#CCFF00] hover:underline">
-              Create an account
-            </Link>
-          </p>
+          <div className="space-y-2 mb-5">
+            <IndocifyLogo />
+            <h1 className="text-3xl font-bold text-white">Welcome back</h1>
+            <p className="text-white/70 mb-8">
+              New to inDocify?{" "}
+              <Link href="/signup" className="text-[#CCFF00] hover:underline">
+                Create an account
+              </Link>
+            </p>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
@@ -82,6 +85,23 @@ export default function LoginPage() {
             <button
               type="button"
               className="w-full bg-white/5 border border-white/10 text-white px-6 py-3 rounded-lg hover:bg-white/10 transition-colors flex items-center justify-center gap-2"
+              onClick={async () => {
+                await signIn("google", {
+                  callbackUrl: "/generate-docs",
+                });
+              }}
+            >
+              <GoogleIcon />
+              Continue with Google
+            </button>
+            <button
+              type="button"
+              className="w-full bg-white/5 border border-white/10 text-white px-6 py-3 rounded-lg hover:bg-white/10 transition-colors flex items-center justify-center gap-2"
+              onClick={async () => {
+                await signIn("github", {
+                  callbackUrl: "/generate-docs",
+                });
+              }}
             >
               <Github className="w-5 h-5" />
               Continue with GitHub

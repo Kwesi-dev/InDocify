@@ -1,24 +1,24 @@
-"use client";
-
 import Link from "next/link";
-import { scrollToSection } from "@/utils";
+import { auth } from "@/auth";
+import GetStartedButton from "../get-started-button";
 
 const ActionsButton = () => {
   return (
     <div className="flex flex-wrap gap-4 mt-8">
-      <button
-        onClick={() => scrollToSection("pricing")}
-        className="bg-[#CCFF00] text-black px-8 py-3 rounded-full hover:bg-[#CCFF00]/90 transition-colors font-medium"
-      >
-        Get Started
-      </button>
-      <Link
-        href="/signup"
-        className="bg-white/10 text-white px-8 py-3 rounded-full hover:bg-white/20 transition-colors font-medium"
-      >
-        Try Now
-      </Link>
+      <GetStartedButton />
+      <SignupButton />
     </div>
+  );
+};
+const SignupButton = async () => {
+  const session = await auth();
+  const link = session ? "/generate-docs" : "/login";
+  return (
+    <Link href={link}>
+      <button className="bg-white/10 text-white px-8 py-3 rounded-full hover:bg-white/20 transition-colors font-medium">
+        Try Now
+      </button>
+    </Link>
   );
 };
 

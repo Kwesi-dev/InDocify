@@ -5,7 +5,7 @@ import PricingSection from "@/components/landing-page/pricing-section";
 import StorySection from "@/components/landing-page/story-section";
 import { LiveChat } from "@/components/live-chat";
 
-export default function Page() {
+export default async function Page() {
   return (
     <main>
       <HeroSection />

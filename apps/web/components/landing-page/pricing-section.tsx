@@ -1,5 +1,6 @@
 import { Check, CreditCard, X } from "lucide-react";
 import TitleTag from "./title-tag";
+import Link from "next/link";
 
 const features = [
   {
@@ -52,9 +53,11 @@ export default function PricingSection() {
               Perfect for small projects and individual developers
             </p>
             <div className="text-4xl font-bold text-white mb-8">$0</div>
-            <button className="w-full bg-white/10 text-white px-6 py-3 rounded-full hover:bg-white/20 transition-colors mb-8">
-              Get Started
-            </button>
+            <Link href="/generate-docs">
+              <button className="w-full bg-white/10 text-white px-6 py-3 rounded-full hover:bg-white/20 transition-colors mb-8">
+                Get Started
+              </button>
+            </Link>
             <div className="space-y-4">
               {features.map((feature, index) => (
                 <div key={index} className="flex items-start gap-3">

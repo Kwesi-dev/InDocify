@@ -2,6 +2,7 @@ import { NavBar } from "./nav-bar";
 import AnimatedBackground from "./animated-background";
 import { AnimatedStripes } from "./animated-stripes";
 import ActionsButton from "./actions-button";
+import LoginButton from "../login-button";
 
 export default function HeroSection() {
   return (
@@ -9,7 +10,7 @@ export default function HeroSection() {
       <AnimatedBackground />
       <AnimatedStripes />
       <div className="relative z-10 container mx-auto px-6 pt-32 h-[calc(100vh-20px)]">
-        <NavBar />
+        <NavBar loginButton={<LoginButton />} />
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-16 h-full">
           <div className="lg:w-1/2">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full mb-8">

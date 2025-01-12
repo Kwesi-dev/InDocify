@@ -4,7 +4,7 @@ import { scrollToSection } from "@/utils";
 import { Logo } from "@workspace/ui/components/Logo";
 import Link from "next/link";
 
-export function NavBar() {
+export function NavBar({ loginButton }: { loginButton?: React.ReactNode }) {
   return (
     <nav className="absolute top-0 left-0 right-0 z-50 px-6 py-8">
       <div className="flex items-center justify-between">
@@ -36,14 +36,7 @@ export function NavBar() {
               DOCS
             </Link>
           </li>
-          <li>
-            <Link
-              href="/login"
-              className="bg-white/10 text-white px-6 py-2 rounded-full hover:bg-white/20 transition-colors font-medium"
-            >
-              LOGIN
-            </Link>
-          </li>
+          <li>{loginButton}</li>
           <li>
             <Link
               href="/demo"
