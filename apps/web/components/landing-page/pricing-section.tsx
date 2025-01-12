@@ -1,4 +1,5 @@
-import { Check, X } from "lucide-react";
+import { Check, CreditCard, X } from "lucide-react";
+import TitleTag from "./title-tag";
 
 const features = [
   {
@@ -28,13 +29,19 @@ export default function PricingSection() {
   return (
     <section className="bg-[#1a1f1a] py-24 relative" id="pricing">
       <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Simple, Transparent Pricing
-          </h2>
-          <p className="text-white/70 text-xl max-w-2xl mx-auto">
-            Choose the plan that best fits your team&apos;s needs
-          </p>
+        <div className="flex flex-col items-center">
+          <TitleTag
+            icon={<CreditCard className="w-4 h-4 text-[#CCFF00]" />}
+            title="Pricing"
+          />
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              Simple, Transparent Pricing
+            </h2>
+            <p className="text-white/70 text-xl max-w-2xl mx-auto">
+              Choose the plan that best fits your team&apos;s needs
+            </p>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">

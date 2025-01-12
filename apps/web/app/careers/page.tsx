@@ -3,28 +3,25 @@ import Link from "next/link";
 
 const positions = [
   {
-    title: "Senior Frontend Engineer",
+    title: "Frontend Engineer",
     department: "Engineering",
     location: "Remote",
     type: "Full-time",
+    link: "/careers/frontend-engineer",
   },
   {
     title: "AI/ML Engineer",
     department: "Engineering",
     location: "Remote",
     type: "Full-time",
-  },
-  {
-    title: "Product Designer",
-    department: "Design",
-    location: "Remote",
-    type: "Full-time",
+    link: "/careers/ai-ml-engineer",
   },
   {
     title: "Developer Advocate",
     department: "Marketing",
     location: "Remote",
     type: "Full-time",
+    link: "/careers/developer-advocate",
   },
 ];
 
@@ -67,13 +64,13 @@ export default function CareersPage() {
             </p>
 
             <h2 className="text-2xl font-bold text-white mb-6">
-              Open Positions
+              Potential Future Openings
             </h2>
             <div className="grid gap-4 mb-12">
               {positions.map((position) => (
                 <Link
                   key={position.title}
-                  href={`/careers/${position.title.toLowerCase().replace(/\s+/g, "-")}`}
+                  href={position.link}
                   className="bg-white/5 rounded-lg p-6 hover:bg-white/10 transition-colors group"
                 >
                   <div className="flex items-center justify-between">

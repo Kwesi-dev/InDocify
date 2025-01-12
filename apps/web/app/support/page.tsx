@@ -15,18 +15,21 @@ const categories = [
     title: "Documentation",
     description: "Browse our comprehensive guides and tutorials",
     count: 45,
+    link: "/docs",
   },
   {
     icon: FileQuestion,
     title: "FAQs",
     description: "Find answers to common questions",
     count: 120,
+    link: "/faqs",
   },
   {
     icon: MessageSquare,
     title: "Community",
     description: "Join discussions with other developers",
     count: 1250,
+    link: "/community",
   },
 ];
 
@@ -77,24 +80,26 @@ export default function SupportPage() {
             {/* Categories */}
             <div className="grid md:grid-cols-3 gap-6 mb-12">
               {categories.map((category) => (
-                <div
-                  key={category.title}
-                  className="bg-white/5 rounded-lg p-6 hover:bg-white/10 transition-colors group cursor-pointer"
-                >
-                  <div className="w-12 h-12 bg-[#CCFF00]/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-[#CCFF00]/20 transition-colors">
-                    <category.icon className="w-6 h-6 text-[#CCFF00]" />
+                <Link key={category.title} href={category.link}>
+                  <div
+                    key={category.title}
+                    className="bg-white/5 rounded-lg p-6 hover:bg-white/10 transition-colors group cursor-pointer"
+                  >
+                    <div className="w-12 h-12 bg-[#CCFF00]/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-[#CCFF00]/20 transition-colors">
+                      <category.icon className="w-6 h-6 text-[#CCFF00]" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">
+                      {category.title}
+                    </h3>
+                    <p className="text-white/70 mb-4">{category.description}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-white/50">
+                        {category.count} articles
+                      </span>
+                      <span className="text-[#CCFF00]">→</span>
+                    </div>
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-2">
-                    {category.title}
-                  </h3>
-                  <p className="text-white/70 mb-4">{category.description}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-white/50">
-                      {category.count} articles
-                    </span>
-                    <span className="text-[#CCFF00]">→</span>
-                  </div>
-                </div>
+                </Link>
               ))}
             </div>
 
@@ -107,7 +112,7 @@ export default function SupportPage() {
                 {popularArticles.map((article) => (
                   <Link
                     key={article.title}
-                    href="#"
+                    href="/blog"
                     className="flex items-center justify-between p-4 rounded-lg hover:bg-white/5 transition-colors"
                   >
                     <div className="flex items-center gap-4">

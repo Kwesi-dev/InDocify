@@ -47,27 +47,6 @@ export default function LoginPage() {
                 placeholder="name@email.com"
               />
             </div>
-
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-white mb-2"
-              >
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#CCFF00] focus:border-transparent"
-                placeholder="Enter your password"
-              />
-            </div>
-
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <input
@@ -83,15 +62,7 @@ export default function LoginPage() {
                   Remember me
                 </label>
               </div>
-
-              <Link
-                href="/forgot-password"
-                className="text-sm text-[#CCFF00] hover:underline"
-              >
-                Forgot password?
-              </Link>
             </div>
-
             <button
               type="submit"
               className="w-full bg-[#CCFF00] text-black px-6 py-3 rounded-lg hover:bg-[#CCFF00]/90 transition-colors font-medium"

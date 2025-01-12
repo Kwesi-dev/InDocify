@@ -160,10 +160,12 @@ export default function SignupPage() {
                     What used to take days now takes minutes."
                   </blockquote>
                   <div className="mt-2 text-sm">
-                    <span className="text-white font-medium">Sarah Chen</span>
+                    <span className="text-white font-medium">
+                      Afriyie Kwesi Samuel
+                    </span>
                     <span className="text-white/50">
                       {" "}
-                      • Lead Developer at TechCorp
+                      • Frontend Lead Developer at Vela Partners
                     </span>
                   </div>
                 </div>

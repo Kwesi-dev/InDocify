@@ -18,8 +18,7 @@ export function Footer() {
               </Link>
             </div>{" "}
             <p className="text-white/70">
-              Simplify documentation with AI-powered insights and seamless
-              collaboration.
+              Effortless onboarding with AI-driven codebase documentation.
             </p>
             <div className="flex space-x-4">
               <Link

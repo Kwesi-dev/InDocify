@@ -1,7 +1,16 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Bot, Github, RefreshCw, Palette, FileCode, Users } from "lucide-react";
+import {
+  Bot,
+  Github,
+  RefreshCw,
+  Palette,
+  FileCode,
+  Users,
+  Sparkles,
+} from "lucide-react";
+import TitleTag from "./title-tag";
 
 const features = [
   {
@@ -49,14 +58,20 @@ export default function FeaturesSection() {
       id="features"
     >
       <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Features Built for Modern Teams
-          </h2>
-          <p className="text-white/70 text-xl max-w-2xl mx-auto">
-            Everything you need to create, maintain, and share world-class
-            documentation
-          </p>
+        <div className="flex flex-col items-center">
+          <TitleTag
+            icon={<Sparkles className="w-4 h-4 text-[#CCFF00]" />}
+            title="Features"
+          />
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              Features Built for Modern Teams
+            </h2>
+            <p className="text-white/70 text-xl max-w-2xl mx-auto">
+              Everything you need to create, maintain, and share world-class
+              documentation
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

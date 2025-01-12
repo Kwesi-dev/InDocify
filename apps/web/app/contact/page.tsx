@@ -1,5 +1,6 @@
 import PageLayout from "@/components/layout";
 import { Mail, MessageSquare, Phone } from "lucide-react";
+import Link from "next/link";
 
 export default function ContactPage() {
   return (
@@ -43,21 +44,23 @@ export default function ContactPage() {
                 </button>
               </div>
 
-              <div className="bg-white/5 rounded-lg p-6">
-                <div className="w-12 h-12 bg-[#CCFF00]/10 rounded-lg flex items-center justify-center mb-4">
-                  <Phone className="w-6 h-6 text-[#CCFF00]" />
+              <Link href="/demo">
+                <div className="bg-white/5 rounded-lg p-6">
+                  <div className="w-12 h-12 bg-[#CCFF00]/10 rounded-lg flex items-center justify-center mb-4">
+                    <Phone className="w-6 h-6 text-[#CCFF00]" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">
+                    Schedule a Call
+                  </h3>
+                  <p className="text-white/70 mb-4">
+                    Book a call with our sales team to discuss enterprise
+                    solutions.
+                  </p>
+                  <button className="text-[#CCFF00] hover:underline">
+                    Book appointment
+                  </button>
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2">
-                  Schedule a Call
-                </h3>
-                <p className="text-white/70 mb-4">
-                  Book a call with our sales team to discuss enterprise
-                  solutions.
-                </p>
-                <button className="text-[#CCFF00] hover:underline">
-                  Book appointment
-                </button>
-              </div>
+              </Link>
             </div>
 
             <div className="bg-white/5 rounded-lg p-8">
