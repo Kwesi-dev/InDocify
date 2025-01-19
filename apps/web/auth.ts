@@ -6,6 +6,7 @@ import Sendgrid from "next-auth/providers/sendgrid";
 import { MagicLinkEmail } from "@workspace/transactional";
 import { render } from "@react-email/render";
 import jwt from "jsonwebtoken";
+import { createSupabaseClient } from "./lib/supabaseClient";
 
 const result = NextAuth({
   adapter: SupabaseAdapter({
@@ -18,7 +19,7 @@ const result = NextAuth({
       clientSecret: process.env.AUTH_GITHUB_SECRET,
       authorization: {
         url: "https://github.com/login/oauth/authorize",
-        params: { scope: "user:email read:user repo" },
+        params: { scope: "user:email repo" },
       },
     }),
     Google({
@@ -66,6 +67,7 @@ const result = NextAuth({
   callbacks: {
     async session({ session, user }) {
       const signingSecret = process.env.SUPABASE_JWT_SECRET;
+
       if (signingSecret) {
         const payload = {
           aud: "authenticated",
@@ -75,7 +77,17 @@ const result = NextAuth({
           role: "authenticated",
         };
         session.supabaseAccessToken = jwt.sign(payload, signingSecret);
+
+        const supabase = createSupabaseClient(session.supabaseAccessToken);
+        const { data } = await supabase
+          .from("users")
+          .select("github_access_token")
+          .eq("email", user.email)
+          .single();
+
+        session.githubAccessToken = data?.github_access_token;
       }
+
       return session;
     },
   },

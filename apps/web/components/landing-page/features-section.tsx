@@ -39,9 +39,9 @@ const features = [
   },
   {
     icon: FileCode,
-    title: "In-Repo Documentation",
+    title: "Personalized Dashboard",
     description:
-      "Generate Markdown-based documentation directly into your code repository. Pro users can integrate docs into mono-repos or Next.js apps, making documentation part of the development workflow.",
+      "InDocify provides a personalized dashboard for each team. You can manage documentation, track progress, and collaborate with your team members effectively.",
   },
   {
     icon: Users,

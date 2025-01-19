@@ -11,7 +11,7 @@ const features = [
   {
     name: "Documentation Preview",
     free: "Platform Preview Only",
-    pro: "Platform Preview + In-Repo Integration",
+    pro: "Platform Preview + Personalized Dashboard For Teams",
   },
   { name: "Markdown Export", free: false, pro: true },
   { name: "Customization", free: "Limited Themes", pro: "Fully Customizable" },

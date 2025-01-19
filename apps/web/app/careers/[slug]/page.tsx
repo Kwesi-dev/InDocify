@@ -110,7 +110,7 @@ const jobDetails = {
 export default async function CareerPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug?: string }>;
 }) {
   const { slug: role } = await params;
   const job = jobDetails[role as keyof typeof jobDetails];

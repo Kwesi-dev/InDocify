@@ -1,4 +1,3 @@
-import { Logo } from "@workspace/ui/components/Logo";
 import { Footer } from "./footer";
 import IndocifyLogo from "./indocify-logo";
 

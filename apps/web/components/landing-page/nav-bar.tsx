@@ -1,10 +1,14 @@
 "use client";
 
+import { logout } from "@/app/actions";
+import { signOut } from "@/auth";
 import { scrollToSection } from "@/utils";
 import { Logo } from "@workspace/ui/components/Logo";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 
 export function NavBar({ loginButton }: { loginButton?: React.ReactNode }) {
+  const { data: session } = useSession();
   return (
     <nav className="absolute top-0 left-0 right-0 z-50 px-6 py-8">
       <div className="flex items-center justify-between">
@@ -36,13 +40,23 @@ export function NavBar({ loginButton }: { loginButton?: React.ReactNode }) {
               DOCS
             </Link>
           </li>
-          <li>{loginButton}</li>
           <li>
-            <Link
-              href="/demo"
-              className="bg-[#CCFF00] text-black px-6 py-2 rounded-full hover:bg-[#CCFF00]/90 transition-colors"
-            >
-              REQUEST A DEMO
+            {session ? (
+              <button
+                className="bg-white/10 text-white px-6 py-2 rounded-full hover:bg-white/20 transition-colors font-medium"
+                onClick={() => logout()}
+              >
+                LOGOUT
+              </button>
+            ) : (
+              <>{loginButton}</>
+            )}
+          </li>
+          <li>
+            <Link href="/demo">
+              <button className="bg-[#CCFF00] text-black px-6 py-2 rounded-full hover:bg-[#CCFF00]/90 transition-colors">
+                REQUEST A DEMO
+              </button>
             </Link>
           </li>
         </ul>
