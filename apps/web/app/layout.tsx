@@ -1,5 +1,4 @@
 import { Geist, Geist_Mono } from "next/font/google";
-import { RootProvider } from "fumadocs-ui/provider";
 import { Providers } from "@/components/providers";
 import { Toaster } from "@workspace/ui/components/toaster";
 import "./globals.css";
@@ -25,9 +24,7 @@ export default function RootLayout({
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased flex flex-col min-h-screen`}
       >
         <Toaster />
-        <RootProvider>
-          <Providers>{children}</Providers>
-        </RootProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
