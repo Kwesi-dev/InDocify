@@ -8,7 +8,7 @@ export const logout = async () => {
 };
 
 export const googleSignIn = async () => {
-  return signIn("google", { callbackUrl: "/generate-docs" });
+  return signIn("google", { callbackUrl: "/analyse-repo" });
 };
 
 export const githubSignIn = async () => {
@@ -16,7 +16,7 @@ export const githubSignIn = async () => {
 };
 
 export const sendgridSignIn = async (email: string) => {
-  return signIn("sendgrid", { email, callbackUrl: "/generate-docs" });
+  return signIn("sendgrid", { email, callbackUrl: "/analyse-repo" });
 };
 
 export const supabaseClient = async () => {

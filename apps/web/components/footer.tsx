@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Github, Twitter, Linkedin } from "lucide-react";
+import { Twitter, Linkedin } from "lucide-react";
 import { Logo } from "@workspace/ui/components/Logo";
-import { scrollToSection } from "@/utils";
 
 export function Footer() {
   return (
@@ -18,15 +17,9 @@ export function Footer() {
               </Link>
             </div>{" "}
             <p className="text-white/70">
-              Effortless onboarding with AI-driven codebase documentation.
+              Understand Any Repository with AI-Powered Insights.
             </p>
             <div className="flex space-x-4">
-              <Link
-                href="https://github.com/indocify"
-                className="text-white/70 hover:text-[#CCFF00]"
-              >
-                <Github className="h-5 w-5" />
-              </Link>
               <Link
                 href="https://twitter.com/indocify"
                 className="text-white/70 hover:text-[#CCFF00]"
@@ -41,96 +34,6 @@ export function Footer() {
               </Link>
             </div>
           </div>
-
-          <div>
-            <h3 className="text-white font-semibold mb-4">Product</h3>
-            <ul className="space-y-2">
-              <li
-                className="text-white/70 hover:text-white cursor-pointer"
-                onClick={() => scrollToSection("features")}
-              >
-                Features
-              </li>
-              <li
-                className="text-white/70 hover:text-white cursor-pointer"
-                onClick={() => scrollToSection("pricing")}
-              >
-                Pricing
-              </li>
-              <li>
-                <Link href="/docs" className="text-white/70 hover:text-white">
-                  Documentation
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/changelog"
-                  className="text-white/70 hover:text-white"
-                >
-                  Changelog
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-white font-semibold mb-4">Company</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/about" className="text-white/70 hover:text-white">
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link href="/blog" className="text-white/70 hover:text-white">
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/careers"
-                  className="text-white/70 hover:text-white"
-                >
-                  Careers
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/contact"
-                  className="text-white/70 hover:text-white"
-                >
-                  Contact
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-white font-semibold mb-4">Legal</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/privacy"
-                  className="text-white/70 hover:text-white"
-                >
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms" className="text-white/70 hover:text-white">
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/security"
-                  className="text-white/70 hover:text-white"
-                >
-                  Security
-                </Link>
-              </li>
-            </ul>
-          </div>
         </div>
 
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
@@ -139,18 +42,18 @@ export function Footer() {
           </p>
           <div className="flex items-center gap-4">
             <Link
-              href="/status"
+              href="/privacy"
               className="text-white/70 hover:text-white text-sm"
             >
-              Status
+              Privacy
             </Link>
 
             <span className="text-white/30">•</span>
             <Link
-              href="/support"
+              href="/contact"
               className="text-white/70 hover:text-white text-sm"
             >
-              Support
+              Contact
             </Link>
           </div>
         </div>

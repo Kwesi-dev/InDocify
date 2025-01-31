@@ -1,16 +1,19 @@
-import FeaturesSection from "@/components/landing-page/features-section";
 import { Footer } from "@/components/footer";
 import HeroSection from "@/components/landing-page/hero-section";
+import { NavBar } from "@/components/landing-page/nav-bar";
 import PricingSection from "@/components/landing-page/pricing-section";
 import StorySection from "@/components/landing-page/story-section";
+import AuthButtons from "@/components/auth-buttons";
+import { WaitlistSection } from "@/components/landing-page/waitlist-section";
 
 export default async function Page() {
   return (
     <main>
+      <NavBar authButtons={<AuthButtons />} />
       <HeroSection />
-      <FeaturesSection />
       <StorySection />
       <PricingSection />
+      <WaitlistSection />
       <Footer />
     </main>
   );

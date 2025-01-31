@@ -1,14 +1,10 @@
 "use client";
 
-import { logout } from "@/app/actions";
-import { signOut } from "@/auth";
 import { scrollToSection } from "@/utils";
 import { Logo } from "@workspace/ui/components/Logo";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 
-export function NavBar({ loginButton }: { loginButton?: React.ReactNode }) {
-  const { data: session } = useSession();
+export function NavBar({ authButtons }: { authButtons?: React.ReactNode }) {
   return (
     <nav className="absolute top-0 left-0 right-0 z-50 px-6 py-8">
       <div className="flex items-center justify-between">
@@ -21,37 +17,12 @@ export function NavBar({ loginButton }: { loginButton?: React.ReactNode }) {
 
         <ul className="flex items-center gap-8">
           <li
-            onClick={() => scrollToSection("features")}
-            className="text-white/90 hover:text-white transition-colors cursor-pointer"
-          >
-            FEATURES
-          </li>
-          <li
             onClick={() => scrollToSection("pricing")}
-            className="text-white/90 hover:text-white transition-colors cursor-pointer"
+            className="text-white/90 transition-colors cursor-pointer hover:text-[#CCFF00]"
           >
             PRICING
           </li>
-          <li>
-            <Link
-              href="/docs"
-              className="text-white/90 hover:text-white transition-colors cursor-pointer"
-            >
-              DOCS
-            </Link>
-          </li>
-          <li>
-            {session ? (
-              <button
-                className="bg-white/10 text-white px-6 py-2 rounded-full hover:bg-white/20 transition-colors font-medium"
-                onClick={() => logout()}
-              >
-                LOGOUT
-              </button>
-            ) : (
-              <>{loginButton}</>
-            )}
-          </li>
+          <li>{authButtons}</li>
           <li>
             <Link href="/demo">
               <button className="bg-[#CCFF00] text-black px-6 py-2 rounded-full hover:bg-[#CCFF00]/90 transition-colors">

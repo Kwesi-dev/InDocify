@@ -5,17 +5,30 @@ import { openai } from "@ai-sdk/openai";
 import { auth } from "@/auth";
 import { createSupabaseClient } from "@/lib/supabaseClient";
 
-const exemptedfiles = [
+const exemptedFiles = [
+  // JavaScript/TypeScript lock files
   "package-lock.json",
   "yarn.lock",
   "pnpm-lock.yaml",
   "pnpm-workspace.yaml",
   "bun.lockb",
   "components.json",
+  // Python lock files and cache
+  "poetry.lock",
+  "Pipfile.lock",
+  "requirements.txt.lock",
+  "*.pyc",
+  "*.pyo",
+  "*.pyd",
+  // Common files
   ".gitignore",
+  ".env",
+  ".env.*",
+  ".DS_Store",
 ];
 
 const exemptedDirs = [
+  // JavaScript/TypeScript build and cache
   ".next",
   ".vercel",
   ".vercel_build_output",
@@ -24,7 +37,23 @@ const exemptedDirs = [
   "public",
   "node_modules",
   "dist",
+  "build",
+  // Python specific
+  "__pycache__",
+  ".pytest_cache",
+  ".mypy_cache",
+  ".coverage",
+  ".tox",
+  ".venv",
+  "venv",
+  "env",
+  "virtualenv",
+  // Common
   "tests",
+  "test",
+  ".git",
+  ".idea",
+  ".vscode",
 ];
 
 export const supabaseClient = async () => {
@@ -87,12 +116,58 @@ export async function fetchGroupedFilesWithContent(
     "Project Overview": [
       "README.md",
       "package.json",
+      "setup.py",
+      "pyproject.toml",
       "LICENSE",
       "CHANGELOG.md",
       "CONTRIBUTING.md",
     ],
-    "Code Structure and Organization": [],
+    "Code Structure and Organization": [
+      // Source code directories
+      "src/**/*",
+      "lib/**/*",
+      "app/**/*",
+      "packages/**/*",
+      "components/**/*",
+      // Python-specific patterns
+      "tests/**/*",
+      "test/**/*",
+      "__init__.py",
+      "__main__.py",
+      "setup.py",
+      "pyproject.toml",
+      // JavaScript/TypeScript patterns
+      "tsconfig.json",
+      "next.config.js",
+      "vite.config.js",
+      "webpack.config.js",
+      "package.json",
+      // Documentation
+      "docs/**/*",
+      "README.md",
+      // API and database
+      "api/**/*",
+      "routes/**/*",
+      "models/**/*",
+      "schemas/**/*",
+      "migrations/**/*",
+      "database/**/*",
+      // Configuration and utilities
+      "config/**/*",
+      "utils/**/*",
+      "helpers/**/*",
+      "scripts/**/*",
+      // Assets and static files
+      "assets/**/*",
+      "static/**/*",
+      "public/**/*",
+      // Type definitions
+      "types/**/*",
+      "@types/**/*",
+      "interfaces/**/*",
+    ],
     "Setting Up the Development Environment": [
+      // JavaScript/TypeScript files
       "package.json",
       "package-lock.json",
       "yarn.lock",
@@ -102,17 +177,38 @@ export async function fetchGroupedFilesWithContent(
       "next.config.js",
       "vite.config.js",
       "webpack.config.js",
+      // Python files
+      "requirements.txt",
+      "Pipfile",
+      "Pipfile.lock",
+      "poetry.lock",
+      "pyproject.toml",
+      "setup.py",
+      "setup.cfg",
+      "tox.ini",
+      "pytest.ini",
+      // Common files
       "README.md",
       "CONTRIBUTING.md",
       "Dockerfile",
       "docker-compose.yml",
     ],
     "Coding Best Practices or Guidelines": [
+      // JavaScript/TypeScript files
       ".eslintrc.js",
       ".eslintrc.json",
       ".prettierrc",
       ".prettierrc.json",
       ".prettierrc.js",
+      // Python files
+      ".pylintrc",
+      "mypy.ini",
+      "setup.cfg",
+      "pytest.ini",
+      "black.toml",
+      "flake8",
+      "isort.cfg",
+      // Common files
       ".editorconfig",
       "CONTRIBUTING.md",
       "jest.config.js",
@@ -131,7 +227,7 @@ export async function fetchGroupedFilesWithContent(
     }
 
     const filePromises = items.map(async (item: any) => {
-      if (exemptedfiles.includes(item.name)) {
+      if (exemptedFiles.includes(item.name)) {
         return;
       }
 
@@ -183,191 +279,198 @@ export async function fetchGroupedFilesWithContent(
   return groupedFiles;
 }
 
-const mdxGuidelines = `
-    ## MDX Guidelines
+function analyzeTechStack(files: Record<string, any>[]) {
+  const techStack = {
+    languages: new Set<string>(),
+    frameworks: new Set<string>(),
+    buildTools: new Set<string>(),
+    packageManagers: new Set<string>(),
+    testing: new Set<string>(),
+    database: new Set<string>(),
+    deployment: new Set<string>(),
+  };
 
-    ### General Markdown Syntax
-    Use Markdown for basic content formatting. Examples include headings, lists, emphasis, tables, and images.
+  // Helper function to check file existence
+  const hasFile = (pattern: string) => {
+    return files.some((file) => {
+      const name = file.name || "";
+      const path = file.path || "";
+      const content = file.content || "";
+      return (
+        name.match(new RegExp(pattern, "i")) ||
+        path.match(new RegExp(pattern, "i")) ||
+        content.match(new RegExp(pattern, "i"))
+      );
+    });
+  };
 
-    **Examples**:
-    - **Headings**:
-    -markdown:
-    # Main Heading
-    ## Subheading
-    ### Sub-Subheading
+  // Helper function to check content
+  const hasContent = (pattern: string) => {
+    return files.some((file) => {
+      const content = file.content || "";
+      return content.match(new RegExp(pattern, "i"));
+    });
+  };
 
-    Text in **bold**.
-    Text in _italics_.
-    Text in ~~strikethrough~~.
+  // Check for Python
+  if (
+    hasFile("requirements.txt") ||
+    hasFile("setup.py") ||
+    hasFile("pyproject.toml") ||
+    hasFile("\\.py$")
+  ) {
+    techStack.languages.add("Python");
 
-    Lists:
-        - Item 1
-        - Item 2
+    // Python specific frameworks
+    if (hasContent("django")) techStack.frameworks.add("Django");
+    if (hasContent("flask")) techStack.frameworks.add("Flask");
+    if (hasContent("fastapi")) techStack.frameworks.add("FastAPI");
 
-        1. Ordered List
-        2. Ordered List
+    // Python package managers
+    if (hasFile("requirements.txt")) techStack.packageManagers.add("pip");
+    if (hasFile("Pipfile")) techStack.packageManagers.add("pipenv");
+    if (hasFile("poetry.lock")) techStack.packageManagers.add("poetry");
 
-    Quotes:
-    > This is a quote.
+    // Python testing
+    if (hasContent("pytest")) techStack.testing.add("pytest");
+    if (hasContent("unittest")) techStack.testing.add("unittest");
 
-    Tables:
-    | Column 1 | Column 2 |
-    | -------- | -------- |
-    | Value 1  | Value 2  |
-    | Value 3  | Value 4  |
+    // Python build tools
+    if (hasFile("setup.py")) techStack.buildTools.add("setuptools");
+    if (hasFile("pyproject.toml")) techStack.buildTools.add("poetry");
+  }
 
-    Images:
-    ![Alt Text](image.png)
+  // Check for JavaScript/TypeScript
+  if (hasFile("\\.js$") || hasFile("\\.jsx$"))
+    techStack.languages.add("JavaScript");
+  if (hasFile("\\.ts$") || hasFile("\\.tsx$"))
+    techStack.languages.add("TypeScript");
 
-    **Code Blocks**:
-    - Use three backticks for code blocks.
+  if (
+    techStack.languages.has("JavaScript") ||
+    techStack.languages.has("TypeScript")
+  ) {
+    // JS/TS Frameworks
+    if (hasFile("next.config")) techStack.frameworks.add("Next.js");
+    if (hasContent("react")) techStack.frameworks.add("React");
+    if (hasContent("vue")) techStack.frameworks.add("Vue");
+    if (hasContent("angular")) techStack.frameworks.add("Angular");
 
+    // Package managers
+    if (hasFile("package-lock.json")) techStack.packageManagers.add("npm");
+    if (hasFile("yarn.lock")) techStack.packageManagers.add("yarn");
+    if (hasFile("pnpm-lock.yaml")) techStack.packageManagers.add("pnpm");
 
-    ### MDX Syntax
-    Include frontmatter for document metadata. Place it at the top of the document.
+    // Build tools
+    if (hasFile("webpack")) techStack.buildTools.add("webpack");
+    if (hasFile("vite")) techStack.buildTools.add("vite");
+    if (hasFile("rollup")) techStack.buildTools.add("rollup");
+    if (hasFile("tsconfig")) techStack.buildTools.add("TypeScript");
 
-    **Examples**:
-    - **Frontmatter**:
-    ---
-    title: "My Document"
-    description: "This is a description of the document."
-    ---            
+    // Testing
+    if (hasContent("jest")) techStack.testing.add("Jest");
+    if (hasContent("vitest")) techStack.testing.add("Vitest");
+    if (hasContent("cypress")) techStack.testing.add("Cypress");
+  }
 
-    Custom Anchor Links:
-    Use the {#anchor} syntax to create anchor links within the document.
+  // Database
+  if (hasContent("prisma")) techStack.database.add("Prisma");
+  if (hasContent("sequelize")) techStack.database.add("Sequelize");
+  if (hasContent("mongoose")) techStack.database.add("MongoDB");
+  if (hasContent("typeorm")) techStack.database.add("TypeORM");
+  if (hasContent("sqlalchemy")) techStack.database.add("SQLAlchemy");
+  if (hasContent("django.*models")) techStack.database.add("Django ORM");
 
-    **Examples**:
-    - **Anchor Link**:
-    # Main Heading {#main-heading}
+  // Deployment
+  if (hasFile("dockerfile")) techStack.deployment.add("Docker");
+  if (hasFile("kubernetes")) techStack.deployment.add("Kubernetes");
+  if (hasFile("vercel.json")) techStack.deployment.add("Vercel");
+  if (hasFile("netlify.toml")) techStack.deployment.add("Netlify");
+  if (hasFile("railway.toml")) techStack.deployment.add("Railway");
+  if (hasFile("fly.toml")) techStack.deployment.add("Fly.io");
 
-    Auto Links:
-    Internal Links:
-    [Internal Link](/internal-link)
-
-    External Links:
-    [External Link](https://example.com)
-    
-    Tabs for Codeblocks:
-    import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
-
-        <Tabs items={["Tab 1", "Tab 2"]}>
-        
-        [three backticks]
-        console.log('A');
-        [/three backticks]
-        
-        
-        [three backticks] ts tab
-        console.log('B');
-        [/three backticks]
-        
-        
-        </Tabs>
-
-    Highlighted Codeblocks:
-    [three backticks]tsx
-    console.log('A');
-    [/three backticks]
-`;
+  return {
+    languages: Array.from(techStack.languages),
+    frameworks: Array.from(techStack.frameworks),
+    buildTools: Array.from(techStack.buildTools),
+    packageManagers: Array.from(techStack.packageManagers),
+    testing: Array.from(techStack.testing),
+    database: Array.from(techStack.database),
+    deployment: Array.from(techStack.deployment),
+  };
+}
 
 export const generateProjectOverviewDocs = async (
   files: Record<string, any>[],
   clone_url: string
 ) => {
+  // Analyze the tech stack first
+  const techStack = analyzeTechStack(files);
+  console.log("techStack", techStack);
+
   const result = await generateText({
     model: openai("gpt-4o-mini"),
     prompt: `
         These are the files and the content needed to help generate docs: ${JSON.stringify(files)}
         Clone url: ${clone_url}
+        
+        Based on the analysis of the repository files, here is the detected technology stack:
+        ${JSON.stringify(techStack, null, 2)}
+        
+        Please generate documentation based ONLY on the detected technologies and files present in the repository.
+        Do not make assumptions about technologies that are not evidenced in the files.
       `,
     system: `
-            You are an expert MDX documentation generator for InDocify, a platform that creates structured, high-quality documentation to simplify developer onboarding. Your current task is to generate the **Project Overview: High-Level Understanding** section of the documentation. Follow the detailed formatting and behavior guidelines below.
-            You are to assume that you are the senior developer or lead developer trying to explain the project to a newly hired developer.
-           
-            ### **MDX Structure**
-
-            1. **Frontmatter**  
-            Every document must begin with a YAML-style frontmatter section containing the title and description. This identifies the section for readers.
-
-            Example:  
-            ---
-            title: "Project Overview"
-            description: "Overview of the project's purpose, features, and architecture to onboard developers."
-            ---
-
-
-            2.	Content Guidelines
-                •	Use headings and subheadings to clearly separate key aspects of the project.
-                •	Summarize the project’s purpose, core features, architecture, and technology stack in a concise, developer-friendly format.
-                •	For each subheading, include detailed explanations that would eliminate the need for repetitive onboarding meetings.
-
+            You are a documentation assistant tasked with generating a **Project Overview** section for a software project.
+            You must ONLY describe technologies and patterns that are actually present in the repository files.
+            Never make assumptions about technologies that aren't evidenced in the file list or tech stack analysis.
             
-            
-            Essential Files for High-Level Documentation
-            1.	README.md
-            •	Purpose: Serves as the project’s introductory documentation.
-            •	Includes:
-            •	Overview of the project.
-            •	Quick start guide.
-            •	High-level purpose and goals.
-            •	Why: A well-maintained README.md typically contains essential context for the project.
-            2.	package.json
-            •	Purpose: Provides insights into the project dependencies, scripts, and metadata.
-            •	Includes:
-            •	Project name, version, and description.
-            •	Scripts for running, building, or testing.
-            •	Dependency list.
-            •	Why: Helps new developers understand the libraries, frameworks, and tools used.
-            3.	LICENSE (optional but recommended)
-            •	Purpose: Specifies the legal terms for using, sharing, or modifying the project.
-            •	Why: Critical for understanding the usage rights and limitations.
-            4.	.gitignore
-            •	Purpose: Lists files and directories ignored by Git.
-            •	Why: Helps clarify which files are excluded from version control and why.
-            5.	tsconfig.json / jsconfig.json
-            •	Purpose: Configures TypeScript or JavaScript settings.
-            •	Why: Important for understanding how the code is structured and typed.
-            6.	next.config.js (for Next.js projects)
-            •	Purpose: Contains project-specific configurations for routing, middleware, and optimizations.
-            •	Why: Provides insights into server-side settings and environment setups.
-            7.	Supabase schema file (if applicable)
-            •	Purpose: Describes the database structure.
-            •	Why: Useful for understanding data models and relationships.
-            8.	CHANGELOG.md
-            •	Purpose: Tracks project updates, fixes, and releases.
-            •	Why: Helps developers understand the evolution of the project and identify recent changes.
-            9.	CONTRIBUTING.md (optional)
-            •	Purpose: Guides contributors on how to participate in the project.
-            •	Why: Relevant for understanding collaboration workflows.
-            10.	Architecture Diagrams or Notes (e.g., /docs/architecture.md)
-            •	Purpose: Provides an overview of system architecture, data flow, and dependencies.
-            •	Why: Crucial for onboarding developers with a top-down understanding of the system.
+            Content Guidelines:
+            1. Project Introduction
+               • Provide a clear, concise description of the project's purpose
+               • Identify the primary programming languages (Python, JavaScript/TypeScript, etc.)
+               • List key frameworks and technologies used
+               • Explain the project's core features and capabilities
 
-            4.	Section Requirements
-            Use the following sections for High-Level Understanding:
-            ## Project Purpose  
-            Provide a brief overview of the project, including its goals and the problems it solves. Use content from README.md.
+            2. Technical Stack Overview
+               • Backend technologies (Python frameworks, Node.js, etc.)
+               • Frontend frameworks (React, Vue, Angular, etc.)
+               • Database systems
+               • Key dependencies and libraries
+               • Build tools and package managers (npm, pip, poetry, etc.)
 
-            ## Core Features  
-            List and describe the key features of the project. Use information from README.md and any relevant documentation files.
+            3. Architecture Overview
+               • High-level system architecture
+               • Key components and their interactions
+               • Data flow between components
+               • External service integrations
 
-            ## Technology Stack  
-            Explain the technologies and tools used to build the project, including frameworks, libraries, and databases. Use package.json for dependencies.
+            4. Getting Started
+               • Prerequisites (language versions, tools, etc.)
+               • Quick start guide
+               • Development environment setup overview
+               • Basic usage examples
 
-            ## Architecture Overview  
-            Provide a summary of the project's structure and key components. If available, embed diagrams for better clarity.  
+            5. Key Features
+               • Core functionality
+               • Notable implementations
+               • Unique selling points
+               • Integration capabilities
 
-            5. Quick Start Guide
+            6. Project Status
+               • Current development stage
+               • Versioning information
+               • Roadmap highlights
+               • Known limitations
 
-            Provide a simple guide to get the project up and running. Include setup instructions and primary scripts from README.md and package.json.
-            
-            6.	Behavior Guidelines for Generation
+            Style Guidelines:
+            • Write in clear, professional language
+            • Use consistent terminology
+            • Include relevant code examples when helpful
+            • Link to detailed documentation where appropriate
+            • Highlight language-specific considerations
+            • Include diagrams or visual aids when beneficial
 
-            •	Accuracy: Ensure the content is technically accurate and uses data from the mentioned files.
-            •	Clarity: Write in a concise, clear, and beginner-friendly manner. Avoid using unexplained jargon.
-            •	Consistency: Adhere to the MDX syntax for formatting, metadata, and embedding external files or diagrams.
-
-            ${mdxGuidelines}  
     `,
   });
 
@@ -377,35 +480,75 @@ export const generateProjectOverviewDocs = async (
 export const generateCodeStructureDocs = async (
   files: Record<string, any>[]
 ) => {
+  // Analyze the tech stack first
+  const techStack = analyzeTechStack(files);
+
   const result = await generateText({
     model: openai("gpt-4o-mini"),
     prompt: `
         These are the files and the content needed to help generate docs: ${JSON.stringify(files)}
+        
+        Based on the analysis of the repository files, here is the detected technology stack:
+        ${JSON.stringify(techStack, null, 2)}
+        
+        Please generate documentation based ONLY on the detected technologies and files present in the repository.
+        Do not make assumptions about technologies that are not evidenced in the files.
       `,
     system: `
-          You are an expert MDX documentation generator for InDocify, a platform that creates structured, high-quality documentation to simplify developer onboarding. Your current task is to generate the **Code Structure and Organization** section of the documentation. Follow the detailed formatting and behavior guidelines below.
-          Your goal is generate a documention which explains the architecture, file organization, and key configurations of the codebase so that the new developer understands the project structure and how to navigate it.
-          If possible how the folders or files connect to each other using a diagram.
-          You are to assume you are the senior developer of the project explaining the architecture, file organization, and key configurations of the codebase so that the developer hired understands the project structure and how to navigate it.
-          
-          ### **MDX Structure**
+          You are a documentation assistant tasked with generating a **Code Structure and Organization** section for a software project.
+          Your goal is to generate documentation which explains the architecture, file organization, and key configurations of the codebase so that the new developer understands the project structure and how to navigate it.
 
-            1. **Frontmatter**  
-            Every document must begin with a YAML-style frontmatter section containing the title and description. This identifies the section for readers.
+          Content Guidelines:
+          1. Directory Structure
+             • Root-level organization
+             • Key directories and their purposes
+             • Language-specific directories (Python packages, JavaScript/TypeScript modules)
+             • Test organization
+             • Resource locations (assets, static files, templates)
 
-            Example:  
-            ---
-            title: "Code Structure and Organization"
-            description: "Detailed documentation explaining the architecture, file organization, and key configurations of the codebase."
-            ---
+          2. Code Organization
+             • Module/Package structure
+             • Component organization
+             • Naming conventions
+             • File grouping strategies
+             • Language-specific patterns (Python packages, JS/TS modules)
 
+          3. Architecture Patterns
+             • Design patterns used
+             • Code layering (MVC, MVVM, etc.)
+             • Service organization
+             • Data flow patterns
+             • State management
 
-            2.	Content Guidelines
-                •	Use headings and subheadings to clearly separate key aspects of the project.
-                •	Summarize the project’s code structure, core features, architecture, and technology stack in a concise, developer-friendly format.
-                •	For each subheading, include detailed explanations that would eliminate the need for repetitive onboarding meetings.  
+          4. Key Components
+             • Core modules/packages
+             • Important classes/functions
+             • API structure
+             • Database schema organization
+             • Utility functions location
 
-            ${mdxGuidelines}
+          5. Configuration
+             • Environment configurations
+             • Build configurations
+             • Language-specific settings (pyproject.toml, tsconfig.json, etc.)
+             • Dependencies management
+             • Development tools setup
+
+          6. Best Practices Implementation
+             • Code organization standards
+             • File naming conventions
+             • Module organization patterns
+             • Import structure
+             • Type organization (for TypeScript/Python type hints)
+
+          Style Guidelines:
+             • Use clear headings and subheadings
+             • Include relevant file tree diagrams
+             • Provide examples of key file locations
+             • Explain language-specific conventions
+             • Link related documentation sections
+             • Include rationale for structural decisions
+
     `,
   });
 
@@ -416,54 +559,78 @@ export const generateProjectSetupDocs = async (
   files: Record<string, any>[],
   clone_url: string
 ) => {
+  // Analyze the tech stack first
+  const techStack = analyzeTechStack(files);
+
   const result = await generateText({
     model: openai("gpt-4o-mini"),
     prompt: `
         These are the files and the content needed to help generate docs: ${JSON.stringify(files)}
         Clone url: ${clone_url}
+        
+        Based on the analysis of the repository files, here is the detected technology stack:
+        ${JSON.stringify(techStack, null, 2)}
+        
+        Please generate documentation based ONLY on the detected technologies and files present in the repository.
+        Do not make assumptions about technologies that are not evidenced in the files.
       `,
     system: `
-          You are an expert MDX documentation generator for InDocify, a platform that creates structured, high-quality documentation to simplify developer onboarding. Your current task is to generate the **Setting Up the Development Environment** section of the documentation. Follow the detailed formatting and behavior guidelines below.
-          Your goal is generate a documention which list the tools, technologies, and configurations needed to set up the development environment.
+          You are a documentation assistant tasked with generating a **Setting Up the Development Environment** section for a software project.
+          Your goal is to generate documentation which lists the tools, technologies, and configurations needed to set up the development environment.
           You can include links to the documentation of the tools if necessary.
           You should take note of the package manager used in the project based on the files provided.
-        
-          Sections for the **Setting Up the Development Environment** section:
-          ## Pre-requisites  
-          List any pre-requisites required to set up the development environment, such as tools, frameworks, or libraries. Use information from package.json and any relevant documentation files.
 
-          ## Installation steps
-          Provide a step-by-step guide for installing and setting up the development environment. Use information from package.json and any relevant documentation files.
+          Content Guidelines:
+          1. Prerequisites
+             • Required language versions (Python, Node.js, etc.)
+             • Development tools and IDEs
+             • System requirements
+             • Required global packages
 
-          ## Configuration  
-          Describe any configuration settings or environment variables that need to be set up to run the project. Use information from package.json and any relevant documentation files.
+          2. Installation Steps
+             • Repository setup
+             • Language-specific setup (Python virtualenv, Node.js version)
+             • Package manager installation (npm, pip, poetry, etc.)
+             • Development dependencies
+             • Environment variables
 
-          ## Running the project  
-          Provide instructions for running the project from the command line or using a development environment. Use information from package.json and any relevant documentation files.
+          3. Configuration
+             • Environment setup (.env files)
+             • IDE configuration
+             • Build tool setup
+             • Test framework configuration
+             • Linter and formatter setup
 
-          ## Troubleshooting  
-          Provide any known issues or challenges that developers may encounter when setting up the development environment. Use information from package.json and any relevant documentation files.
+          4. Build Process
+             • Development build steps
+             • Production build process
+             • Asset compilation
+             • Type generation
+             • Database setup
 
+          5. Running the Application
+             • Development server
+             • Test execution
+             • Debug configuration
+             • Common commands
+             • Docker setup (if applicable)
 
-          ### **MDX Structure**
+          6. Common Issues
+             • Known setup problems
+             • Troubleshooting guides
+             • Platform-specific issues
+             • Dependency conflicts
+             • Environment problems
 
-            1. **Frontmatter**  
-            Every document must begin with a YAML-style frontmatter section containing the title and description. This identifies the section for readers.
+          Style Guidelines:
+             • Provide step-by-step instructions
+             • Include command examples
+             • Note platform differences (Windows/Mac/Linux)
+             • Explain configuration options
+             • Include verification steps
+             • Reference official documentation
+      
 
-            Example:  
-            ---
-            title: "Code Structure and Organization"
-            description: "Detailed documentation explaining the architecture, file organization, and key configurations of the codebase."
-            ---
-
-
-            2.	Content Guidelines
-                •	Use headings and subheadings to clearly separate key aspects of the project.
-                •	Summarize the project’s code structure, core features, architecture, and technology stack in a concise, developer-friendly format.
-                •	For each subheading, include detailed explanations that would eliminate the need for repetitive onboarding meetings.
-                
-
-            ${mdxGuidelines}
     `,
   });
 
@@ -473,71 +640,80 @@ export const generateProjectSetupDocs = async (
 export const generateBestPracticesDocs = async (
   files: Record<string, any>[]
 ) => {
+  // Analyze the tech stack first
+  const techStack = analyzeTechStack(files);
+
   const result = await generateText({
     model: openai("gpt-4o-mini"),
     prompt: `
         These are the files and the content needed to help generate docs: ${JSON.stringify(files)}
+        
+        Based on the analysis of the repository files, here is the detected technology stack:
+        ${JSON.stringify(techStack, null, 2)}
+        
+        Please generate documentation based ONLY on the detected technologies and files present in the repository.
+        Do not make assumptions about technologies that are not evidenced in the files.
       `,
     system: `
-      You are a documentation assistant tasked with generating a **Coding Best Practices or Guidelines** section for a software project. Your goal is to help new developers understand the project's coding conventions, folder structures, naming conventions, and standards, ensuring consistency across the team. The output should focus on describing **best practices** and **guidelines** rather than explaining the functionality of the code.
+          You are a documentation assistant tasked with generating a **Coding Best Practices or Guidelines** section for a software project. Your goal is to help new developers understand the project's coding conventions, folder structures, naming conventions, and standards, ensuring consistency across the team.
 
-       ### **MDX Structure**
+          Content Guidelines:
+          1. Code Style
+             • Language-specific style guides (PEP 8, JavaScript Standard)
+             • Formatting conventions
+             • Naming conventions
+             • Documentation standards
+             • Type annotations usage
 
-            1. **Frontmatter**  
-            Every document must begin with a YAML-style frontmatter section containing the title and description. This identifies the section for readers.
+          2. Architecture Guidelines
+             • Module organization
+             • Component structure
+             • Design patterns
+             • State management
+             • Error handling
 
-            Example:  
-            ---
-            title: "Code Structure and Organization"
-            description: "Detailed documentation explaining the architecture, file organization, and key configurations of the codebase."
-            ---
+          3. Testing Standards
+             • Test organization
+             • Testing frameworks
+             • Coverage requirements
+             • Mocking practices
+             • Integration tests
 
+          4. Version Control
+             • Branch naming
+             • Commit messages
+             • PR/MR process
+             • Code review guidelines
+             • Release process
 
-            2.	Content Guidelines
-                •	Use headings and subheadings to clearly separate key aspects of the project.
-                •	Summarize the project’s code structure, core features, architecture, and technology stack in a concise, developer-friendly format.
-                •	For each subheading, include detailed explanations that would eliminate the need for repetitive onboarding meetings.
-                
+          5. Performance Considerations
+             • Optimization guidelines
+             • Resource management
+             • Caching strategies
+             • Memory management
+             • Async patterns
 
-      Here are the specific requirements for generating this section based on the provided files. If the files do not contain the necessary information, please provide a clear and concise response that can be used to help developers understand the project's coding practices.
+          6. Security Best Practices
+             • Authentication handling
+             • Data validation
+             • API security
+             • Environment variables
+             • Dependency management
 
-      1. **Folder and File Naming Conventions**:
-        - Provide clear guidelines on how folders and files are organized and named in the project.
-        - Explain how components, utilities, hooks, and other key elements are structured (e.g., components/ for UI components, lib/ for utilities).
-        - Mention naming conventions such as **PascalCase** for components and **camelCase** for utilities.
+          7. Documentation Requirements
+             • Code comments
+             • API documentation
+             • README standards
+             • Change documentation
+             • Type definitions
 
-      2. **Linting and Formatting**:
-        - Identify linting and formatting tools used in the project (e.g., ESLint, Prettier).
-        - Specify key rules, such as indentation, quotes, semicolons, trailing commas, etc.
-
-      3. **Commit Message Guidelines**:
-        - Include the commit message conventions, such as **Conventional Commits**.
-        - Provide examples of proper commit messages (e.g., feat: add authentication module).
-
-      4. **Testing Practices**:
-        - Describe testing standards followed in the project (e.g., using Jest, Vitest, or other frameworks).
-        - Include guidelines for organizing and naming test files (e.g., Navbar.test.tsx).
-
-      5. **Version Control and Git Hooks**:
-        - Outline any Git hooks in place, such as pre-commit or pre-push hooks (e.g., linting or testing checks using Husky).
-
-      6. **Environment Variables**:
-        - Explain how environment variables are managed using .env files.
-        - Mention the purpose of .env.example as a template.
-
-      7. **General Coding Practices**:
-        - Provide rules for naming variables, constants, and functions.
-        - Highlight any prohibited practices (e.g., mutating state directly, hardcoding values).
-        - Mention any patterns developers should follow (e.g., separating business logic from UI components).
-
-      8. **Tool-Specific Configurations**:
-        - Include details about configuration files like .eslintrc, .prettierrc, jest.config.js, or commitlint.config.js.
-
-      Your response must be concise, well-structured, and easy to follow. Avoid diving into the actual implementation details of the code but ensure the practices are actionable and directly applicable to the repository.
-
-      In addition, detect and mention whether the project uses **npm**, **pnpm**, or another package manager, and tailor the guidelines accordingly. If possible, extract this information dynamically based on the project's package.json file or related files.
-
-      ${mdxGuidelines}
+          Style Guidelines:
+             • Use clear examples
+             • Explain rationale behind practices
+             • Include anti-patterns to avoid
+             • Reference language-specific tools
+             • Link to official style guides
+             • Include code snippets
           `,
   });
 

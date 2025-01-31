@@ -39,7 +39,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         >
           {children}
         </NextThemesProvider>
-        <ReactQueryDevtools initialIsOpen={false} />
+        {/* <ReactQueryDevtools initialIsOpen={false} /> */}
       </QueryClientProvider>
     </SessionProvider>
   );

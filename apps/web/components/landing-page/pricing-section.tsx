@@ -9,20 +9,11 @@ const features = [
     pro: "Public and Private Repos",
   },
   {
-    name: "Documentation Preview",
-    free: "Platform Preview Only",
-    pro: "Platform Preview + Personalized Dashboard For Teams",
+    name: "Generate Documentation Guides",
+    pro: "Generate Documentation Guides",
   },
-  { name: "Markdown Export", free: false, pro: true },
-  { name: "Customization", free: "Limited Themes", pro: "Fully Customizable" },
   { name: "Code Push Updates", free: false, pro: "Via GitHub Webhooks" },
   { name: "Mono-Repo Support", free: false, pro: true },
-  { name: "Collaborative Editing", free: false, pro: true },
-  {
-    name: "API Integration Docs",
-    free: "Basic (One Repo)",
-    pro: "Comprehensive (All Integrated Repos)",
-  },
   { name: "Priority Support", free: false, pro: true },
 ];
 
@@ -53,7 +44,7 @@ export default function PricingSection() {
               Perfect for small projects and individual developers
             </p>
             <div className="text-4xl font-bold text-white mb-8">$0</div>
-            <Link href="/generate-docs">
+            <Link href="/analyse-repo">
               <button className="w-full bg-white/10 text-white px-6 py-3 rounded-full hover:bg-white/20 transition-colors mb-8">
                 Get Started
               </button>
@@ -91,7 +82,7 @@ export default function PricingSection() {
               For teams that need more power and flexibility
             </p>
             <div className="text-4xl font-bold text-white mb-8">
-              $29
+              $9
               <span className="text-lg font-normal text-white/70">/month</span>
             </div>
             <button className="w-full bg-[#CCFF00] text-black px-6 py-3 rounded-full hover:bg-[#CCFF00]/90 transition-colors mb-8 font-medium">

@@ -11,24 +11,23 @@ import { googleSignIn, sendgridSignIn } from "@/app/actions";
 const features = [
   {
     icon: Bot,
-    title: "AI-Powered Documentation",
+    title: "AI-Powered Insights",
     description:
-      "Let our AI analyze your codebase and generate comprehensive documentation in minutes",
+      "Harness the power of AI to analyze your codebase and create clear, purpose-driven documentation effortlessly.",
   },
   {
     icon: Zap,
-    title: "Instant Setup",
+    title: "Quick and Easy Setup",
     description:
-      "Connect your GitHub repository and get started with documentation in under 5 minutes",
+      "Seamlessly connect your GitHub repository and start understanding your codebase in just minutes.",
   },
   {
     icon: GitBranch,
-    title: "Auto-Sync Updates",
+    title: "Real-Time Codebase Sync",
     description:
-      "Documentation stays in sync with your code through automatic updates and webhooks",
+      "Keep your InDocify codebase in sync with your repository. Automatic updates ensure documentation reflects every change or push.",
   },
 ];
-
 export default function SignupPageContent() {
   const [email, setEmail] = useState("");
 
@@ -124,7 +123,7 @@ export default function SignupPageContent() {
               <div className="absolute -inset-1 bg-gradient-to-r from-[#CCFF00]/30 to-purple-500/30 rounded-lg blur"></div>
               <div className="relative bg-black/40 backdrop-blur-sm rounded-lg p-6 space-y-6">
                 <h2 className="text-2xl font-bold text-white">
-                  Transform Your Documentation Workflow
+                  Revolutionize How You Understand and Collaborate on Code
                 </h2>
                 <div className="space-y-8">
                   {features.map((feature, index) => (
@@ -146,8 +145,8 @@ export default function SignupPageContent() {
 
                 <div className="pt-6 mt-6 border-t border-white/10">
                   <blockquote className="text-white/70 italic">
-                    "InDocify has revolutionized how we handle documentation.
-                    What used to take days now takes minutes."
+                    "InDocify transforms the way we understand codebases What
+                    used to take days now takes minutes."
                   </blockquote>
                   <div className="mt-2 text-sm">
                     <span className="text-white font-medium">
@@ -155,7 +154,7 @@ export default function SignupPageContent() {
                     </span>
                     <span className="text-white/50">
                       {" "}
-                      • Frontend Lead Developer at Vela Partners
+                      • Frontend Lead Engineer at Vela Partners
                     </span>
                   </div>
                 </div>

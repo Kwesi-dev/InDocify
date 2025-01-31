@@ -5,26 +5,26 @@ import { Users, Star, GitBranch, Clock } from "lucide-react";
 import TitleTag from "./title-tag";
 
 const metrics = [
-  { value: "60%", label: "Reduced Onboarding Time" },
-  { value: "85%", label: "Documentation Accuracy" },
-  { value: "12hrs", label: "Saved Per Developer Monthly" },
+  { value: "70%", label: "Faster Repository Onboarding" },
+  { value: "90%", label: "Improved Repository Insights" },
+  { value: "15hrs", label: "Hours Saved per Developer Monthly" },
 ];
 
 const timeline = [
   {
-    title: "The Challenge",
+    title: "The Problem",
     description:
-      "As codebases grew more complex, developers spent countless hours explaining and documenting code instead of building. We knew there had to be a better way.",
+      "Understanding complex repositories has always been a barrier for developers, especially when contributing to new projects or onboarding to unfamiliar codebases.",
   },
   {
-    title: "The Solution",
+    title: "The Breakthrough",
     description:
-      "We built an AI-powered platform that automatically generates and maintains documentation, making it easy for teams to stay in sync and scale efficiently.",
+      "We created an AI-driven platform that analyzes any repository, answers questions in real-time, and provides clear, concise documentation to accelerate understanding.",
   },
   {
-    title: "The Impact",
+    title: "The Transformation",
     description:
-      "Teams using inDocify have reduced onboarding time by 60% and spend more time building features instead of explaining code.",
+      "Developers using InDocify spend 70% less time deciphering codebases and gain instant insights, empowering them to contribute effectively and innovate faster.",
   },
 ];
 
@@ -51,8 +51,8 @@ export default function StorySection() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-white/70 text-xl max-w-2xl mx-auto"
           >
-            From frustration to innovation: How we're transforming technical
-            documentation
+            From Complexity to Clarity: How InDocify Enhances Repository
+            Understanding
           </motion.p>
         </div>
 
@@ -115,73 +115,42 @@ export default function StorySection() {
         >
           <div className="absolute inset-0 bg-gradient-to-br from-[#CCFF00]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
           <div className="max-w-3xl mx-auto relative">
-            <div className="flex flex-wrap gap-8 mb-8">
-              <div className="flex items-center gap-2">
-                <GitBranch className="w-5 h-5 text-[#CCFF00]" />
-                <span className="text-white/70">Open Source First</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-[#CCFF00]" />
-                <span className="text-white/70">Community Driven</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-5 h-5 text-[#CCFF00]" />
-                <span className="text-white/70">Always Up-to-date</span>
-              </div>
-            </div>
-
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-              Why We Built inDocify
+              Why I Built inDocify
             </h2>
 
             <div className="space-y-6 text-lg text-white/70">
               <p>
-                Every developer knows the feeling: you join a new team, excited
-                to contribute, but spend weeks trying to understand the
-                codebase. The documentation is outdated, incomplete, or worse -
-                non-existent. Senior developers spend precious time explaining
-                the same concepts repeatedly instead of building new features.
+                Every developer knows the challenge: joining a new team or
+                contributing to a project often means spending weeks trying to
+                navigate the codebase. Documentation is frequently outdated,
+                incomplete, or nonexistent. Developers waste valuable time
+                deciphering code or seeking explanations instead of focusing on
+                innovation.
               </p>
 
               <p>
-                We experienced this firsthand across multiple companies and
-                projects. That's when we realized: documentation shouldn't be a
-                burden. It should be as dynamic and alive as the code itself.
+                I’ve faced this myself. Across multiple projects, I realized
+                that understanding a codebase shouldn’t be a struggle.
+                Documentation should be a dynamic, accessible resource for every
+                developer, no matter the repository.
               </p>
 
               <blockquote className="border-l-4 border-[#CCFF00] pl-6 my-8 italic">
-                "We're not just building a documentation tool. We're
-                transforming how teams understand and share knowledge about
-                their code."
+                “InDocify isn’t just about documentation. It’s about
+                transforming how developers explore, understand, and collaborate
+                on codebases.”
               </blockquote>
 
               <p>
-                Today, InDocify is empowering growing teams to focus less on
-                explaining and more on building. Our AI-powered platform is
-                designed to generate comprehensive, context-aware documentation
-                that stays in sync with your codebase. By simplifying onboarding
-                and enhancing collaboration, we’re helping developers work
-                smarter, not harder, as they scale their projects and teams.
+                Today, InDocify empowers developers by providing instant
+                insights into any repository. My AI-powered platform analyzes
+                code, generates real-time explanations, and produces
+                comprehensive documentation that evolves with your projects.
+                Whether onboarding to a new team or contributing to an
+                open-source project, InDocify simplifies the process, saving
+                time and enhancing collaboration.
               </p>
-            </div>
-
-            <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center">
-              <motion.a
-                href="/demo"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="inline-flex items-center justify-center gap-2 bg-[#CCFF00] text-black px-8 py-3 rounded-lg hover:bg-[#CCFF00]/90 transition-colors font-medium"
-              >
-                See it in Action
-              </motion.a>
-              <motion.a
-                href="/about"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="inline-flex items-center justify-center gap-2 bg-white/10 text-white px-8 py-3 rounded-lg hover:bg-white/20 transition-colors"
-              >
-                Learn More
-              </motion.a>
             </div>
           </div>
         </motion.div>

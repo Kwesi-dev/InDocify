@@ -17,3 +17,20 @@ export const scrollToSection = (sectionId: string) => {
  */
 export const atob = (encoded: string) =>
   Buffer.from(encoded, "base64").toString("utf-8");
+
+/**
+ * Extracts the owner and repo from a GitHub repository URL
+ * @param repoUrl The URL of the repository
+ * @returns An object with the owner and repo
+ */
+
+export function extractOwnerAndRepo(repoUrl: string): {
+  owner: string;
+  repo: string;
+} {
+  const match = repoUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+  if (!match) {
+    return { owner: "", repo: "" };
+  }
+  return { owner: match[1] as string, repo: match[2] as string };
+}

@@ -29,16 +29,15 @@ export default function TermsPage() {
                     2. Description of Service
                   </h2>
                   <p className="text-white/70">
-                    inDocify provides an AI-powered documentation platform that
-                    helps teams create, maintain, and organize technical
-                    documentation. Our services include:
+                    inDocify provides an AI-powered platform that helps it's
+                    users to understand codebases of any repository with
+                    AI-Powered Insights. Our services include:
                   </p>
                   <ul className="list-disc pl-6 text-white/70 space-y-2 mt-4">
-                    <li>Automated documentation generation</li>
-                    <li>Documentation hosting and management</li>
-                    <li>Collaboration tools</li>
-                    <li>API documentation features</li>
-                    <li>Integration with version control systems</li>
+                    <li>Repository analysis</li>
+                    <li>Interactive Q/A</li>
+                    <li>Codebase Overview</li>
+                    <li>Contributor Onboarding</li>
                   </ul>
                 </section>
 

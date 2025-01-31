@@ -6,7 +6,7 @@ const page = async () => {
   const session = await auth();
 
   if (session) {
-    redirect("/generate-docs");
+    redirect("/analyse-repo");
   }
   return <SignupPageContent />;
 };
