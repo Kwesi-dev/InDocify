@@ -430,22 +430,22 @@ export async function fetchAndProcessZipRepo(owner: string, repo: string) {
 //   return { analysisResults, readmeFile };
 // }
 
-// export async function generateDocs(readmeFileContent: string) {
-//   const result = await generateText({
-//     model: openai("gpt-4-turbo"),
-//     system: `
-//         You are to generate a project overview based on the provided README file content.
-//         The project overview must be a summary of the projects readme content.
-//         If the README file is not present, let the user know unfortunately you were not able to generate a project overview.
-//     `,
-//     prompt: `
-//       **Readme file content**:
-//       ${readmeFileContent}
-//     `,
-//   });
+export async function generateDocs(readmeFileContent: string) {
+  const result = await generateText({
+    model: openai("gpt-4-turbo"),
+    system: `
+        You are to generate a project overview based on the provided README file content.
+        The project overview must be a summarized version of the projects readme content.
+        If the README file is not present, let the user know unfortunately you were not able to generate a project overview.
+    `,
+    prompt: `
+      **Readme file content**:
+      ${readmeFileContent}
+    `,
+  });
 
-//   return result.text;
-// }
+  return result.text;
+}
 
 // import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 // import { generateEmbedding } from "@/lib/ai/embedding";

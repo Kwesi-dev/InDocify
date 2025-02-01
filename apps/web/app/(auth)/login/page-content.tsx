@@ -1,23 +1,42 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import IndocifyLogo from "@/components/indocify-logo";
 import GoogleIcon from "@/components/google-icon";
-import { googleSignIn, sendgridSignIn } from "@/app/actions";
+import { googleSignIn } from "@/app/actions";
+import { useSearchParams } from "next/navigation";
+import ParticlesAnimation from "@/components/particles-animation";
 // import ParticlesAnimation from "@/components/particles-animation";
 
 export default function LoginPageContent() {
-  const [email, setEmail] = useState("");
+  const searchParams = useSearchParams();
+  const repoName = searchParams.get("repo");
+  const repoUrl = searchParams.get("next-repo-url");
+  const owner = searchParams.get("owner");
+  const googleCallbackUrl =
+    repoName && repoUrl && owner
+      ? `/repo-extraction?next-repo-url=${repoUrl}&repo=${repoName}&owner=${owner}`
+      : repoName && repoUrl
+        ? `/repo-extraction?next-repo-url=${repoUrl}&repo=${repoName}`
+        : "/analyse-repo";
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await sendgridSignIn(email);
-  };
+  const registrationUrl =
+    repoName && repoUrl && owner
+      ? `/signup?next-repo-url=${repoUrl}&repo=${repoName}&owner=${owner}`
+      : repoName && repoUrl
+        ? `/signup?next-repo-url=${repoUrl}&repo=${repoName}`
+        : "/signup";
+
+  // const [email, setEmail] = useState("");
+
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   await sendgridSignIn(email);
+  // };
 
   return (
     <div className="min-h-screen bg-[#1a1f1a] flex flex-col">
-      {/* <ParticlesAnimation /> */}
+      <ParticlesAnimation />
       <div className="flex-1 flex flex-col items-center justify-center px-6">
         <div className="w-full max-w-sm">
           <div className="space-y-2 mb-5">
@@ -25,13 +44,16 @@ export default function LoginPageContent() {
             <h1 className="text-3xl font-bold text-white">Welcome back</h1>
             <p className="text-white/70 mb-8">
               New to inDocify?{" "}
-              <Link href="/signup" className="text-[#CCFF00] hover:underline">
+              <Link
+                href={registrationUrl}
+                className="text-[#CCFF00] hover:underline"
+              >
                 Create an account
               </Link>
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          {/* <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label
                 htmlFor="email"
@@ -83,17 +105,18 @@ export default function LoginPageContent() {
               </div>
             </div>
 
-            <button
-              type="button"
-              className="w-full bg-white/5 border border-white/10 text-white px-6 py-3 rounded-lg hover:bg-white/10 transition-colors flex items-center justify-center gap-2"
-              onClick={async () => {
-                await googleSignIn();
-              }}
-            >
-              <GoogleIcon />
-              Continue with Google
-            </button>
-          </form>
+           
+          </form> */}
+          <button
+            type="button"
+            className="w-full bg-white/5 border border-white/10 text-white px-6 py-3 rounded-lg hover:bg-white/10 transition-colors flex items-center justify-center gap-2"
+            onClick={async () => {
+              await googleSignIn(googleCallbackUrl);
+            }}
+          >
+            <GoogleIcon />
+            Continue with Google
+          </button>
 
           <p className="mt-6 text-sm text-white/50 text-center">
             By signing in, you agree to our{" "}

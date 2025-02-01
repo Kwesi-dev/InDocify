@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Bot, Code2, FileText, Check } from "lucide-react";
 
-const steps = [
+const urlSteps = [
   {
     icon: Bot,
-    text: "Connecting to your repository",
-    detail: "Verifying your GitHub connection",
+    text: "Connecting to repository",
+    detail: "Verifying GitHub connection",
   },
   {
     icon: Code2,
@@ -22,20 +22,42 @@ const steps = [
   },
   {
     icon: Check,
-    text: "Almost ready",
-    detail: "Preparing to redirect you to your inDocify chatroom",
+    text: "Preparing repoTalk room",
+    detail: "Preparing to redirect you to your inDocify repoTalk room",
+  },
+];
+
+const zipSteps = [
+  {
+    icon: Code2,
+    text: "Extracting files",
+    detail: "Extracting the contents of the ZIP file",
+  },
+  {
+    icon: FileText,
+    text: "Analysing your files",
+    detail: "Analyzing the structure and content of your codebase",
+  },
+  {
+    icon: Check,
+    text: "Preparing repoTalk room",
+    detail: "Preparing to redirect you to your inDocify repoTalk room",
   },
 ];
 
 export default function AnalysingRepoAnimation({
   progress,
+  stepsType = "urlSteps",
 }: {
   progress: number;
+  stepsType?: "urlSteps" | "zipSteps";
 }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [positions, setPositions] = useState<{ left: string; top: string }[]>(
     []
   );
+
+  const steps = stepsType === "zipSteps" ? zipSteps : urlSteps;
 
   const CurrentIcon = steps[currentStep]?.icon;
 

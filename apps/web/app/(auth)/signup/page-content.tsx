@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { Bot, Zap, GitBranch } from "lucide-react";
 import IndocifyLogo from "@/components/indocify-logo";
 import GoogleIcon from "@/components/google-icon";
-import { googleSignIn, sendgridSignIn } from "@/app/actions";
+import { googleSignIn } from "@/app/actions";
+import { useSearchParams } from "next/navigation";
+import ParticlesAnimation from "@/components/particles-animation";
 // import ParticlesAnimation from "@/components/particles-animation";
 
 const features = [
@@ -29,16 +30,32 @@ const features = [
   },
 ];
 export default function SignupPageContent() {
-  const [email, setEmail] = useState("");
+  // const [email, setEmail] = useState("");
+  const searchParams = useSearchParams();
+  const repoName = searchParams.get("repo");
+  const repoUrl = searchParams.get("next-repo-url");
+  const owner = searchParams.get("owner");
+  const googleCallbackUrl =
+    repoName && repoUrl && owner
+      ? `/repo-extraction?next-repo-url=${repoUrl}&repo=${repoName}&owner=${owner}`
+      : repoName && repoUrl
+        ? `/repo-extraction?next-repo-url=${repoUrl}&repo=${repoName}`
+        : "/analyse-repo";
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await sendgridSignIn(email);
-  };
+  const loginUrl =
+    repoName && repoUrl && owner
+      ? `/login?next-repo-url=${repoUrl}&repo=${repoName}&owner=${owner}`
+      : repoName && repoUrl
+        ? `/login?next-repo-url=${repoUrl}&repo=${repoName}`
+        : "/login";
+
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   await sendgridSignIn(email, googleCallbackUrl);
+  // };
 
   return (
     <div className="min-h-screen bg-[#1a1f1a] flex flex-col">
-      {/* <ParticlesAnimation /> */}
       <div className="flex-1 flex">
         {/* Left Column - Form */}
         <div className="w-full lg:w-1/2 flex flex-col p-8 lg:p-12 xl:p-16">
@@ -51,14 +68,17 @@ export default function SignupPageContent() {
               </h1>
               <p className="text-white/70">
                 Already have an account?{" "}
-                <Link href="/login" className="text-[#CCFF00] hover:underline">
+                <Link
+                  href={loginUrl}
+                  className="text-[#CCFF00] hover:underline"
+                >
                   Sign in
                 </Link>
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
+            {/* <form onSubmit={handleSubmit} className="space-y-6"> */}
+            {/* <div>
                 <label htmlFor="email" className="sr-only">
                   Email address
                 </label>
@@ -89,19 +109,18 @@ export default function SignupPageContent() {
                 <div className="relative flex justify-center text-sm">
                   <span className="px-2 bg-[#1a1f1a] text-white/50">OR</span>
                 </div>
-              </div>
-
-              <button
-                type="button"
-                className="w-full bg-white/5 border border-white/10 text-white px-6 py-3 rounded-lg hover:bg-white/10 transition-colors flex items-center justify-center gap-2"
-                onClick={async () => {
-                  await googleSignIn();
-                }}
-              >
-                <GoogleIcon />
-                Continue with Google
-              </button>
-            </form>
+              </div> */}
+            {/* </form> */}
+            <button
+              type="button"
+              className="w-full bg-white/5 border border-white/10 text-white px-6 py-3 rounded-lg hover:bg-white/10 transition-colors flex items-center justify-center gap-2"
+              onClick={async () => {
+                await googleSignIn(googleCallbackUrl);
+              }}
+            >
+              <GoogleIcon />
+              Continue with Google
+            </button>
 
             <p className="mt-6 text-sm text-white/50 text-center">
               By signing up, you agree to our{" "}

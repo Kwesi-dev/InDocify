@@ -6,9 +6,13 @@ import { Button } from "@workspace/ui/components/button";
 
 interface FileUploadZoneProps {
   onFileSelect: (file: File) => void;
+  isLoading: boolean;
 }
 
-export function FileUploadZone({ onFileSelect }: FileUploadZoneProps) {
+export function FileUploadZone({
+  onFileSelect,
+  isLoading,
+}: FileUploadZoneProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -122,16 +126,27 @@ export function FileUploadZone({ onFileSelect }: FileUploadZoneProps) {
                   variant="ghost"
                   onClick={removeFile}
                   className="text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                  disabled={isLoading}
                 >
                   <X className="w-4 h-4 mr-2" />
                   Remove
                 </Button>
                 <Button
-                  className="bg-[#CCFF00] text-black hover:bg-[#CCFF00]/90"
+                  className="bg-[#CCFF00] text-black hover:bg-[#CCFF00]/90 flex items-center justify-center"
                   onClick={() => onFileSelect(selectedFile)}
+                  disabled={isLoading}
                 >
-                  Continue
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                  {isLoading ? (
+                    <>
+                      Processing
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    </>
+                  ) : (
+                    <>
+                      Continue
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </>
+                  )}
                 </Button>
               </>
             )}

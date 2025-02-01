@@ -17,16 +17,15 @@ import IndocifyLogo from "@/components/indocify-logo";
 import ParticlesAnimation from "@/components/particles-animation";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import {
-  analyzeJS,
-  analyzePython,
-  detectTechStack,
-  fetchRepoFiles,
-  generateDocs,
-  processEmbeddings,
-} from "../agents/new/actions";
+import { generateDocs } from "../agents/new/actions";
 import { useSupabase } from "@/hooks/useSupabase";
 import AnalysingRepoAnimation from "@/components/analysing-repo-animation";
+import {
+  MAX_SIZE_LIMIT_FOR_FREE_PLAN,
+  MAX_SIZE_LIMIT_FOR_PRO_PLAN,
+} from "@/utils/data";
+import { fetchAndProcessZipRepo } from "../agents/new/actions";
+import { SizeLimitAlert } from "@/components/size-limit-alert";
 
 export default function SetupPage() {
   const [step, setStep] = useState(1);
@@ -44,6 +43,12 @@ export default function SetupPage() {
   const router = useRouter();
   const githubAccessToken = session?.githubAccessToken;
   const supabase = useSupabase();
+  const user = session?.user?.email ? "free" : "pro";
+  const [sizeLimitExceeded, setSizeLimitExceeded] = useState({
+    status: false,
+    fileSize: 0,
+    sizeLimit: 0,
+  });
 
   const { data: repos, isLoading: isLoadingRepos } = useQuery({
     enabled: !!githubAccessToken,
@@ -74,67 +79,81 @@ export default function SetupPage() {
   const handleGenerateDocs = async () => {
     setIsAnalyzing(true);
     try {
-      const files = await fetchRepoFiles(
+      //get repo zip size
+      const response = await fetch(
+        `/api/repo/size?owner=${selectedRepo?.owner}&repo=${selectedRepo?.repo}`
+      );
+      const size = await response.json();
+      if (user === "free" && size > MAX_SIZE_LIMIT_FOR_FREE_PLAN) {
+        setSizeLimitExceeded({
+          status: true,
+          fileSize: size,
+          sizeLimit: MAX_SIZE_LIMIT_FOR_FREE_PLAN,
+        });
+        return;
+      } else if (user === "pro" && size > MAX_SIZE_LIMIT_FOR_PRO_PLAN) {
+        setSizeLimitExceeded({
+          status: true,
+          fileSize: size,
+          sizeLimit: MAX_SIZE_LIMIT_FOR_PRO_PLAN,
+        });
+        return;
+      } else {
+        if (sizeLimitExceeded.status === true)
+          setSizeLimitExceeded({
+            status: false,
+            fileSize: 0,
+            sizeLimit: 0,
+          });
+      }
+      setProgress(20);
+      const files = await fetchAndProcessZipRepo(
         selectedRepo?.owner as string,
-        selectedRepo?.repo as string,
-        githubAccessToken as string
+        selectedRepo?.repo as string
       );
 
-      setProgress(20);
-      const techStack = await detectTechStack(files.filesWithContent);
+      //save files to database
+      files?.map(async (file) => {
+        if (!supabase) return;
+        //save file to db
+        await supabase.from("github_files").insert({
+          path: file.path,
+          content: file.content,
+          repo: selectedRepo?.repo,
+          owner: selectedRepo?.owner,
+          githubAccessToken: githubAccessToken,
+          email: session?.user?.email,
+        });
+      });
+      setProgress(40);
       const data = await fetch(
         `/api/repo/metadata?owner=${selectedRepo?.owner}&repo=${selectedRepo?.repo}`
       );
       const metadata = await data.json();
 
-      setProgress(40);
-      const analysis =
-        techStack.language.toLowerCase() === "javascript" ||
-        techStack.language.toLowerCase() === "typescript"
-          ? await analyzeJS(files.filesWithContent)
-          : await analyzePython(files.filesWithContent);
       setProgress(60);
-      //save analysis to supabase
-      await supabase.from("github_files").upsert(
-        [
-          {
-            owner: selectedRepo?.owner,
-            repo: selectedRepo?.repo,
-            github_access_token: githubAccessToken,
-            repo_files: JSON.stringify(analysis),
-          },
-        ],
-        {
-          onConflict: "repo",
-        }
-      );
+      //find the readme file
+      const readmeFile = files?.find((file: any) => file.path === "README.md");
+      //save the files to the database
+      const docsRes = await generateDocs(readmeFile?.content as string);
+
       setProgress(80);
-      const docsRes = await generateDocs(
-        analysis.readmeFile?.content as string
-      );
-      //save docs to supabase
-      await supabase.from("github_docs").upsert(
-        [
-          {
-            owner: selectedRepo?.owner,
-            repo: selectedRepo?.repo,
-            github_access_token: githubAccessToken,
-            readme: docsRes,
-            metadata: JSON.stringify({
-              ...metadata,
-              totalFiles: files.filesWithContent.length,
-            }),
-          },
-        ],
-        {
-          onConflict: "repo",
-        }
-      );
-      await processEmbeddings(
-        files.filesWithContent,
-        selectedRepo?.repo as string
-      );
+
+      //save readme to database
+      await supabase.from("github_docs").insert({
+        owner: selectedRepo?.owner,
+        repo: selectedRepo?.repo,
+        readme: docsRes,
+        githubAccessToken: githubAccessToken,
+        email: session?.user?.email,
+        metadata: JSON.stringify({
+          ...metadata,
+          totalFiles: files?.length,
+        }),
+      });
+
       setProgress(100);
+
       router.push(
         `/chat?owner=${selectedRepo?.owner}&repo=${selectedRepo?.repo}`
       );
@@ -160,6 +179,14 @@ export default function SetupPage() {
   return (
     <div className="min-h-screen bg-[#1a1f1a] flex flex-col">
       {isAnalyzing ? <AnalysingRepoAnimation progress={progress} /> : null}
+      <SizeLimitAlert
+        isOpen={sizeLimitExceeded.status}
+        onClose={() =>
+          setSizeLimitExceeded({ status: false, fileSize: 0, sizeLimit: 0 })
+        }
+        fileSize={sizeLimitExceeded.fileSize}
+        sizeLimit={sizeLimitExceeded.sizeLimit}
+      />
       {/* Animated Background */}
       <ParticlesAnimation />
       {/* Content */}
@@ -343,6 +370,12 @@ export default function SetupPage() {
 
           {/* Footer */}
           <div className="text-center space-y-4">
+            <p className="text-white/50">
+              To use other methods kindly click{" "}
+              <Link href="/" className="text-[#CCFF00] hover:underline">
+                Home
+              </Link>
+            </p>
             <p className="text-white/50">
               Need help?{" "}
               <Link href="/support" className="text-[#CCFF00] hover:underline">

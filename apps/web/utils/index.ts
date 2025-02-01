@@ -1,3 +1,5 @@
+import { customAlphabet } from "nanoid";
+
 /**
  * Scrolls to a section of the page
  * @param sectionId The id of the section to scroll to
@@ -34,3 +36,7 @@ export function extractOwnerAndRepo(repoUrl: string): {
   }
   return { owner: match[1] as string, repo: match[2] as string };
 }
+
+const alphabet =
+  "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+export const nanoid = customAlphabet(alphabet, 10);

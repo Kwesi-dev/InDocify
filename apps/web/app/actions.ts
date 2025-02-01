@@ -7,16 +7,16 @@ export const logout = async () => {
   return signOut();
 };
 
-export const googleSignIn = async () => {
-  return signIn("google", { callbackUrl: "/analyse-repo" });
+export const googleSignIn = async (callbackUrl: string) => {
+  return signIn("google", { redirectTo: callbackUrl });
 };
 
 export const githubSignIn = async () => {
   return signIn("github");
 };
 
-export const sendgridSignIn = async (email: string) => {
-  return signIn("sendgrid", { email, callbackUrl: "/analyse-repo" });
+export const sendgridSignIn = async (email: string, callbackUrl: string) => {
+  return signIn("sendgrid", { email, redirectTo: callbackUrl });
 };
 
 export const supabaseClient = async () => {
