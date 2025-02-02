@@ -2,7 +2,7 @@
 
 import AnalysingRepoAnimation from "@/components/analysing-repo-animation";
 import { useSearchParams } from "next/navigation";
-import { fetchAndProcessZipRepo } from "../agents/new/actions";
+import { fetchAndProcessZipRepo, generateDocs } from "../agents/new/actions";
 import { useSupabase } from "@/hooks/useSupabase";
 import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
@@ -21,10 +21,6 @@ const Page = () => {
   const prepareRepoForExtraction = useCallback(async () => {
     let files: { path: string; content: string }[] = [];
     try {
-      //after 200 seconds set progress to 100
-      setTimeout(() => {
-        setProgress(25);
-      }, 500);
       if (nextRepoUrl?.includes("zip-file")) {
         const file_id = nextRepoUrl.split("-")[2];
         const { data, error } = await supabase
@@ -40,10 +36,7 @@ const Page = () => {
         files = (await fetchAndProcessZipRepo(owner, repo)) as typeof files;
       }
 
-      setProgress(50);
-      setTimeout(() => {
-        setProgress(25);
-      }, 500);
+      setProgress(25);
       //map through files and prepare them for saving to db
       if (!files) {
         //alet the user of the error
@@ -53,33 +46,67 @@ const Page = () => {
       files.map(async (file) => {
         if (!supabase) return;
         //save file to db
-        await supabase.from("github_files").upsert({
+        await supabase.from("github_files").insert({
           path: file.path,
           content: file.content,
           repo: repo,
           owner: owner,
-          githubAccessToken: session?.githubAccessToken as string,
           email: session?.user?.email as string,
         });
       });
+      setProgress(50);
+
+      let metadata: Record<string, any> = {};
+      if (owner) {
+        const data = await fetch(
+          `/api/repo/metadata?owner=${owner}&repo=${repo}`
+        );
+        metadata = await data.json();
+      }
+
+      const readmeFile = files?.find(
+        (file: any) =>
+          file.path.includes("README.md") || file.path.includes("readme.md")
+      );
+      console.log(readmeFile, "readmeFile");
+      console.log(files, "files");
+
+      setProgress(75);
+
+      const docsRes = await generateDocs(readmeFile?.content as string);
+
+      if (owner) {
+        await supabase.from("github_docs").insert({
+          owner: owner,
+          repo: repo,
+          readme: docsRes,
+          email: session?.user?.email,
+          metadata: {
+            ...metadata,
+            totalFiles: files?.length,
+          },
+        });
+      } else {
+        await supabase.from("github_docs").insert({
+          repo: repo,
+          readme: docsRes,
+          email: session?.user?.email,
+          metadata: JSON.stringify({
+            ...metadata,
+            totalFiles: files?.length,
+          }),
+        });
+      }
 
       setProgress(100);
       const path = owner
-        ? `/chat?owner=${owner}&repo=${repo}`
-        : `/chat?repo=${repo}`;
+        ? `/repo-talkroom?owner=${owner}&repo=${repo}`
+        : `/repo-talkroom?repo=${repo}`;
       router.push(path);
     } catch (error) {
       console.log(error);
     }
-  }, [
-    nextRepoUrl,
-    owner,
-    repo,
-    router,
-    session?.githubAccessToken,
-    session?.user?.email,
-    supabase,
-  ]);
+  }, [nextRepoUrl, owner, repo, router, session?.user?.email, supabase]);
 
   useEffect(() => {
     prepareRepoForExtraction();

@@ -72,7 +72,7 @@ export default function AnalysingRepoAnimation({
   useEffect(() => {
     const stepSize = 100 / steps.length;
     setCurrentStep(Math.floor(progress / stepSize));
-  }, [progress]);
+  }, [progress, steps.length]);
 
   return (
     <div className="min-h-screen bg-[#1a1f1a] flex items-center justify-center p-6 fixed inset-0 w-full z-50">
@@ -196,7 +196,7 @@ export default function AnalysingRepoAnimation({
                       />
                     )}
                   </div>
-                  <div>
+                  <div className="flex flex-col items-start">
                     <h3 className="text-white font-medium">{step.text}</h3>
                     <p className="text-white/50 text-sm">{step.detail}</p>
                   </div>

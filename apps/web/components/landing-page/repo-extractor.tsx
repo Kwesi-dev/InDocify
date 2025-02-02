@@ -1,4 +1,4 @@
-import { fetchAndProcessZipRepo } from "@/app/agents/new/actions";
+import { fetchAndProcessZipRepo, generateDocs } from "@/app/agents/new/actions";
 import { extractOwnerAndRepo, nanoid } from "@/utils";
 import {
   EXCLUDED_FILES,
@@ -17,6 +17,7 @@ import { SizeLimitAlert } from "../size-limit-alert";
 import { ErrorAlert } from "../error-alert";
 import { useRouter } from "next/navigation";
 import { useSupabase } from "@/hooks/useSupabase";
+import AnalysingRepoAnimation from "../analysing-repo-animation";
 
 const user1 = "free";
 const user2 = "pro";
@@ -52,21 +53,6 @@ export const getValidFiles = async (unzippedFiles: JSZip, repoName: string) => {
   // Step 6: Filter out undefined values (excluded files)
   const validFiles = extractedFiles.filter((f) => f !== undefined);
 
-  // Step 7: Store valid files in the database
-  // const { data, error } = await supabase.from("files").insert(
-  //   validFiles.map((file) => ({
-  //     repo: repoName, // Use the extracted repository name
-  //     path: file.path,
-  //     content: file.content,
-  //   }))
-  // );
-
-  // if (error) {
-  //   console.error("Error saving files to Supabase:", error);
-  //   return;
-  // }
-
-  // console.log("Files saved successfully:", data);
   console.log(validFiles, repoName);
   return validFiles;
 };
@@ -85,6 +71,9 @@ const RepoExtractor = () => {
   >(null);
   const [extractingRepo, setExtractingRepo] = useState(false);
   const [extractingZipFile, setExtractingZipFile] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [analysingRepo, setAnalysingRepo] = useState(false);
+  const [analysingZipFile, setAnalysingZipFile] = useState(false);
   const supabase = useSupabase();
   const router = useRouter();
 
@@ -120,6 +109,7 @@ const RepoExtractor = () => {
           fileSize: size,
           sizeLimit: MAX_SIZE_LIMIT_FOR_FREE_PLAN,
         });
+        setExtractingRepo(false);
         return;
       } else if (user === "pro" && size > MAX_SIZE_LIMIT_FOR_PRO_PLAN) {
         setSizeLimitExceeded({
@@ -127,6 +117,7 @@ const RepoExtractor = () => {
           fileSize: size,
           sizeLimit: MAX_SIZE_LIMIT_FOR_PRO_PLAN,
         });
+        setExtractingRepo(false);
         return;
       } else {
         if (sizeLimitExceeded.status === true)
@@ -138,12 +129,57 @@ const RepoExtractor = () => {
       }
       checkSession(repoUrl, repo, owner);
       if (!session) return;
+      setExtractingRepo(false);
+      setAnalysingRepo(true);
       const files = await fetchAndProcessZipRepo(owner, repo);
-      console.log("files", files);
+      //save the files to supabase
+      files?.map(async (file) => {
+        if (!supabase) return;
+        //save file to db
+        await supabase.from("github_files").insert({
+          path: file.path,
+          content: file.content,
+          repo: repo,
+          owner: owner,
+          github_access_token: session?.githubAccessToken as string,
+          email: session?.user?.email as string,
+        });
+      });
+
+      setProgress(25);
+      const data = await fetch(
+        `/api/repo/metadata?owner=${owner}&repo=${repo}`
+      );
+      const metadata = await data.json();
+
+      setProgress(50);
+      //find the readme file
+      const readmeFile = files?.find(
+        (file: any) =>
+          file.path.includes("README.md") || file.path.includes("readme.md")
+      );
+      //save the files to the database
+      const docsRes = await generateDocs(readmeFile?.content as string);
+
+      setProgress(75);
+
+      //save readme to database
+      await supabase.from("github_docs").insert({
+        owner: owner,
+        repo: repo,
+        readme: docsRes,
+        email: session?.user?.email,
+        metadata: JSON.stringify({
+          ...metadata,
+          totalFiles: files?.length,
+        }),
+      });
+
+      setProgress(100);
+
+      router.push(`/repo-talkroom?owner=${owner}&repo=${repo}`);
     } catch (error) {
       console.log("error", error);
-    } finally {
-      setExtractingRepo(false);
     }
   };
 
@@ -168,6 +204,7 @@ const RepoExtractor = () => {
           fileSize: fileSizeInMb,
           sizeLimit: MAX_SIZE_LIMIT_FOR_FREE_PLAN_ZIP,
         });
+        setExtractingZipFile(false);
         return;
       } else if (
         user === "pro" &&
@@ -178,6 +215,7 @@ const RepoExtractor = () => {
           fileSize: fileSizeInMb,
           sizeLimit: MAX_SIZE_LIMIT_FOR_PRO_PLAN_ZIP,
         });
+        setExtractingZipFile(false);
         return;
       } else {
         if (sizeLimitExceeded.status === true)
@@ -218,14 +256,44 @@ const RepoExtractor = () => {
           file_id: file_id,
           content: validFiles,
         });
-
-        console.log(error);
       }
       checkSession(`zip-file-${file_id}`, repoName);
+      if (!session) return;
+      setAnalysingZipFile(true);
+      setProgress(25);
+      //save the files to supabase
+      validFiles?.map(async (file) => {
+        if (!supabase) return;
+        //save file to db
+        await supabase.from("github_files").insert({
+          path: file.path,
+          content: file.content,
+          repo: repoName,
+          owner: "user",
+          email: session?.user?.email as string,
+        });
+      });
+      setProgress(50);
+      const readmeFile = validFiles?.find(
+        (file: any) =>
+          file.path.includes("README.md") || file.path.includes("readme.md")
+      );
+      //save the files to the database
+      const docsRes = await generateDocs(readmeFile?.content as string);
+      setProgress(75);
+
+      await supabase.from("github_docs").insert({
+        repo: repoName,
+        readme: docsRes,
+        email: session?.user?.email,
+        metadata: JSON.stringify({
+          totalFiles: validFiles?.length,
+        }),
+      });
+      setProgress(100);
+      router.push(`/repo-talkroom?repo=${repoName}`);
     } catch (error) {
       console.log("error", error);
-    } finally {
-      setExtractingZipFile(false);
     }
   };
 
@@ -289,6 +357,12 @@ const RepoExtractor = () => {
             : "The uploaded ZIP file does not appear to be a valid code repository."
         }
       />
+      {analysingRepo || analysingZipFile ? (
+        <AnalysingRepoAnimation
+          progress={progress}
+          stepsType={analysingZipFile ? "zipSteps" : "urlSteps"}
+        />
+      ) : null}
     </>
   );
 };

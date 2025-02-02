@@ -31,7 +31,7 @@ export function UserProfile({ name, email, avatarUrl }: UserProfileProps) {
             <AvatarImage src={avatarUrl} alt={name} />
             <AvatarFallback>
               {name
-                .split(" ")
+                ?.split(" ")
                 .map((n) => n[0])
                 .join("")}
             </AvatarFallback>

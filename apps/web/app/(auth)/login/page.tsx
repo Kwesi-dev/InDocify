@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import LoginPageContent from "./page-content";
 import { redirect } from "next/navigation";
+import { createSupabaseClient } from "@/lib/supabaseClient";
 
 const page = async ({
   searchParams,
@@ -12,10 +13,21 @@ const page = async ({
   }>;
 }) => {
   const session = await auth();
+
   const { ["next-repo-url"]: nextRepoUrl, repo, owner } = await searchParams;
-  console.log(nextRepoUrl, repo, "server");
 
   if (session) {
+    const supabase = createSupabaseClient(
+      session?.supabaseAccessToken as string
+    );
+    //check to see if at aleast the user has a record count
+    const data = await supabase
+      .from("github_docs")
+      .select("id")
+      .eq("email", session?.user?.email)
+      .limit(1)
+      .single();
+
     if (nextRepoUrl && repo) {
       if (owner) {
         redirect(
@@ -25,6 +37,9 @@ const page = async ({
         redirect(`/repo-extraction?next-repo-url=${nextRepoUrl}&repo=${repo}`);
       }
     } else {
+      if (data.data?.id) {
+        redirect("/repo-talkroom");
+      }
       redirect("/analyse-repo");
     }
   }
