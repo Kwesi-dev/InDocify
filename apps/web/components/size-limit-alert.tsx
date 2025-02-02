@@ -14,6 +14,7 @@ interface SizeLimitAlertProps {
   onClose: () => void;
   fileSize: number;
   sizeLimit: number;
+  buttonText?: string;
 }
 
 export function SizeLimitAlert({
@@ -21,6 +22,7 @@ export function SizeLimitAlert({
   onClose,
   fileSize,
   sizeLimit,
+  buttonText = "Try Another File",
 }: SizeLimitAlertProps) {
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
@@ -41,7 +43,7 @@ export function SizeLimitAlert({
             onClick={onClose}
             className="bg-[#CCFF00] text-black hover:bg-[#CCFF00]/90"
           >
-            Try Another File
+            {buttonText}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

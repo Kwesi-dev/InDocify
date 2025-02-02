@@ -11,99 +11,294 @@ import {
 } from "@workspace/ui/components/popover";
 import { ScrollArea } from "@workspace/ui/components/scroll-area";
 import { cn } from "@workspace/ui/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { extractOwnerAndRepo } from "@/utils";
+import { ProcessingDialog } from "../processing-dialog";
+import {
+  MAX_SIZE_LIMIT_FOR_FREE_PLAN,
+  MAX_SIZE_LIMIT_FOR_PRO_PLAN,
+} from "@/utils/data";
+import { SizeLimitAlert } from "@/components/size-limit-alert";
+import { fetchAndProcessZipRepo, generateDocs } from "@/app/agents/new/actions";
+import { useSupabase } from "@/hooks/useSupabase";
+import { useSession } from "next-auth/react";
+import useCreateQueryString from "@/hooks/useCreateQueryString";
+import useShallowRouter from "@/hooks/useShallowRouter";
 
+export type Repo = {
+  id: string;
+  name: string;
+  description: string;
+  url: string;
+};
 interface RepoSelectorProps {
   selectedRepo: string | null;
-  onSelectRepo: (repo: string) => void;
   isCollapsed?: boolean;
 }
 
-// Mock data - replace with actual repo data
-const repos = [
-  { id: "1", name: "inDocify-web", description: "Main web application" },
-  { id: "2", name: "inDocify-api", description: "Backend API service" },
-  { id: "3", name: "inDocify-docs", description: "Documentation site" },
-  { id: "4", name: "inDocify-cli", description: "Command line interface" },
-  { id: "5", name: "inDocify-sdk", description: "Software development kit" },
-];
-
 export function RepoSelector({
   selectedRepo,
-  onSelectRepo,
   isCollapsed = false,
 }: RepoSelectorProps) {
   const [search, setSearch] = useState("");
+  const [activeRepo, setActiveRepo] = useState<Repo | null>(null);
   const [open, setOpen] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const [sizeLimitExceeded, setSizeLimitExceeded] = useState({
+    status: false,
+    fileSize: 0,
+    sizeLimit: 0,
+  });
+  const supabase = useSupabase();
+  const { data: session } = useSession();
+  const [progress, setProgress] = useState({
+    label: "",
+    value: 0,
+  });
+  const { addQueryString } = useCreateQueryString();
+  const shallowRoute = useShallowRouter();
+  const sub = "pro";
+  const user = sub === "pro" ? "pro" : "free";
 
-  const filteredRepos = repos.filter((repo) =>
-    repo.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const { data: repos } = useQuery({
+    queryKey: ["repos"],
+    queryFn: async () => {
+      const response = await fetch("/api/repo");
+      const data = await response.json();
+      return data ?? [];
+    },
+  });
+
+  const filteredRepos = repos
+    ? repos
+        .filter((repo: any) =>
+          repo.name.toLowerCase().includes(search.toLowerCase())
+        )
+        .map((repo: any) => {
+          return {
+            id: repo.id,
+            name: repo.name,
+            description: repo.description,
+            url: repo.html_url,
+          };
+        })
+    : [];
+
+  const handleRepoSelect = async (activeRepo: Repo) => {
+    if (activeRepo) {
+      const { owner, repo } = extractOwnerAndRepo(activeRepo.url as string);
+      //check if the repo exist in the db
+      const { data } = await supabase
+        .from("github_docs")
+        .select("id")
+        .eq("owner", owner)
+        .eq("repo", repo)
+        .eq("email", session?.user?.email)
+        .single();
+      if (data?.id) {
+        shallowRoute(`/repo-talkroom?owner=${owner}&repo=${repo}`);
+        return;
+      }
+
+      setProcessing(true);
+      setProgress({
+        label: "Confirming repository size",
+        value: 0,
+      });
+      try {
+        const response = await fetch(
+          `/api/repo/size?owner=${owner}&repo=${repo}`
+        );
+        const size = await response.json();
+        if (user === "free" && size > MAX_SIZE_LIMIT_FOR_FREE_PLAN) {
+          setSizeLimitExceeded({
+            status: true,
+            fileSize: size,
+            sizeLimit: MAX_SIZE_LIMIT_FOR_FREE_PLAN,
+          });
+          setProcessing(false);
+          return;
+        } else if (user === "pro" && size > MAX_SIZE_LIMIT_FOR_PRO_PLAN) {
+          setSizeLimitExceeded({
+            status: true,
+            fileSize: size,
+            sizeLimit: MAX_SIZE_LIMIT_FOR_PRO_PLAN,
+          });
+          setProcessing(false);
+          return;
+        } else {
+          if (sizeLimitExceeded.status === true)
+            setSizeLimitExceeded({
+              status: false,
+              fileSize: 0,
+              sizeLimit: 0,
+            });
+        }
+        setProgress({
+          label: "Extracting repository files",
+          value: 10,
+        });
+
+        const files = await fetchAndProcessZipRepo(owner, repo);
+        //save the files to supabase
+        files?.map(async (file) => {
+          if (!supabase) return;
+          //save file to db
+          await supabase.from("github_files").insert({
+            path: file.path,
+            content: file.content,
+            repo: repo,
+            owner: owner,
+            email: session?.user?.email as string,
+          });
+        });
+        setProgress({
+          label: "Extracting repository metadata",
+          value: 50,
+        });
+        const data = await fetch(
+          `/api/repo/metadata?owner=${owner}&repo=${repo}`
+        );
+        const metadata = await data.json();
+
+        setProgress({
+          label: "Extracting repository readme",
+          value: 75,
+        });
+        //find the readme file
+        const readmeFile = files?.find(
+          (file: any) =>
+            file.path.includes("README.md") || file.path.includes("readme.md")
+        );
+        //save the files to the database
+        const docsRes = await generateDocs(readmeFile?.content as string);
+
+        setProgress({
+          label: "Generating readmedocumentation",
+          value: 75,
+        });
+
+        //save readme to database
+        await supabase.from("github_docs").insert({
+          owner: owner,
+          repo: repo,
+          readme: docsRes,
+          email: session?.user?.email,
+          metadata: JSON.stringify({
+            ...metadata,
+            totalFiles: files?.length,
+          }),
+        });
+
+        setProgress({
+          label: "Finalizing and preparing repository for repoTalk",
+          value: 100,
+        });
+        addQueryString({
+          repo,
+          owner,
+        });
+        setProcessing(false);
+      } catch (error) {
+        // console.log(error);
+      }
+    }
+  };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          role="combobox"
-          aria-expanded={open}
-          className={cn(
-            "text-white/70 hover:text-white hover:bg-white/5 w-full p-0 hover:pl-1",
-            isCollapsed ? "justify-center" : "justify-start"
-          )}
-        >
-          <div
-            className={`flex items-center ${isCollapsed ? "gap-0" : "gap-2"}`}
+    <>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="ghost"
+            role="combobox"
+            aria-expanded={open}
+            className={cn(
+              "text-white/70 hover:text-white hover:bg-white/5 w-full p-0 hover:pl-2",
+              isCollapsed ? "justify-center" : "justify-start"
+            )}
           >
-            <GitFork className="w-4 h-4" />
-            {!isCollapsed ? "Repositories" : ""}
+            <div
+              className={`flex items-center ${isCollapsed ? "gap-0" : "gap-2"}`}
+            >
+              <GitFork className="w-4 h-4" />
+              {!isCollapsed ? "Repositories" : ""}
+            </div>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          className="w-[300px] p-0"
+          align={isCollapsed ? "start" : "center"}
+        >
+          <div className="p-3 border-b border-border">
+            <div className="relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search repositories..."
+                className="pl-8"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
           </div>
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent
-        className="w-[300px] p-0"
-        align={isCollapsed ? "start" : "center"}
-      >
-        <div className="p-3 border-b border-border">
-          <div className="relative">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search repositories..."
-              className="pl-8"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-        </div>
-        <ScrollArea className="h-[300px]">
-          <div className="p-2">
-            {filteredRepos.map((repo) => (
-              <Button
-                key={repo.id}
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start gap-2 text-left",
-                  selectedRepo === repo.id && "bg-accent"
-                )}
-                onClick={() => {
-                  onSelectRepo(repo.id);
-                  setOpen(false);
-                }}
-              >
-                <GitFork className="w-4 h-4 shrink-0" />
-                <div className="flex-1 truncate">
-                  <div className="font-medium">{repo.name}</div>
-                  <div className="text-xs text-muted-foreground truncate">
-                    {repo.description}
-                  </div>
-                </div>
-                {selectedRepo === repo.id && (
-                  <Check className="w-4 h-4 shrink-0" />
-                )}
-              </Button>
-            ))}
-          </div>
-        </ScrollArea>
-      </PopoverContent>
-    </Popover>
+          <ScrollArea className="h-[250px]">
+            {filteredRepos?.length === 0 ? (
+              <div className="p-2">No repositories found.</div>
+            ) : (
+              <div className="p-2">
+                {filteredRepos.map((repo: Repo) => (
+                  <Button
+                    key={repo.id}
+                    variant="ghost"
+                    className={cn(
+                      "w-full justify-start gap-2 text-left",
+                      selectedRepo === repo.name && "bg-accent"
+                    )}
+                    disabled={selectedRepo === repo.name}
+                    onClick={() => {
+                      setActiveRepo(repo);
+                      handleRepoSelect(repo);
+                      setOpen(false);
+                    }}
+                  >
+                    <GitFork className="w-4 h-4 shrink-0" />
+                    <div className="flex-1 truncate">
+                      <div className="font-medium">{repo.name}</div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {repo.description
+                          ? repo.description?.substring(0, 30) + "..."
+                          : "no description"}
+                      </div>
+                    </div>
+                    {selectedRepo === repo.name && (
+                      <Check className="w-4 h-4 shrink-0" />
+                    )}
+                  </Button>
+                ))}
+              </div>
+            )}
+          </ScrollArea>
+        </PopoverContent>
+      </Popover>
+      {processing ? (
+        <ProcessingDialog
+          isOpen={processing}
+          onOpenChange={setProcessing}
+          repoName={activeRepo?.name as string}
+          progress={progress}
+        />
+      ) : null}
+      {sizeLimitExceeded.status ? (
+        <SizeLimitAlert
+          isOpen={sizeLimitExceeded.status}
+          onClose={() =>
+            setSizeLimitExceeded({ status: false, fileSize: 0, sizeLimit: 0 })
+          }
+          fileSize={sizeLimitExceeded.fileSize}
+          sizeLimit={sizeLimitExceeded.sizeLimit}
+          buttonText="Try Another Repository"
+        />
+      ) : null}
+    </>
   );
 }

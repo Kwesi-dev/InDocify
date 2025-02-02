@@ -28,7 +28,6 @@ export function RepoHeader() {
     },
   });
   const repoStats = JSON.parse(data?.metadata || "{}");
-  console.log("repoStats", repoStats);
   return (
     <div className="border-b border-white/10">
       <div className="px-6 py-4">

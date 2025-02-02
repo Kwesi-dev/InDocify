@@ -9,15 +9,11 @@ import { RepoHeader } from "@/components/chat/chat-header";
 export default function ChatPage() {
   const searchParams = useSearchParams();
   const selectedRepo = searchParams.get("repo");
+  const owner = searchParams.get("owner");
 
   return (
     <div className="flex h-screen bg-[#1a1f1a] overflow-hidden">
-      <Sidebar
-        onRepoSelect={() => {
-          //
-        }}
-        selectedRepo={selectedRepo}
-      />
+      <Sidebar selectedRepo={selectedRepo} owner={owner} />
       <main className="flex-1">
         {selectedRepo ? (
           <>

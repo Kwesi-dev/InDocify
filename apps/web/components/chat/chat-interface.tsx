@@ -11,26 +11,72 @@ import { Bot, User } from "@/components/icons";
 import { LoadingAnimation } from "./loading-animation";
 import { useChat } from "ai/react";
 import ReactMarkdown from "react-markdown";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { EmptyChatState } from "./empty-chat-state";
+import { nanoid } from "@/utils";
+import useShallowRouter from "@/hooks/useShallowRouter";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
+import { useSupabase } from "@/hooks/useSupabase";
 
 export function ChatInterface() {
-  const repo = useSearchParams().get("repo");
-  const { messages, input, handleInputChange, handleSubmit, isLoading } =
-    useChat({
-      maxSteps: 3,
-      api: "/api/chat",
-      experimental_prepareRequestBody: ({ messages }) => {
-        return {
-          messages,
-          repo,
-        };
-      },
-    });
+  const params = useSearchParams();
+  const repo = params.get("repo");
+  const owner = params.get("owner");
+  const currentThread = usePathname().split("/")[2];
+  const newThread = useRef<string | null>(!currentThread ? nanoid() : null);
+  const shallowRoute = useShallowRouter();
+  const { data: session } = useSession();
+  const supabase = useSupabase();
+  const query = useQueryClient();
+
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    isLoading,
+    setMessages,
+  } = useChat({
+    maxSteps: 3,
+    api: "/api/chat",
+    experimental_prepareRequestBody: ({ messages }) => {
+      return {
+        messages,
+        repo,
+        currentThread: currentThread ?? newThread.current,
+        owner,
+      };
+    },
+    onFinish: () => {
+      query.invalidateQueries({
+        queryKey: ["threads", session?.user?.email, repo],
+      });
+    },
+  });
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const _ = useQuery({
+    queryKey: ["messages", session?.user?.email, repo, currentThread],
+    queryFn: async () => {
+      if (!supabase) return null;
+      const { data, error } = await supabase
+        .from("threads")
+        .select("messages")
+        .eq("thread_id", currentThread)
+        .eq("repo", repo)
+        .eq("email", session?.user?.email)
+        .single();
+      if (error) {
+        throw error;
+      }
+      setMessages(JSON.parse(data?.messages) || []);
+      return data?.messages || [];
+    },
+  });
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -50,6 +96,11 @@ export function ChatInterface() {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
+      if (!currentThread) {
+        shallowRoute(
+          `/repo-talkroom/${newThread.current}?repo=${repo}&owner=${owner}`
+        );
+      }
       handleSubmit(e);
     }
   };
@@ -84,7 +135,7 @@ export function ChatInterface() {
                   {/* Avatar */}
                   <div
                     className={cn(
-                      "w-8 h-8 rounded-full flex items-center justify-center",
+                      "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
                       message.role === "assistant"
                         ? "bg-[#CCFF00]"
                         : "bg-white/10"
@@ -153,7 +204,17 @@ export function ChatInterface() {
 
       {/* Input Area */}
       <div className="border-t border-white/10 p-4">
-        <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
+        <form
+          onSubmit={(e) => {
+            if (!currentThread) {
+              shallowRoute(
+                `/repo-talkroom/${newThread.current}?repo=${repo}&owner=${owner}`
+              );
+            }
+            handleSubmit(e);
+          }}
+          className="max-w-3xl mx-auto"
+        >
           <div className="relative">
             <Textarea
               ref={textareaRef}
@@ -161,7 +222,7 @@ export function ChatInterface() {
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               placeholder="Ask about your codebase..."
-              className="min-h-[60px] w-full bg-white/5 border border-white/10 rounded-lg pl-4 pr-12 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#CCFF00] focus:border-transparent resize-none"
+              className="min-h-[60px] w-full bg-white/5 border border-white/10 rounded-lg pl-4 pr-12 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#CCFF00] focus:border-[#CCFF00]/50 resize-none"
               rows={1}
             />
             <Button

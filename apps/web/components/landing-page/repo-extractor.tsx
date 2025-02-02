@@ -138,10 +138,9 @@ const RepoExtractor = () => {
         //save file to db
         await supabase.from("github_files").insert({
           path: file.path,
-          content: file.content,
+          content: JSON.stringify(file.content),
           repo: repo,
           owner: owner,
-          github_access_token: session?.githubAccessToken as string,
           email: session?.user?.email as string,
         });
       });

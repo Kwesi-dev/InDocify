@@ -11,14 +11,17 @@ import DocumentationSection from "./documentation-section";
 import { RepoSelector } from "./repo-selector";
 import { UserProfile } from "./user-profile";
 import { useSession } from "next-auth/react";
+import useShallowRouter from "@/hooks/useShallowRouter";
+import { nanoid } from "nanoid";
 
 interface SidebarProps {
   selectedRepo: string | null;
-  onRepoSelect: (repo: string | null) => void;
+  owner: string | null;
 }
 
-export default function Sidebar({ selectedRepo, onRepoSelect }: SidebarProps) {
+export default function Sidebar({ selectedRepo, owner }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const shallowRoute = useShallowRouter();
   const { data: session } = useSession();
 
   return (
@@ -56,6 +59,12 @@ export default function Sidebar({ selectedRepo, onRepoSelect }: SidebarProps) {
           )}
           size="sm"
           title={isCollapsed ? "New Chat" : undefined}
+          disabled={!selectedRepo}
+          onClick={() => {
+            shallowRoute(
+              `/repo-talkroom/${nanoid()}?repo=${selectedRepo}&owner=${owner}`
+            );
+          }}
         >
           <Plus className="w-4 h-4" />
           {!isCollapsed && "New Chat"}
@@ -66,11 +75,7 @@ export default function Sidebar({ selectedRepo, onRepoSelect }: SidebarProps) {
       <div className={`space-y-6 py-4 ${isCollapsed ? "px-2" : "px-4"}`}>
         {/* Repositories Section */}
         <div className="space-y-4">
-          <RepoSelector
-            selectedRepo={selectedRepo}
-            onSelectRepo={onRepoSelect}
-            isCollapsed={isCollapsed}
-          />
+          <RepoSelector selectedRepo={selectedRepo} isCollapsed={isCollapsed} />
         </div>
 
         {/* Documentation Section */}
@@ -86,7 +91,7 @@ export default function Sidebar({ selectedRepo, onRepoSelect }: SidebarProps) {
                 <Clock className="w-4 h-4" />
                 Recent Chats
               </div>
-              <RecentChats />
+              <RecentChats repo={selectedRepo as string} />
             </div>
           )}
         </ScrollArea>
