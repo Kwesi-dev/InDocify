@@ -1,11 +1,11 @@
 import { GitFork, GitBranch, FileText } from "lucide-react";
 import RepoDetails from "./repo-sheet";
-import { useSupabase } from "@/hooks/useSupabase";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { useSupabaseClient } from "@/lib/SupabaseClientProvider";
 
 export function RepoHeader() {
-  const supabase = useSupabase();
+  const supabase = useSupabaseClient();
   const params = useSearchParams();
   const selectedRepo = params.get("repo");
   const owner = params.get("owner");

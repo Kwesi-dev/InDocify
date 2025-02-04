@@ -20,10 +20,10 @@ import {
 } from "@/utils/data";
 import { SizeLimitAlert } from "@/components/size-limit-alert";
 import { fetchAndProcessZipRepo, generateDocs } from "@/app/agents/new/actions";
-import { useSupabase } from "@/hooks/useSupabase";
 import { useSession } from "next-auth/react";
 import useCreateQueryString from "@/hooks/useCreateQueryString";
 import useShallowRouter from "@/hooks/useShallowRouter";
+import { useSupabaseClient } from "@/lib/SupabaseClientProvider";
 
 export type Repo = {
   id: string;
@@ -49,7 +49,7 @@ export function RepoSelector({
     fileSize: 0,
     sizeLimit: 0,
   });
-  const supabase = useSupabase();
+  const supabase = useSupabaseClient();
   const { data: session } = useSession();
   const [progress, setProgress] = useState({
     label: "",
@@ -88,6 +88,7 @@ export function RepoSelector({
     if (activeRepo) {
       const { owner, repo } = extractOwnerAndRepo(activeRepo.url as string);
       //check if the repo exist in the db
+      if (!supabase) return;
       const { data } = await supabase
         .from("github_docs")
         .select("id")
@@ -227,15 +228,15 @@ export function RepoSelector({
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-[300px] p-0"
+          className="w-[300px] p-0 bg-[#232723] border border-white/10"
           align={isCollapsed ? "start" : "center"}
         >
-          <div className="p-3 border-b border-border">
+          <div className="p-3 border-b border-white/10">
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search repositories..."
-                className="pl-8"
+                className="text-white pl-8 border border-white/10 active:border-white/40 focus:ring-0 focus:border-white/40"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -251,8 +252,8 @@ export function RepoSelector({
                     key={repo.id}
                     variant="ghost"
                     className={cn(
-                      "w-full justify-start gap-2 text-left",
-                      selectedRepo === repo.name && "bg-accent"
+                      "w-full justify-start gap-2 text-left hover:bg-white/5",
+                      selectedRepo === repo.name && "bg-white/10"
                     )}
                     disabled={selectedRepo === repo.name}
                     onClick={() => {
@@ -261,9 +262,11 @@ export function RepoSelector({
                       setOpen(false);
                     }}
                   >
-                    <GitFork className="w-4 h-4 shrink-0" />
+                    <GitFork className="w-4 h-4 shrink-0 text-white/50" />
                     <div className="flex-1 truncate">
-                      <div className="font-medium">{repo.name}</div>
+                      <div className="font-medium text-white/50">
+                        {repo.name}
+                      </div>
                       <div className="text-xs text-muted-foreground truncate">
                         {repo.description
                           ? repo.description?.substring(0, 30) + "..."
@@ -271,7 +274,7 @@ export function RepoSelector({
                       </div>
                     </div>
                     {selectedRepo === repo.name && (
-                      <Check className="w-4 h-4 shrink-0" />
+                      <Check className="w-4 h-4 shrink-0 text-white" />
                     )}
                   </Button>
                 ))}

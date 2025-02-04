@@ -16,8 +16,8 @@ import { FileUploadZone } from "./file-upload-zone";
 import { SizeLimitAlert } from "../size-limit-alert";
 import { ErrorAlert } from "../error-alert";
 import { useRouter } from "next/navigation";
-import { useSupabase } from "@/hooks/useSupabase";
 import AnalysingRepoAnimation from "../analysing-repo-animation";
+import { useSupabaseClient } from "@/lib/SupabaseClientProvider";
 
 const user1 = "free";
 const user2 = "pro";
@@ -74,7 +74,7 @@ const RepoExtractor = () => {
   const [progress, setProgress] = useState(0);
   const [analysingRepo, setAnalysingRepo] = useState(false);
   const [analysingZipFile, setAnalysingZipFile] = useState(false);
-  const supabase = useSupabase();
+  const supabase = useSupabaseClient();
   const router = useRouter();
 
   //CONSTANTS DATA
@@ -163,16 +163,18 @@ const RepoExtractor = () => {
       setProgress(75);
 
       //save readme to database
-      await supabase.from("github_docs").insert({
-        owner: owner,
-        repo: repo,
-        readme: docsRes,
-        email: session?.user?.email,
-        metadata: JSON.stringify({
-          ...metadata,
-          totalFiles: files?.length,
-        }),
-      });
+      if (supabase) {
+        await supabase.from("github_docs").insert({
+          owner: owner,
+          repo: repo,
+          readme: docsRes,
+          email: session?.user?.email,
+          metadata: JSON.stringify({
+            ...metadata,
+            totalFiles: files?.length,
+          }),
+        });
+      }
 
       setProgress(100);
 
@@ -249,9 +251,9 @@ const RepoExtractor = () => {
       // Step 5: Filter out excluded files
       const validFiles = await getValidFiles(unzippedFiles, repoName);
       const file_id = nanoid();
-      if (!session) {
+      if (!session && supabase) {
         //save file to db temporarily
-        const { error } = await supabase.from("standby_files").insert({
+        await supabase.from("standby_files").insert({
           file_id: file_id,
           content: validFiles,
         });
@@ -280,15 +282,16 @@ const RepoExtractor = () => {
       //save the files to the database
       const docsRes = await generateDocs(readmeFile?.content as string);
       setProgress(75);
-
-      await supabase.from("github_docs").insert({
-        repo: repoName,
-        readme: docsRes,
-        email: session?.user?.email,
-        metadata: JSON.stringify({
-          totalFiles: validFiles?.length,
-        }),
-      });
+      if (supabase) {
+        await supabase.from("github_docs").insert({
+          repo: repoName,
+          readme: docsRes,
+          email: session?.user?.email,
+          metadata: JSON.stringify({
+            totalFiles: validFiles?.length,
+          }),
+        });
+      }
       setProgress(100);
       router.push(`/repo-talkroom?repo=${repoName}`);
     } catch (error) {

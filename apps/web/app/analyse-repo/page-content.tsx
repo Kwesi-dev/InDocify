@@ -18,7 +18,6 @@ import ParticlesAnimation from "@/components/particles-animation";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { generateDocs } from "../agents/new/actions";
-import { useSupabase } from "@/hooks/useSupabase";
 import AnalysingRepoAnimation from "@/components/analysing-repo-animation";
 import {
   MAX_SIZE_LIMIT_FOR_FREE_PLAN,
@@ -26,6 +25,7 @@ import {
 } from "@/utils/data";
 import { fetchAndProcessZipRepo } from "../agents/new/actions";
 import { SizeLimitAlert } from "@/components/size-limit-alert";
+import { useSupabaseClient } from "@/lib/SupabaseClientProvider";
 
 export default function PageContent() {
   const [step, setStep] = useState(1);
@@ -42,7 +42,7 @@ export default function PageContent() {
   const [progress, setProgress] = useState(0);
   const router = useRouter();
   const githubAccessToken = session?.githubAccessToken;
-  const supabase = useSupabase();
+  const supabase = useSupabaseClient();
   const user = session?.user?.email ? "free" : "pro";
   const [sizeLimitExceeded, setSizeLimitExceeded] = useState({
     status: false,
@@ -140,6 +140,7 @@ export default function PageContent() {
 
       setProgress(80);
 
+      if (!supabase) return;
       //save readme to database
       await supabase.from("github_docs").insert({
         owner: selectedRepo?.owner,

@@ -34,18 +34,6 @@ const docs = [
     description: "Coding standards and best practices",
     icon: FileText,
   },
-  {
-    id: "4",
-    title: "API Documentation",
-    description: "API endpoints and usage examples",
-    icon: FileText,
-  },
-  {
-    id: "5",
-    title: "Deployment Guide",
-    description: "Build and deployment procedures",
-    icon: FileText,
-  },
 ];
 
 export default function DocumentationSection({
@@ -70,20 +58,20 @@ export default function DocumentationSection({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[300px] p-0"
+        className="w-[320px] px-2 bg-[#1a1f1a] border border-white/10"
         align={isCollapsed ? "start" : "center"}
       >
-        <ScrollArea className="h-[300px]">
-          <div className="p-2">
+        <ScrollArea className="h-fit">
+          <div className="p-2 space-y-4">
             {docs.map((doc) => (
               <Button
                 key={doc.id}
                 variant="ghost"
-                className="w-full justify-start gap-2 text-left"
+                className="w-full justify-start gap-2 text-left hover:bg-white/5"
               >
-                <doc.icon className="w-4 h-4 shrink-0" />
+                <doc.icon className="w-4 h-4 shrink-0 text-white/50" />
                 <div className="flex-1 truncate">
-                  <div className="font-medium">{doc.title}</div>
+                  <div className="font-medium text-white/50">{doc.title}</div>
                   <div className="text-xs text-muted-foreground truncate">
                     {doc.description}
                   </div>

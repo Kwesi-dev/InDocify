@@ -3,10 +3,10 @@
 import AnalysingRepoAnimation from "@/components/analysing-repo-animation";
 import { useSearchParams } from "next/navigation";
 import { fetchAndProcessZipRepo, generateDocs } from "../agents/new/actions";
-import { useSupabase } from "@/hooks/useSupabase";
 import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useSupabaseClient } from "@/lib/SupabaseClientProvider";
 
 const Page = () => {
   const searchParams = useSearchParams();
@@ -15,7 +15,7 @@ const Page = () => {
   const owner = searchParams.get("owner") as string;
   const [progress, setProgress] = useState(0);
   const router = useRouter();
-  const supabase = useSupabase();
+  const supabase = useSupabaseClient();
   const { data: session } = useSession();
 
   const prepareRepoForExtraction = useCallback(async () => {
@@ -23,6 +23,7 @@ const Page = () => {
     try {
       if (nextRepoUrl?.includes("zip-file")) {
         const file_id = nextRepoUrl.split("-")[2];
+        if (!supabase) return;
         const { data, error } = await supabase
           .from("standby_files")
           .select("content")
@@ -74,6 +75,8 @@ const Page = () => {
       setProgress(75);
 
       const docsRes = await generateDocs(readmeFile?.content as string);
+
+      if (!supabase) return;
 
       if (owner) {
         await supabase.from("github_docs").insert({

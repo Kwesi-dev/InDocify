@@ -17,7 +17,7 @@ import { nanoid } from "@/utils";
 import useShallowRouter from "@/hooks/useShallowRouter";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import { useSupabase } from "@/hooks/useSupabase";
+import { useSupabaseClient } from "@/lib/SupabaseClientProvider";
 
 export function ChatInterface() {
   const params = useSearchParams();
@@ -27,7 +27,7 @@ export function ChatInterface() {
   const newThread = useRef<string | null>(!currentThread ? nanoid() : null);
   const shallowRoute = useShallowRouter();
   const { data: session } = useSession();
-  const supabase = useSupabase();
+  const supabase = useSupabaseClient();
   const query = useQueryClient();
 
   const {
@@ -60,6 +60,7 @@ export function ChatInterface() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const _ = useQuery({
+    enabled: !!currentThread && !!repo,
     queryKey: ["messages", session?.user?.email, repo, currentThread],
     queryFn: async () => {
       if (!supabase) return null;
@@ -71,12 +72,18 @@ export function ChatInterface() {
         .eq("email", session?.user?.email)
         .single();
       if (error) {
-        throw error;
+        console.log(error);
       }
-      setMessages(JSON.parse(data?.messages) || []);
+      setMessages(JSON.parse(data?.messages || "[]"));
       return data?.messages || [];
     },
   });
+
+  useEffect(() => {
+    if (!currentThread) {
+      setMessages([]);
+    }
+  }, [currentThread, setMessages]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {

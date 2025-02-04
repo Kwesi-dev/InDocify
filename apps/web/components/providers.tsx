@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { persistQueryClient } from "@tanstack/react-query-persist-client";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import SupabaseClientProvider from "@/lib/SupabaseClientProvider";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const queryClient = new QueryClient({
@@ -37,7 +38,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           disableTransitionOnChange
           enableColorScheme
         >
-          {children}
+          <SupabaseClientProvider>{children}</SupabaseClientProvider>
         </NextThemesProvider>
         {/* <ReactQueryDevtools initialIsOpen={false} /> */}
       </QueryClientProvider>
