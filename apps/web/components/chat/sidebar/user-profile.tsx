@@ -1,4 +1,4 @@
-import { LogOut, Settings, UserIcon } from "lucide-react";
+import { LogOut } from "lucide-react";
 import {
   Avatar,
   AvatarFallback,
@@ -9,7 +9,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 
@@ -42,8 +41,11 @@ export function UserProfile({ name, email, avatarUrl }: UserProfileProps) {
           </div>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-[240px]">
-        <DropdownMenuItem>
+      <DropdownMenuContent
+        align="start"
+        className="w-[240px] bg-[#1a1f1a] border border-white/10"
+      >
+        {/* <DropdownMenuItem>
           <UserIcon className="mr-2 h-4 w-4" />
           Profile
         </DropdownMenuItem>
@@ -51,10 +53,10 @@ export function UserProfile({ name, email, avatarUrl }: UserProfileProps) {
           <Settings className="mr-2 h-4 w-4" />
           Settings
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-red-500">
-          <LogOut className="mr-2 h-4 w-4" />
-          Log out
+        <DropdownMenuSeparator /> */}
+        <DropdownMenuItem className="text-red-500 cursor-pointer hover:bg-white/5 group">
+          <LogOut className="mr-2 h-4 w-4 group-hover:text-red-500" />
+          <span className="group-hover:text-red-500">Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

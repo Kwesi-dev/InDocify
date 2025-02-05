@@ -98,7 +98,7 @@ export default function Sidebar({ selectedRepo, owner }: SidebarProps) {
       </div>
 
       {/* User Profile Section - Fixed at bottom */}
-      <div className="py-[26px] border-t border-white/10 mt-auto">
+      <div className="h-[85px] border-t border-white/10 mt-auto flex items-center justify-center">
         {!isCollapsed ? (
           <UserProfile
             name={session?.user.name as string}

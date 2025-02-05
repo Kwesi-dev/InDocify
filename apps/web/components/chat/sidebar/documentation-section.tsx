@@ -9,6 +9,9 @@ import {
 } from "@workspace/ui/components/popover";
 import { ScrollArea } from "@workspace/ui/components/scroll-area";
 import { cn } from "@workspace/ui/lib/utils";
+import { useSearchParams } from "next/navigation";
+import useShallowRouter from "@/hooks/useShallowRouter";
+import { useState } from "react";
 
 interface DocumentationSectionProps {
   isCollapsed?: boolean;
@@ -39,8 +42,13 @@ const docs = [
 export default function DocumentationSection({
   isCollapsed = false,
 }: DocumentationSectionProps) {
+  const [open, setOpen] = useState(false);
+  const repo = useSearchParams().get("repo");
+  const shallowRoute = useShallowRouter();
+  const searchParams = useSearchParams();
+  const docsTitle = searchParams.get("doc") as string;
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
@@ -48,6 +56,7 @@ export default function DocumentationSection({
             "text-white/70 hover:text-white hover:bg-white/5 w-full p-0 hover:pl-1",
             isCollapsed ? "justify-center" : "justify-start"
           )}
+          disabled={!repo}
         >
           <div
             className={`flex items-center ${isCollapsed ? "gap-0" : "gap-2"}`}
@@ -67,7 +76,19 @@ export default function DocumentationSection({
               <Button
                 key={doc.id}
                 variant="ghost"
-                className="w-full justify-start gap-2 text-left hover:bg-white/5"
+                className={`w-full justify-start gap-2 text-left hover:bg-white/5 ${
+                  docsTitle === doc.title && "bg-white/5"
+                }`}
+                onClick={() => {
+                  const newSearchParams = new URLSearchParams(searchParams);
+                  shallowRoute(
+                    `/repo-talkroom?doc=${doc.title}&${newSearchParams.toString()}`
+                  );
+                  setOpen(false);
+                }}
+                disabled={
+                  docsTitle === doc.title || doc.title !== "Getting Started"
+                }
               >
                 <doc.icon className="w-4 h-4 shrink-0 text-white/50" />
                 <div className="flex-1 truncate">

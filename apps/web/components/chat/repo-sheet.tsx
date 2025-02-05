@@ -20,6 +20,7 @@ import { Button } from "@workspace/ui/components/button";
 import { ScrollArea } from "@workspace/ui/components/scroll-area";
 import { Separator } from "@workspace/ui/components/separator";
 import ReactMarkdown from "react-markdown";
+import { useEffect, useState } from "react";
 
 interface RepoDetailsProps {
   repo: {
@@ -59,6 +60,17 @@ function convertTime(dateString: string) {
 }
 
 export default function RepoDetails({ repo }: RepoDetailsProps) {
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+
+  useEffect(() => {
+    setDate(convertDate(repo.stats.pushed_at));
+  }, [repo.stats.pushed_at]);
+
+  useEffect(() => {
+    setTime(convertTime(repo.stats.pushed_at));
+  }, [repo.stats.pushed_at]);
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -130,18 +142,14 @@ export default function RepoDetails({ repo }: RepoDetailsProps) {
                   <Calendar className="h-4 w-4" />
                   Created
                 </div>
-                <span className="text-sm text-white">
-                  {convertDate(repo?.stats?.metadata?.created)}
-                </span>
+                <span className="text-sm text-white">{date}</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm text-white/70">
                   <Clock className="h-4 w-4" />
                   Last updated
                 </div>
-                <span className="text-sm text-white">
-                  {convertTime(repo?.stats?.metadata?.lastUpdated)}
-                </span>
+                <span className="text-sm text-white">{time}</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm text-white/70">

@@ -22,7 +22,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@workspace/ui/components/alert-dialog";
-import { useOptimistic, useRef, useState, useTransition } from "react";
+import {
+  useEffect,
+  useOptimistic,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { Input } from "@workspace/ui/components/input";
 import { deleteThread, renameThread } from "@/app/actions";
 import { toast } from "@workspace/ui/hooks/use-toast";
@@ -37,7 +43,7 @@ export function RecentChats({ repo }: { repo: string }) {
   const { data: session } = useSession();
 
   const { data: threads, isLoading } = useQuery({
-    enabled: !!repo,
+    enabled: !!repo && !!supabase,
     queryKey: ["threads", session?.user?.email, repo],
     queryFn: async () => {
       if (!supabase) return null;
@@ -64,21 +70,19 @@ export function RecentChats({ repo }: { repo: string }) {
           </div>
         ) : (
           <>
-            {threads &&
-              threads?.map((chat) => (
-                <Thread
-                  key={chat.thread_id}
-                  chat={chat}
-                  email={session?.user?.email as string}
-                  repo={repo}
-                />
-              ))}
-            {threads?.length === 0 ||
-              (!threads && (
-                <div className="text-sm text-white/50 pl-12 mt-10">
-                  No recent chats
-                </div>
-              ))}
+            {threads?.map((chat) => (
+              <Thread
+                key={chat.thread_id}
+                chat={chat}
+                email={session?.user?.email as string}
+                repo={repo}
+              />
+            ))}
+            {threads?.length === 0 || !threads ? (
+              <div className="text-sm text-white/50 pl-12 mt-10">
+                No recent chats
+              </div>
+            ) : null}
           </>
         )}
       </div>
@@ -124,6 +128,10 @@ const Thread = ({
       setIsRenaming({ threadId: null, state: false });
     }
   };
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, [isRenaming.state]);
 
   const updateName = async () => {
     startTransition(async () => {

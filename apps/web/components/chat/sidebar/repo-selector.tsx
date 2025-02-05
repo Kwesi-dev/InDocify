@@ -26,10 +26,10 @@ import useShallowRouter from "@/hooks/useShallowRouter";
 import { useSupabaseClient } from "@/lib/SupabaseClientProvider";
 
 export type Repo = {
-  id: string;
   name: string;
   description: string;
   url: string;
+  owner?: string;
 };
 interface RepoSelectorProps {
   selectedRepo: string | null;
@@ -49,8 +49,8 @@ export function RepoSelector({
     fileSize: 0,
     sizeLimit: 0,
   });
-  const supabase = useSupabaseClient();
   const { data: session } = useSession();
+  const supabase = useSupabaseClient();
   const [progress, setProgress] = useState({
     label: "",
     value: 0,
@@ -60,29 +60,41 @@ export function RepoSelector({
   const sub = "pro";
   const user = sub === "pro" ? "pro" : "free";
 
-  const { data: repos } = useQuery({
-    queryKey: ["repos"],
+  const { data: repos, isLoading } = useQuery({
+    enabled: !!supabase,
+    queryKey: ["repos", session?.user?.email],
     queryFn: async () => {
-      const response = await fetch("/api/repo");
-      const data = await response.json();
-      return data ?? [];
+      let repos: Repo[] = [];
+      if (supabase) {
+        const { data: savedRepos } = await supabase
+          .from("github_repos")
+          .select("name,description,url,owner")
+          .eq("email", session?.user?.email);
+        if (savedRepos) {
+          repos = [...savedRepos, ...repos];
+        } else {
+          const response = await fetch("/api/repo");
+          const data = await response.json();
+          repos = data;
+        }
+      }
+      return repos ?? [];
     },
   });
-
-  const filteredRepos = repos
-    ? repos
-        .filter((repo: any) =>
-          repo.name.toLowerCase().includes(search.toLowerCase())
-        )
-        .map((repo: any) => {
-          return {
-            id: repo.id,
-            name: repo.name,
-            description: repo.description,
-            url: repo.html_url,
-          };
-        })
-    : [];
+  const filteredRepos =
+    repos && !isLoading
+      ? repos
+          .filter((repo: any) =>
+            repo.name.toLowerCase().includes(search.toLowerCase())
+          )
+          .map((repo: any) => {
+            return {
+              name: repo.name,
+              description: repo.description,
+              url: repo.html_url,
+            };
+          })
+      : [];
 
   const handleRepoSelect = async (activeRepo: Repo) => {
     if (activeRepo) {
@@ -244,12 +256,14 @@ export function RepoSelector({
           </div>
           <ScrollArea className="h-[250px]">
             {filteredRepos?.length === 0 ? (
-              <div className="p-2">No repositories found.</div>
+              <div className="p-2 text-white/30 text-center">
+                No repositories found.
+              </div>
             ) : (
               <div className="p-2">
                 {filteredRepos.map((repo: Repo) => (
                   <Button
-                    key={repo.id}
+                    key={repo.name}
                     variant="ghost"
                     className={cn(
                       "w-full justify-start gap-2 text-left hover:bg-white/5",
@@ -267,7 +281,7 @@ export function RepoSelector({
                       <div className="font-medium text-white/50">
                         {repo.name}
                       </div>
-                      <div className="text-xs text-muted-foreground truncate">
+                      <div className="text-xs text-white/30 truncate">
                         {repo.description
                           ? repo.description?.substring(0, 30) + "..."
                           : "no description"}

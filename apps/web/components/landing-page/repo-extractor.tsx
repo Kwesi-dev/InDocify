@@ -22,7 +22,7 @@ import { useSupabaseClient } from "@/lib/SupabaseClientProvider";
 const user1 = "free";
 const user2 = "pro";
 
-export const getValidFiles = async (unzippedFiles: JSZip, repoName: string) => {
+export const getValidFiles = async (unzippedFiles: JSZip) => {
   const extractedFiles = await Promise.all(
     Object.entries(unzippedFiles.files).map(async ([path, fileObj]) => {
       if (fileObj.dir) {
@@ -53,7 +53,6 @@ export const getValidFiles = async (unzippedFiles: JSZip, repoName: string) => {
   // Step 6: Filter out undefined values (excluded files)
   const validFiles = extractedFiles.filter((f) => f !== undefined);
 
-  console.log(validFiles, repoName);
   return validFiles;
 };
 
@@ -102,7 +101,6 @@ const RepoExtractor = () => {
         `/api/repo/size?owner=${owner}&repo=${repo}`
       );
       const size = await response.json();
-      console.log("size", size);
       if (user === "free" && size > MAX_SIZE_LIMIT_FOR_FREE_PLAN) {
         setSizeLimitExceeded({
           status: true,
@@ -132,18 +130,20 @@ const RepoExtractor = () => {
       setExtractingRepo(false);
       setAnalysingRepo(true);
       const files = await fetchAndProcessZipRepo(owner, repo);
-      //save the files to supabase
-      files?.map(async (file) => {
-        if (!supabase) return;
-        //save file to db
-        await supabase.from("github_files").insert({
+      const unsavedFiles = files?.map((file) => {
+        return {
           path: file.path,
           content: JSON.stringify(file.content),
           repo: repo,
           owner: owner,
           email: session?.user?.email as string,
-        });
+        };
       });
+      //save the files to supabase
+
+      if (!supabase) return;
+      //save file to db
+      await supabase.from("github_files").insert(unsavedFiles);
 
       setProgress(25);
       const data = await fetch(
@@ -174,6 +174,23 @@ const RepoExtractor = () => {
             totalFiles: files?.length,
           }),
         });
+        console.log("saved readme", metadata);
+
+        const { error } = await supabase.from("github_repos").upsert(
+          {
+            name: repo,
+            email: session?.user?.email,
+            owner,
+            description: metadata?.metadata.about || "",
+          },
+          {
+            onConflict: "name,email",
+          }
+        );
+
+        if (error) {
+          console.log("error saving repo", error);
+        }
       }
 
       setProgress(100);
@@ -249,7 +266,7 @@ const RepoExtractor = () => {
       }
 
       // Step 5: Filter out excluded files
-      const validFiles = await getValidFiles(unzippedFiles, repoName);
+      const validFiles = await getValidFiles(unzippedFiles);
       const file_id = nanoid();
       if (!session && supabase) {
         //save file to db temporarily
@@ -291,6 +308,16 @@ const RepoExtractor = () => {
             totalFiles: validFiles?.length,
           }),
         });
+
+        await supabase.from("github_repos").upsert(
+          {
+            name: repoName,
+            email: session?.user?.email,
+          },
+          {
+            onConflict: "name,email",
+          }
+        );
       }
       setProgress(100);
       router.push(`/repo-talkroom?repo=${repoName}`);
