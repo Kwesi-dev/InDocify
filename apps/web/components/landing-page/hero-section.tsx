@@ -40,12 +40,16 @@ export default function HeroSection() {
               <div className="absolute inset-0 bg-gradient-to-r from-[#CCFF00] via-purple-500 to-[#CCFF00] opacity-30 blur-xl" />
             </div>
             <div className="relative bg-white/5 backdrop-blur-sm px-6 py-2 rounded-full">
-              <span className="text-white/90">Code to Answers in Seconds</span>
-              <span className="ml-2 text-[#CCFF00]">✨ AI-Powered</span>
+              <span className="text-white/90 text-xs md:text-sm">
+                Code to Answers in Seconds
+              </span>
+              <span className="ml-2 text-[#CCFF00] text-xs md:text-sm">
+                ✨ AI-Powered
+              </span>
             </div>
           </div>
 
-          <h1 className="text-3xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight">
+          <h1 className="text-2xl md:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-tight">
             Understand Any Repository
             <br />
             <span className="text-[#CCFF00]">with AI-Powered Insights.</span>

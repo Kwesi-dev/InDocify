@@ -341,7 +341,7 @@ const RepoExtractor = () => {
             />
             <button
               type="submit"
-              className="bg-[#CCFF00] text-black px-6 py-3 rounded-xl hover:bg-[#CCFF00]/90 transition-colors font-medium flex items-center justify-center gap-2 w-[125px]"
+              className="bg-[#CCFF00] text-black px-6 py-3 rounded-xl hover:bg-[#CCFF00]/90 transition-colors font-medium flex items-center justify-center gap-2 w-[80px] md:w-[125px]"
               // disabled={repoUrl === "" || extractingRepo}
               disabled
             >
@@ -349,7 +349,7 @@ const RepoExtractor = () => {
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               ) : (
                 <>
-                  <GitBranch className="w-5 h-5" />
+                  <GitBranch className="w-5 h-5 md:block hidden" />
                   Import
                 </>
               )}
