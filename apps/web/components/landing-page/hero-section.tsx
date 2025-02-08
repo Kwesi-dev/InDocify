@@ -105,7 +105,7 @@ export default function HeroSection() {
             </div>
 
             <div className="text-white/50 text-sm">
-              "Faster than anything I&apos;ve seen before&quot;
+              Next-level speed for understanding code.
             </div>
           </div>
         </div>

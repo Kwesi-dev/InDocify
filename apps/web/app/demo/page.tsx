@@ -88,14 +88,6 @@ export default function DemoPage() {
           </div>
         </div>
       </main>
-
-      <footer className="border-t border-white/10">
-        <div className="container mx-auto px-6 py-6">
-          <p className="text-white/50 text-sm text-center">
-            © {new Date().getFullYear()} InDocify. All rights reserved.
-          </p>
-        </div>
-      </footer>
     </PageLayout>
   );
 }
