@@ -9,7 +9,7 @@ import { Textarea } from "@workspace/ui/components/textarea";
 import { cn } from "@workspace/ui/lib/utils";
 import { Bot, User } from "@/components/icons";
 import { LoadingAnimation } from "./loading-animation";
-import { useChat } from "ai/react";
+import { Message, useChat } from "ai/react";
 import ReactMarkdown from "react-markdown";
 import { usePathname, useSearchParams } from "next/navigation";
 import { EmptyChatState } from "./empty-chat-state";
@@ -40,14 +40,16 @@ export function ChatInterface() {
   } = useChat({
     maxSteps: 3,
     api: "/api/chat",
-    experimental_prepareRequestBody: ({ messages }) => {
-      return {
-        messages,
-        repo,
-        currentThread: currentThread ?? newThread.current,
-        owner,
-      };
-    },
+    experimental_prepareRequestBody: ({
+      messages,
+    }: {
+      messages: Message[];
+    }) => ({
+      messages: messages as any[],
+      repo,
+      currentThread: currentThread ?? newThread.current,
+      owner,
+    }),
     onFinish: () => {
       query.invalidateQueries({
         queryKey: ["threads", session?.user?.email, repo],

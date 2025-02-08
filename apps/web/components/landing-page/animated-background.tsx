@@ -68,14 +68,20 @@ export default function AnimatedBackground() {
 
       // Find connections
       for (let i = 0; i < points.length; i++) {
+        const point1 = points[i];
+        if (!point1) continue;
+
         for (let j = i + 1; j < points.length; j++) {
-          const dx = points[i].x - points[j].x;
-          const dy = points[i].y - points[j].y;
+          const point2 = points[j];
+          if (!point2) continue;
+
+          const dx = point1.x - point2.x;
+          const dy = point1.y - point2.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
 
           if (distance < connectionDistance) {
-            points[i].connections.push(points[j]);
-            points[j].connections.push(points[i]);
+            point1.connections.push(point2);
+            point2.connections.push(point1);
           }
         }
       }
