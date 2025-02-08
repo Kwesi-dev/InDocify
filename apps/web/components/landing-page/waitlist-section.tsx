@@ -4,7 +4,7 @@ import { useState } from "react";
 import { CheckCircle, Users, Zap, Clock } from "lucide-react";
 import { Input } from "@workspace/ui/components/input";
 import { Button } from "@workspace/ui/components/button";
-import { useSupabaseClient } from "@/lib/SupabaseClientProvider";
+import { usePublicSupabaseClient } from "@/lib/PublicSupabaseClientProvider";
 
 const benefits = [
   {
@@ -30,7 +30,7 @@ const benefits = [
 export function WaitlistSection() {
   const [email, setEmail] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const supabase = useSupabaseClient();
+  const supabase = usePublicSupabaseClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
