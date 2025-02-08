@@ -40,7 +40,7 @@ export default function SignupPageContent() {
       ? `/repo-extraction?next-repo-url=${repoUrl}&repo=${repoName}&owner=${owner}`
       : repoName && repoUrl
         ? `/repo-extraction?next-repo-url=${repoUrl}&repo=${repoName}`
-        : "/analyse-repo";
+        : "/";
 
   const loginUrl =
     repoName && repoUrl && owner

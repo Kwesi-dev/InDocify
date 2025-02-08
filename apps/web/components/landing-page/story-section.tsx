@@ -1,14 +1,14 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Users, Star, GitBranch, Clock } from "lucide-react";
+import { Star } from "lucide-react";
 import TitleTag from "./title-tag";
 
-const metrics = [
-  { value: "70%", label: "Faster Repository Onboarding" },
-  { value: "90%", label: "Improved Repository Insights" },
-  { value: "15hrs", label: "Hours Saved per Developer Monthly" },
-];
+// const metrics = [
+//   { value: "70%", label: "Faster Repository Onboarding" },
+//   { value: "90%", label: "Improved Repository Insights" },
+//   { value: "15hrs", label: "Hours Saved per Developer Monthly" },
+// ];
 
 const timeline = [
   {
@@ -56,27 +56,8 @@ export default function StorySection() {
           </motion.p>
         </div>
 
-        {/* Metrics */}
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
-          {metrics.map((metric, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="bg-white/5 rounded-xl p-6 text-center relative group hover:bg-white/10 transition-all"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-[#CCFF00]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
-              <h3 className="text-4xl font-bold text-[#CCFF00] mb-2">
-                {metric.value}
-              </h3>
-              <p className="text-white/70">{metric.label}</p>
-            </motion.div>
-          ))}
-        </div>
-
         {/* Timeline */}
-        <div className="max-w-4xl mx-auto mb-16">
+        <div className="max-w-4xl mx-auto mb-16 hidden md:block">
           <div className="relative">
             <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-px bg-white/10" />
             {timeline.map((item, index) => (
@@ -101,6 +82,60 @@ export default function StorySection() {
                   </div>
                 </div>
                 <div className="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 bg-[#CCFF00] rounded-full" />
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        <div className="max-w-4xl mx-auto mb-16 px-4 block md:hidden">
+          <div className="relative">
+            {/* Timeline line - hidden on mobile, shown on md and up */}
+            <div className="absolute left-[16px] md:left-1/2 md:-translate-x-1/2 h-full w-px bg-white/10" />
+
+            {timeline.map((item, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{
+                  opacity: 1,
+                  y: 0,
+                  x: 0,
+                }}
+                transition={{ duration: 0.5, delay: index * 0.2 }}
+                className={`relative flex items-start md:items-center mb-12 ${
+                  index % 2 === 0 ? "md:justify-start" : "md:justify-end"
+                }`}
+              >
+                {/* Timeline dot */}
+                <div
+                  className={`
+                absolute left-0 md:left-1/2 w-8 h-8 
+                transform md:-translate-x-1/2 
+                flex items-center justify-center
+                z-10
+              `}
+                >
+                  <div className="w-4 h-4 bg-[#CCFF00] rounded-full" />
+                </div>
+
+                {/* Content container */}
+                <div
+                  className={`
+                pl-12 md:pl-0 w-full md:w-[calc(50%-2rem)]
+                ${index % 2 === 0 ? "md:pr-8" : "md:pl-8"}
+                ${index % 2 === 0 ? "md:ml-0" : "md:ml-auto"}
+              `}
+                >
+                  <div className="bg-white/5 rounded-xl p-6 relative group hover:bg-white/10 transition-all">
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#CCFF00]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
+                    <h3 className="text-xl md:text-2xl font-bold text-white mb-2">
+                      {item.title}
+                    </h3>
+                    <p className="text-white/70 text-sm md:text-base">
+                      {item.description}
+                    </p>
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>

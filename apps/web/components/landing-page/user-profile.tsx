@@ -35,7 +35,7 @@ const UserLandingProfile = ({ session }: { session: Session }) => {
 
           <div className="border-t border-white/10 my-1" />
           <Link
-            href="/analyse-repo"
+            href="/connect-github"
             className="flex items-center gap-2 px-4 py-2 text-white hover:bg-white/5 transition-colors"
           >
             <Github className="w-4 h-4" />

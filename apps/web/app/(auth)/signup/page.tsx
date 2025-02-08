@@ -25,7 +25,7 @@ const page = async ({
         redirect(`/repo-extraction?next-repo-url=${nextRepoUrl}&repo=${repo}`);
       }
     } else {
-      redirect("/analyse-repo");
+      redirect("/");
     }
   }
   return <SignupPageContent />;

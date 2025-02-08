@@ -12,7 +12,32 @@ export default function DemoPage() {
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
   const handleSchedule = () => {
-    // Handle scheduling logic
+    if (!selectedDate || !selectedTime) return;
+
+    // Format the date for display
+    const formattedDate = selectedDate.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+    // Combine the email content
+    const subject = encodeURIComponent("New Demo Request - InDocify");
+    const body = encodeURIComponent(
+      `New demo request for InDocify:\n\n` +
+        `Date: ${formattedDate}\n` +
+        `Time: ${selectedTime}\n\n` +
+        `Please confirm this demo request.`
+    );
+
+    // Open default email client with your email address
+    window.location.href = `mailto:afriyiesamuel36@gmail.com?subject=${subject}&body=${body}`;
+
+    // Redirect after a short delay to allow the mailto to open
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 1000);
   };
 
   return (
@@ -21,7 +46,7 @@ export default function DemoPage() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-white mb-4">
-              Schedule a Demo with Our Team
+              Schedule a Demo with the developer
             </h1>
             <p className="text-white/70 text-lg">
               Learn how InDocify can transform your documentation workflow in a

@@ -40,7 +40,7 @@ const page = async ({
       if (data.data?.id) {
         redirect("/repo-talkroom");
       }
-      redirect("/analyse-repo");
+      redirect("/");
     }
   }
   return <LoginPageContent />;

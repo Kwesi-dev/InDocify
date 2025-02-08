@@ -12,7 +12,7 @@ const ActionsButton = () => {
 };
 const SignupButton = async () => {
   const session = await auth();
-  const link = session ? "/analyse-repo" : "/signup";
+  const link = session ? "/" : "/signup";
   return (
     <Link href={link}>
       <button className="bg-white/10 text-white px-8 py-3 rounded-full hover:bg-white/20 transition-colors font-medium">

@@ -1,5 +1,5 @@
 import PageLayout from "@/components/layout";
-import { Mail, MessageSquare, Phone } from "lucide-react";
+import { Mail, Phone } from "lucide-react";
 import Link from "next/link";
 
 export default function ContactPage() {
@@ -29,19 +29,6 @@ export default function ContactPage() {
                 >
                   support@indocify.com
                 </a>
-              </div>
-
-              <div className="bg-white/5 rounded-lg p-6">
-                <div className="w-12 h-12 bg-[#CCFF00]/10 rounded-lg flex items-center justify-center mb-4">
-                  <MessageSquare className="w-6 h-6 text-[#CCFF00]" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">Live Chat</h3>
-                <p className="text-white/70 mb-4">
-                  Chat with our team in real-time during business hours.
-                </p>
-                <button className="text-[#CCFF00] hover:underline">
-                  Start a conversation
-                </button>
               </div>
 
               <Link href="/demo">

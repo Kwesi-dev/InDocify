@@ -45,13 +45,13 @@ export default function HeroSection() {
             </div>
           </div>
 
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight">
+          <h1 className="text-3xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight">
             Understand Any Repository
             <br />
             <span className="text-[#CCFF00]">with AI-Powered Insights.</span>
           </h1>
 
-          <p className="text-white/70 text-xl mb-12 max-w-2xl mx-auto">
+          <p className="text-white/70 text-md  md:text-xl mb-12 max-w-lg md:max-w-2xl mx-auto">
             Analyze, navigate, and ask questions about any codebase—your own or
             others’—with AI-powered insights and documentation.
           </p>
