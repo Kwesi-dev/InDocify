@@ -59,19 +59,29 @@ export async function POST(req: Request) {
           content: result.text,
         },
       ];
-      const { error } = await supabase.from("threads").upsert(
-        {
-          messages: history,
-          thread_id: currentThread,
-          repo,
-          email: session?.user?.email as string,
-          title: result.text,
-          owner,
-        },
-        {
-          onConflict: "thread_id",
-        }
-      );
+
+      // First check if thread exists and has a title
+      const { data: existingThread } = await supabase
+        .from("threads")
+        .select("title")
+        .eq("thread_id", currentThread)
+        .single();
+
+      // Prepare upsert data - only include title if there isn't one already
+      const upsertData = {
+        messages: history,
+        thread_id: currentThread,
+        repo,
+        email: session?.user?.email as string,
+        owner,
+        ...(!existingThread?.title && {
+          title: history[history.length - 1].content,
+        }),
+      };
+
+      const { error } = await supabase.from("threads").upsert(upsertData, {
+        onConflict: "thread_id",
+      });
 
       if (error) {
         console.error("Error upserting thread:", error);
@@ -103,7 +113,7 @@ export async function POST(req: Request) {
       - **AI Response (if found):** "The file \`auth.js\` is located at \`src/auth/auth.js\`."
       - **AI Response (if not found):** "Sorry, I don't have any idea about it."
       
-    - **User:** "What does the README/readme say?"
+    - **User:** "What does the README/readme say?" or "How can I set it up on my local machine"
       - **AI Action:** Search for "README" or "readme" in the database.
       - **AI Response (if found):** "The README.md file contains: 'Welcome to the project...'"
 

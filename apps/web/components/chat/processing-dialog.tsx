@@ -3,6 +3,7 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
 import { LoadingSpinner } from "../loading-spinner";
@@ -28,6 +29,7 @@ export function ProcessingDialog({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md bg-[#1a1f1a] border-white/10">
         <DialogTitle hidden />
+        <DialogDescription hidden />
         <div className="flex flex-col items-center justify-center gap-6 py-8">
           <div className="relative">
             <div className="absolute inset-0 rounded-full bg-[#CCFF00]/20 blur-xl" />

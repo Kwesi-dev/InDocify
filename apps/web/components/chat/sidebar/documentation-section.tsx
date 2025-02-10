@@ -9,9 +9,9 @@ import {
 } from "@workspace/ui/components/popover";
 import { ScrollArea } from "@workspace/ui/components/scroll-area";
 import { cn } from "@workspace/ui/lib/utils";
-import { useSearchParams } from "next/navigation";
-import useShallowRouter from "@/hooks/useShallowRouter";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { useDocumentationStore } from "@/lib/stores";
 
 interface DocumentationSectionProps {
   isCollapsed?: boolean;
@@ -25,12 +25,12 @@ const docs = [
     description: "Project setup and initial configuration",
     icon: FileText,
   },
-  {
-    id: "2",
-    title: "Architecture Overview",
-    description: "System design and component structure",
-    icon: FileText,
-  },
+  // {
+  //   id: "2",
+  //   title: "Architecture Overview",
+  //   description: "System design and component structure",
+  //   icon: FileText,
+  // },
   {
     id: "3",
     title: "Development Guidelines",
@@ -42,9 +42,10 @@ const docs = [
 export default function DocumentationSection({
   isCollapsed = false,
 }: DocumentationSectionProps) {
+  const { setDocumentation, documentation } = useDocumentationStore();
   const [open, setOpen] = useState(false);
   const repo = useSearchParams().get("repo");
-  const shallowRoute = useShallowRouter();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const docsTitle = searchParams.get("doc") as string;
   return (
@@ -81,14 +82,16 @@ export default function DocumentationSection({
                 }`}
                 onClick={() => {
                   const newSearchParams = new URLSearchParams(searchParams);
-                  shallowRoute(
+                  newSearchParams.delete("doc");
+                  if (documentation) {
+                    setDocumentation("");
+                  }
+                  router.push(
                     `/repo-talkroom?doc=${doc.title}&${newSearchParams.toString()}`
                   );
                   setOpen(false);
                 }}
-                disabled={
-                  docsTitle === doc.title || doc.title !== "Getting Started"
-                }
+                disabled={docsTitle === doc.title}
               >
                 <doc.icon className="w-4 h-4 shrink-0 text-white/50" />
                 <div className="flex-1 truncate">

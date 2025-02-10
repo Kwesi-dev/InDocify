@@ -79,9 +79,7 @@ export function FileUploadZone({
         ref={fileInputRef}
         type="file"
         accept=".zip"
-        // onChange={handleFileInput}
-        disabled
-        onChange={(e) => e.preventDefault()}
+        onChange={handleFileInput}
         className="hidden"
         id="file-upload"
       />
@@ -126,21 +124,17 @@ export function FileUploadZone({
               <>
                 <Button
                   variant="ghost"
-                  // onClick={removeFile}
+                  onClick={removeFile}
                   className="text-red-400 hover:text-red-300 hover:bg-red-400/10"
-                  // disabled={isLoading}
-                  disabled
-                  onClick={() => null}
+                  disabled={isLoading}
                 >
                   <X className="w-4 h-4 mr-2" />
                   Remove
                 </Button>
                 <Button
                   className="bg-[#CCFF00] text-black hover:bg-[#CCFF00]/90 flex items-center justify-center"
-                  // onClick={() => onFileSelect(selectedFile)}
-                  // disabled={isLoading}
-                  disabled
-                  onClick={() => null}
+                  onClick={() => onFileSelect(selectedFile)}
+                  disabled={isLoading}
                 >
                   {isLoading ? (
                     <>

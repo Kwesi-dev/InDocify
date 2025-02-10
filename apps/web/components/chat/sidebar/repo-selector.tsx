@@ -98,122 +98,154 @@ export function RepoSelector({
 
   const handleRepoSelect = async (activeRepo: Repo) => {
     if (activeRepo) {
-      const { owner, repo } = extractOwnerAndRepo(activeRepo.url as string);
-      //check if the repo exist in the db
-      if (!supabase) return;
-      const { data } = await supabase
-        .from("github_docs")
-        .select("id")
-        .eq("owner", owner)
-        .eq("repo", repo)
-        .eq("email", session?.user?.email)
-        .single();
-      if (data?.id) {
-        shallowRoute(`/repo-talkroom?owner=${owner}&repo=${repo}`);
-        return;
+      console.log("activeRepo", activeRepo);
+      let shouldProcess = false;
+      let repoOwner = "";
+      let repoName = "";
+
+      if (!activeRepo.url) {
+        if (supabase) {
+          const { data } = await supabase
+            .from("github_docs")
+            .select("id")
+            .eq("repo", activeRepo.name)
+            .eq("email", session?.user?.email)
+            .single();
+          if (data?.id) {
+            shallowRoute(`/repo-talkroom?repo=${activeRepo.name}`);
+            return;
+          } else {
+            shouldProcess = true;
+            repoName = activeRepo.name;
+          }
+        }
+      } else {
+        const { owner, repo } = extractOwnerAndRepo(activeRepo.url as string);
+        if (supabase) {
+          const { data } = await supabase
+            .from("github_docs")
+            .select("id")
+            .eq("owner", owner)
+            .eq("repo", repo)
+            .eq("email", session?.user?.email)
+            .single();
+          if (data?.id) {
+            shallowRoute(`/repo-talkroom?owner=${owner}&repo=${repo}`);
+            return;
+          } else {
+            shouldProcess = true;
+            repoOwner = owner;
+            repoName = repo;
+          }
+        }
       }
 
-      setProcessing(true);
-      setProgress({
-        label: "Confirming repository size",
-        value: 0,
-      });
-      try {
-        const response = await fetch(
-          `/api/repo/size?owner=${owner}&repo=${repo}`
-        );
-        const size = await response.json();
-        if (user === "free" && size > MAX_SIZE_LIMIT_FOR_FREE_PLAN) {
-          setSizeLimitExceeded({
-            status: true,
-            fileSize: size,
-            sizeLimit: MAX_SIZE_LIMIT_FOR_FREE_PLAN,
-          });
-          setProcessing(false);
-          return;
-        } else if (user === "pro" && size > MAX_SIZE_LIMIT_FOR_PRO_PLAN) {
-          setSizeLimitExceeded({
-            status: true,
-            fileSize: size,
-            sizeLimit: MAX_SIZE_LIMIT_FOR_PRO_PLAN,
-          });
-          setProcessing(false);
-          return;
-        } else {
-          if (sizeLimitExceeded.status === true)
+      if (shouldProcess) {
+        setProcessing(true);
+        setProgress({
+          label: "Confirming repository size",
+          value: 0,
+        });
+        try {
+          const response = await fetch(
+            `/api/repo/size?owner=${repoOwner}&repo=${repoName}`
+          );
+          const size = await response.json();
+          if (user === "free" && size > MAX_SIZE_LIMIT_FOR_FREE_PLAN) {
             setSizeLimitExceeded({
-              status: false,
-              fileSize: 0,
-              sizeLimit: 0,
+              status: true,
+              fileSize: size,
+              sizeLimit: MAX_SIZE_LIMIT_FOR_FREE_PLAN,
             });
-        }
-        setProgress({
-          label: "Extracting repository files",
-          value: 10,
-        });
-
-        const files = await fetchAndProcessZipRepo(owner, repo);
-        //save the files to supabase
-        files?.map(async (file) => {
-          if (!supabase) return;
-          //save file to db
-          await supabase.from("github_files").insert({
-            path: file.path,
-            content: file.content,
-            repo: repo,
-            owner: owner,
-            email: session?.user?.email as string,
+            setProcessing(false);
+            return;
+          } else if (user === "pro" && size > MAX_SIZE_LIMIT_FOR_PRO_PLAN) {
+            setSizeLimitExceeded({
+              status: true,
+              fileSize: size,
+              sizeLimit: MAX_SIZE_LIMIT_FOR_PRO_PLAN,
+            });
+            setProcessing(false);
+            return;
+          } else {
+            if (sizeLimitExceeded.status === true)
+              setSizeLimitExceeded({
+                status: false,
+                fileSize: 0,
+                sizeLimit: 0,
+              });
+          }
+          setProgress({
+            label: "Extracting repository files",
+            value: 10,
           });
-        });
-        setProgress({
-          label: "Extracting repository metadata",
-          value: 50,
-        });
-        const data = await fetch(
-          `/api/repo/metadata?owner=${owner}&repo=${repo}`
-        );
-        const metadata = await data.json();
 
-        setProgress({
-          label: "Extracting repository readme",
-          value: 75,
-        });
-        //find the readme file
-        const readmeFile = files?.find(
-          (file: any) =>
-            file.path.includes("README.md") || file.path.includes("readme.md")
-        );
-        //save the files to the database
-        const docsRes = await generateDocs(readmeFile?.content as string);
+          const files = await fetchAndProcessZipRepo(repoOwner, repoName);
+          //save the files to supabase
+          files?.map(async (file) => {
+            if (!supabase) return;
+            //save file to db
+            await supabase.from("github_files").insert({
+              path: file.path,
+              content: file.content,
+              repo: repoName,
+              owner: repoOwner,
+              email: session?.user?.email as string,
+            });
+          });
+          setProgress({
+            label: "Extracting repository metadata",
+            value: 50,
+          });
+          const data = await fetch(
+            `/api/repo/metadata?owner=${repoOwner}&repo=${repoName}`
+          );
+          const metadata = await data.json();
 
-        setProgress({
-          label: "Generating readmedocumentation",
-          value: 75,
-        });
+          setProgress({
+            label: "Extracting repository readme",
+            value: 75,
+          });
+          //find the readme file
+          const readmeFile = files?.find(
+            (file: any) =>
+              file.path.includes("README.md") || file.path.includes("readme.md")
+          );
+          //save the files to the database
+          const docsRes = await generateDocs(readmeFile?.content as string);
 
-        //save readme to database
-        await supabase.from("github_docs").insert({
-          owner: owner,
-          repo: repo,
-          readme: docsRes,
-          email: session?.user?.email,
-          metadata: JSON.stringify({
-            ...metadata,
-            totalFiles: files?.length,
-          }),
-        });
+          setProgress({
+            label: "Generating readmedocumentation",
+            value: 75,
+          });
 
-        setProgress({
-          label: "Finalizing and preparing repository for repoTalk",
-          value: 100,
-        });
-        addQueryString({
-          repo,
-          owner,
-        });
-        setProcessing(false);
-      } catch (error) {
-        // console.log(error);
+          //save readme to database
+          if (supabase) {
+            await supabase.from("github_docs").insert({
+              owner: repoOwner,
+              repo: repoName,
+              readme: docsRes,
+              email: session?.user?.email,
+              metadata: JSON.stringify({
+                ...metadata,
+                totalFiles: files?.length,
+              }),
+            });
+          }
+
+          setProgress({
+            label: "Finalizing and preparing repository for repoTalk",
+            value: 100,
+          });
+          addQueryString({
+            repo: repoName,
+            owner: repoOwner,
+          });
+          setProcessing(false);
+        } catch (error) {
+          console.error("Error processing repository:", error);
+          setProcessing(false);
+        }
       }
     }
   };

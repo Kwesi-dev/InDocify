@@ -30,7 +30,7 @@ export function extractOwnerAndRepo(repoUrl: string): {
   owner: string;
   repo: string;
 } {
-  const match = repoUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+  const match = repoUrl?.match(/github\.com\/([^\/]+)\/([^\/]+)/);
   if (!match) {
     return { owner: "", repo: "" };
   }

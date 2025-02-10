@@ -10,7 +10,6 @@ import { cn } from "@workspace/ui/lib/utils";
 import { Bot, User } from "@/components/icons";
 import { LoadingAnimation } from "./loading-animation";
 import { Message, useChat } from "ai/react";
-import ReactMarkdown from "react-markdown";
 import { usePathname, useSearchParams } from "next/navigation";
 import { EmptyChatState } from "./empty-chat-state";
 import { nanoid } from "@/utils";
@@ -18,6 +17,7 @@ import useShallowRouter from "@/hooks/useShallowRouter";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useSupabaseClient } from "@/lib/SupabaseClientProvider";
+import { MemoizedMarkdown } from "@/lib/Markdown";
 
 export function ChatInterface() {
   const params = useSearchParams();
@@ -62,7 +62,7 @@ export function ChatInterface() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const _ = useQuery({
-    enabled: !!currentThread && !!repo,
+    enabled: !!currentThread && !!repo && !!session,
     queryKey: ["messages", session?.user?.email, repo, currentThread],
     queryFn: async () => {
       if (!supabase) return null;
@@ -128,11 +128,12 @@ export function ChatInterface() {
           <AnimatePresence initial={false}>
             {messages.length === 0 ? <EmptyChatState repoName={repo!} /> : null}
 
-            {messages.map((message) => {
+            {messages.map((message, index) => {
+              console.log("message", message.id);
               if (message.content === "") return null;
               return (
                 <motion.div
-                  key={message.id}
+                  key={`${message.id}-${index}`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
@@ -164,9 +165,13 @@ export function ChatInterface() {
                         {message.role === "assistant" ? "AI Assistant" : "You"}
                       </span>
                     </div>
-
-                    <div className="prose prose-invert max-w-none text-white/90 text-wrap">
-                      <ReactMarkdown>{message.content}</ReactMarkdown>
+                    <div className="prose prose-invert max-w-full w-full overflow-hidden text-white/90">
+                      <div className="w-full max-w-[650px] overflow-hidden break-words">
+                        <MemoizedMarkdown
+                          id={message.id}
+                          content={message.content}
+                        />
+                      </div>
                     </div>
 
                     {/* Message Actions */}

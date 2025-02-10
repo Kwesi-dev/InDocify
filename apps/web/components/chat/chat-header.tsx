@@ -3,12 +3,14 @@ import RepoDetails from "./repo-sheet";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useSupabaseClient } from "@/lib/SupabaseClientProvider";
+import { useSession } from "next-auth/react";
 
 export function RepoHeader() {
   const supabase = useSupabaseClient();
   const params = useSearchParams();
   const selectedRepo = params.get("repo");
-  const owner = params.get("owner");
+  const { data: session } = useSession();
+  const email = session?.user?.email;
 
   const { data } = useQuery({
     enabled: !!selectedRepo && !!supabase,
@@ -18,8 +20,8 @@ export function RepoHeader() {
       const { data, error } = await supabase
         .from("github_docs")
         .select("readme, metadata")
-        .eq("owner", owner)
         .eq("repo", selectedRepo)
+        .eq("email", email)
         .single();
       if (error) {
         throw error;

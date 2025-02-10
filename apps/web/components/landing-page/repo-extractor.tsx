@@ -174,7 +174,6 @@ const RepoExtractor = () => {
             totalFiles: files?.length,
           }),
         });
-        console.log("saved readme", metadata);
 
         const { error } = await supabase.from("github_repos").upsert(
           {
@@ -182,6 +181,7 @@ const RepoExtractor = () => {
             email: session?.user?.email,
             owner,
             description: metadata?.metadata.about || "",
+            url: repoUrl,
           },
           {
             onConflict: "name,email",
@@ -330,20 +330,18 @@ const RepoExtractor = () => {
     <>
       <div className="max-w-2xl mx-auto mb-12">
         <div className="bg-white/5 backdrop-blur-sm p-2 rounded-2xl">
-          <form onSubmit={(e) => e.preventDefault()} className="flex gap-2">
+          <form onSubmit={handleRepoSubmit} className="flex gap-2">
             <input
               type="text"
               value={repoUrl}
               onChange={(e) => setRepoUrl(e.target.value)}
               placeholder="Enter public repository URL"
               className="flex-1 bg-black/20 text-white placeholder-white/50 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#CCFF00]"
-              disabled
             />
             <button
               type="submit"
               className="bg-[#CCFF00] text-black px-6 py-3 rounded-xl hover:bg-[#CCFF00]/90 transition-colors font-medium flex items-center justify-center gap-2 w-[80px] md:w-[125px]"
-              // disabled={repoUrl === "" || extractingRepo}
-              disabled
+              disabled={repoUrl === "" || extractingRepo}
             >
               {extractingRepo ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
