@@ -62,14 +62,6 @@ export const MemoizedMarkdown = memo(
             className?: string;
             children?: React.ReactNode;
           } & React.HTMLAttributes<HTMLElement>) {
-            console.log("Code block details:", {
-              inline,
-              className,
-              children: String(children),
-              node,
-              props,
-            });
-
             const match = /language-(\w+)/.exec(className || "");
             const language = match ? match[1] : "text";
 

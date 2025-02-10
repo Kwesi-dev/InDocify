@@ -98,7 +98,6 @@ export function RepoSelector({
 
   const handleRepoSelect = async (activeRepo: Repo) => {
     if (activeRepo) {
-      console.log("activeRepo", activeRepo);
       let shouldProcess = false;
       let repoOwner = "";
       let repoName = "";

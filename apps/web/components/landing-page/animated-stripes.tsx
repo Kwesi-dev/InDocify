@@ -1,18 +1,31 @@
 "use client";
 
+const STRIPES_COUNT = 15;
+const BASE_OPACITY = 0.1;
+const OPACITY_STEP = 0.05;
+
 export function AnimatedStripes() {
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden">
       <div className="relative w-full h-full">
-        {Array.from({ length: 15 }).map((_, i) => (
+        {Array.from({ length: STRIPES_COUNT }).map((_, i) => (
           <div
             key={i}
             className="absolute h-full w-24 bg-gradient-to-b from-transparent via-purple-500/20 to-transparent"
-            style={{
-              left: `${i * 8}%`,
-              opacity: 0.1 + i * 0.05,
-              animation: `stripeFloat ${10 + i * 0.5}s infinite ease-in-out`,
-            }}
+            style={
+              {
+                "--stripe-left": `${i * 8}%`,
+                "--stripe-opacity": (
+                  BASE_OPACITY +
+                  i * OPACITY_STEP
+                ).toString(),
+                "--animation-duration": `${10 + i * 0.5}s`,
+                left: "var(--stripe-left)",
+                opacity: "var(--stripe-opacity)",
+                animation:
+                  "stripeFloat var(--animation-duration) infinite ease-in-out",
+              } as React.CSSProperties
+            }
           />
         ))}
       </div>

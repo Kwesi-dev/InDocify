@@ -9,9 +9,17 @@ import {
 } from "@workspace/ui/components/popover";
 import { ScrollArea } from "@workspace/ui/components/scroll-area";
 import { cn } from "@workspace/ui/lib/utils";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useDocumentationStore } from "@/lib/stores";
+import useShallowRouter from "@/hooks/useShallowRouter";
+import { useSupabaseClient } from "@/lib/SupabaseClientProvider";
+import { useSession } from "next-auth/react";
+import {
+  generateDevelopmentGuidelines,
+  generateGetStartedDocs,
+} from "@/app/agents/new/actions";
+import { getDocsColumnName } from "@/utils";
 
 interface DocumentationSectionProps {
   isCollapsed?: boolean;
@@ -25,14 +33,8 @@ const docs = [
     description: "Project setup and initial configuration",
     icon: FileText,
   },
-  // {
-  //   id: "2",
-  //   title: "Architecture Overview",
-  //   description: "System design and component structure",
-  //   icon: FileText,
-  // },
   {
-    id: "3",
+    id: "2",
     title: "Development Guidelines",
     description: "Coding standards and best practices",
     icon: FileText,
@@ -42,12 +44,74 @@ const docs = [
 export default function DocumentationSection({
   isCollapsed = false,
 }: DocumentationSectionProps) {
-  const { setDocumentation, documentation } = useDocumentationStore();
+  const { setDocumentation, documentation, setIsGenerating } =
+    useDocumentationStore();
   const [open, setOpen] = useState(false);
   const repo = useSearchParams().get("repo");
-  const router = useRouter();
+  const shallowRoute = useShallowRouter();
   const searchParams = useSearchParams();
+  const repoName = searchParams.get("repo");
   const docsTitle = searchParams.get("doc") as string;
+  const supabase = useSupabaseClient();
+  const { data: session } = useSession();
+
+  const fetchDocumentation = async (title: string) => {
+    setOpen(false);
+    setIsGenerating(true);
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set("doc", title);
+    shallowRoute(`/repo-talkroom?${newSearchParams.toString()}`);
+    if (documentation) {
+      setDocumentation(null);
+    }
+
+    const column = getDocsColumnName(title);
+
+    if (supabase) {
+      const { data, error } = await supabase
+        .from("github_docs")
+        .select(column)
+        .eq("email", session?.user?.email)
+        .eq("repo", repoName)
+        .single();
+
+      if (data) {
+        setDocumentation(data?.[column as keyof typeof data]);
+        setIsGenerating(false);
+        return;
+      }
+      if (error) {
+        console.log(error);
+      }
+    }
+
+    const agent =
+      column === "get_started"
+        ? generateGetStartedDocs
+        : column === "development_guidelines"
+          ? generateDevelopmentGuidelines
+          : null;
+    if (!agent) return;
+    try {
+      const response = await agent(repoName as string);
+      setDocumentation(response);
+      //save the text to the database
+      if (!supabase) return;
+      await supabase.from("github_docs").upsert(
+        {
+          [column]: response,
+          repo: repoName,
+          email: session?.user?.email as string,
+        },
+        { onConflict: "email, repo" }
+      );
+    } catch (error) {
+      console.log("error", error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -80,17 +144,7 @@ export default function DocumentationSection({
                 className={`w-full justify-start gap-2 text-left hover:bg-white/5 ${
                   docsTitle === doc.title && "bg-white/5"
                 }`}
-                onClick={() => {
-                  const newSearchParams = new URLSearchParams(searchParams);
-                  newSearchParams.delete("doc");
-                  if (documentation) {
-                    setDocumentation("");
-                  }
-                  router.push(
-                    `/repo-talkroom?doc=${doc.title}&${newSearchParams.toString()}`
-                  );
-                  setOpen(false);
-                }}
+                onClick={() => fetchDocumentation(doc.title)}
                 disabled={docsTitle === doc.title}
               >
                 <doc.icon className="w-4 h-4 shrink-0 text-white/50" />
