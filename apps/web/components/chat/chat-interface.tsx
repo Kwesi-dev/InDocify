@@ -18,6 +18,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useSupabaseClient } from "@/lib/SupabaseClientProvider";
 import { MemoizedMarkdown } from "@/lib/Markdown";
+import { RateLimitDialog } from "./rate-limit-dialog";
+import useQuestionLimit from "@/hooks/useQuestionLimit";
 
 export function ChatInterface() {
   const params = useSearchParams();
@@ -29,6 +31,7 @@ export function ChatInterface() {
   const { data: session } = useSession();
   const supabase = useSupabaseClient();
   const query = useQueryClient();
+  const { questionCount, isLimited, updateQuestionCount } = useQuestionLimit();
 
   const {
     messages,
@@ -115,6 +118,9 @@ export function ChatInterface() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
+      {isLimited ? (
+        <RateLimitDialog isOpen={isLimited} onClose={() => {}} />
+      ) : null}
       {/* Messages */}
       <ScrollArea ref={scrollAreaRef} className="flex-[0.85] p-4">
         <div className="max-w-3xl mx-auto space-y-6 ">
@@ -137,6 +143,7 @@ export function ChatInterface() {
               );
             }
             handleSubmit(e);
+            updateQuestionCount(questionCount + 1);
           }}
           className="max-w-3xl mx-auto"
         >

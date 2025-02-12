@@ -2,8 +2,8 @@
 
 import AnimatedBackground from "./animated-background";
 import { AnimatedStripes } from "./animated-stripes";
-import { Sparkles } from "lucide-react";
 import RepoExtractor from "./repo-extractor";
+import { VideoSnippet } from "./video-snippet";
 
 export default function HeroSection() {
   return (
@@ -74,6 +74,9 @@ export default function HeroSection() {
 
             <div className="text-white/50 text-sm">
               Next-level speed for understanding code.
+            </div>
+            <div className="py-[100px]">
+              <VideoSnippet />
             </div>
           </div>
         </div>
