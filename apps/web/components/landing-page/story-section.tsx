@@ -4,12 +4,6 @@ import { motion } from "motion/react";
 import { Star } from "lucide-react";
 import TitleTag from "./title-tag";
 
-// const metrics = [
-//   { value: "70%", label: "Faster Repository Onboarding" },
-//   { value: "90%", label: "Improved Repository Insights" },
-//   { value: "15hrs", label: "Hours Saved per Developer Monthly" },
-// ];
-
 const timeline = [
   {
     title: "The Problem",
@@ -172,19 +166,15 @@ export default function StorySection() {
               </p>
 
               <blockquote className="border-l-4 border-[#CCFF00] pl-6 my-8 italic">
-                “InDocify isn’t just about documentation. It’s about
-                transforming how developers explore, understand, and collaborate
-                on codebases.”
+                “InDocify is about transforming how developers explore,
+                understand, and collaborate on codebases.”
               </blockquote>
 
               <p>
                 Today, InDocify empowers developers by providing instant
                 insights into any repository. My AI-powered platform analyzes
-                code, generates real-time explanations, and produces
-                comprehensive documentation that evolves with your projects.
-                Whether onboarding to a new team or contributing to an
-                open-source project, InDocify simplifies the process, saving
-                time and enhancing collaboration.
+                code, generates real-time explanations allowing developers to
+                understand, learn, and innovate faster.
               </p>
             </div>
           </div>

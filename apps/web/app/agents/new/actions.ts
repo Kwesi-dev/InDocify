@@ -567,6 +567,483 @@ export async function generateGetStartedDocs(repo: string) {
   return result.text;
 }
 
+// export async function generateArchitectureDocs(repo: string) {
+//   const session = await auth();
+//   const supabase = createSupabaseClient(session?.supabaseAccessToken as string);
+
+//   const result = await generateText({
+//     model: openai("gpt-4-turbo"),
+//     system: `
+//       You are a technical documentation expert specialized in creating comprehensive architecture documentation by analyzing repository content through a database interface. Your primary task is to generate detailed architectural documentation using the repository's actual files and content.
+//       The name of the repository is: ${repo}
+
+//       **Role and Capabilities:**
+//       - You analyze repository structure and content to document architectural decisions
+//       - You map relationships between different components and services
+//       - You focus on actual implementation patterns found in the codebase
+
+//       **Available Tools:**
+//       - searchFiles: Use this to find relevant files and their contents based on keywords
+//       - Additional tools may be provided for deeper repository analysis
+
+//       **Key Files to Analyze:**
+//       1. Architecture Documentation:
+//          - docs/architecture.md, ARCHITECTURE.md
+//          - docs/design.md, DESIGN.md
+//          - docs/system-design.md
+//          - docs/high-level-design.md
+//          - docs/technical-design.md
+//          - docs/adr/* (Architecture Decision Records)
+//          - wiki/architecture/*
+
+//       2. Application Entry Points:
+//          - src/index.{js,ts}
+//          - src/main.{js,ts}
+//          - src/app.{js,ts}
+//          - pages/_app.{js,ts}
+//          - app/layout.{js,ts}
+
+//       3. Configuration Files:
+//          - next.config.js
+//          - vite.config.ts
+//          - webpack.config.js
+//          - tsconfig.json (module paths)
+//          - package.json (dependencies)
+//          - turbo.json (workspaces)
+//          - nx.json (monorepo)
+
+//       4. API Definitions:
+//          - src/api/*
+//          - pages/api/*
+//          - app/api/*
+//          - swagger.{json,yaml}
+//          - openapi.{json,yaml}
+//          - graphql.schema
+
+//       5. Database Schema:
+//          - prisma/schema.prisma
+//          - migrations/*
+//          - schema.sql
+//          - models/*
+//          - entities/*
+
+//       6. Infrastructure Files:
+//          - docker-compose.yml
+//          - Dockerfile
+//          - kubernetes/*
+//          - terraform/*
+//          - .env.example
+//          - nginx.conf
+
+//       **Search Patterns for Architecture Analysis:**
+//       1. Component Organization:
+//          - Component folder structure
+//          - Module boundaries
+//          - Service layers
+//          - Feature organization
+//          - Domain separation
+
+//       2. Data Flow Patterns:
+//          - API routes and handlers
+//          - State management setup
+//          - Database access patterns
+//          - Service communication
+//          - Event handling
+
+//       3. Integration Patterns:
+//          - External service integrations
+//          - Authentication implementation
+//          - API middleware
+//          - Database connections
+//          - Caching strategies
+
+//       4. Infrastructure Patterns:
+//          - Deployment configuration
+//          - Service orchestration
+//          - Environment setup
+//          - Scaling provisions
+//          - Monitoring setup
+
+//       **Analysis Strategy:**
+//       1. First Pass - High-Level Architecture:
+//          - Identify main application components
+//          - Map service boundaries
+//          - Document data flow
+//          - Understand deployment strategy
+
+//       2. Second Pass - Implementation Details:
+//          - Analyze component interactions
+//          - Review state management
+//          - Examine API structure
+//          - Study database schema
+
+//       3. Third Pass - Cross-Cutting Concerns:
+//          - Security implementations
+//          - Performance optimizations
+//          - Scalability provisions
+//          - Monitoring solutions
+
+//       **Documentation Structure:**
+//       1. System Overview
+//          - High-level architecture diagram
+//          - Key components and their purposes
+//          - Technology stack overview
+//          - System boundaries and interfaces
+
+//       2. Component Architecture
+//          - Detailed component breakdown
+//          - Component relationships
+//          - Data flow diagrams
+//          - State management approach
+
+//       3. Data Architecture
+//          - Database schema overview
+//          - Data models and relationships
+//          - Caching strategy
+//          - Data flow patterns
+
+//       4. API Architecture
+//          - API design patterns
+//          - Endpoint organization
+//          - Authentication/Authorization
+//          - Integration patterns
+
+//       5. Infrastructure Architecture
+//          - Deployment architecture
+//          - Scaling strategy
+//          - Environment configuration
+//          - DevOps practices
+
+//       **Error Handling:**
+//       - If architectural details are not explicit:
+//          * Infer from code organization
+//          * Note assumptions made
+//          * Suggest architectural improvements
+//          * Flag potential architectural debt
+
+//       Remember to:
+//       - Focus on actual implementation patterns
+//       - Provide concrete examples from the codebase
+//       - Highlight architectural decisions and their rationale
+//       - Note scalability and performance considerations
+//       - Document security measures and best practices
+
+//       **Final Thoughts:**
+//       - Do not conclude by referring to external documentation, instead encourage users to use the chat platform for clarification about the architecture.
+//     `,
+//     prompt: `
+//       Generate a comprehensive architecture overview documentation.
+//       Start by analyzing key architectural files and patterns, then document the system's structure and organization.
+//     `,
+//     tools: {
+//       searchFiles: tool({
+//         description: `search for files to analyze the project architecture.`,
+//         parameters: z.object({
+//           keywords: z.string().describe("the keywords to search for"),
+//           repo: z.string().describe("the repository to search"),
+//         }),
+//         execute: async ({ keywords, repo }) => {
+//           // Split the keywords into individual terms and clean them
+//           const searchTerms = keywords
+//             .split(/[,\s]+/)
+//             .map((term) => term.trim())
+//             .filter((term) => term.length > 0);
+
+//           console.log("searchTerms", searchTerms);
+
+//           // Create an array of promises for parallel execution
+//           const searchPromises = searchTerms.map(async (term) => {
+//             const { data, error } = await supabase
+//               .from("github_files")
+//               .select("path, content")
+//               .or(`path.ilike.%${term}%,content.ilike.%${term}%`)
+//               .eq("repo", repo);
+
+//             if (error) {
+//               console.log("Error searching for term:", term, error);
+//               return [];
+//             }
+//             return data || [];
+//           });
+
+//           // Execute all searches in parallel and combine results
+//           const results = await Promise.all(searchPromises);
+
+//           // Flatten and deduplicate results based on file path
+//           const uniqueFiles = new Map();
+//           results.flat().forEach((file) => {
+//             if (file && file.path) {
+//               uniqueFiles.set(file.path, file);
+//             }
+//           });
+
+//           return Array.from(uniqueFiles.values());
+//         },
+//       }),
+//     },
+//     maxSteps: 3,
+//   });
+//   return result.text;
+// }
+
+export async function generateDevelopmentGuidelines(repo: string) {
+  const session = await auth();
+  const supabase = createSupabaseClient(session?.supabaseAccessToken as string);
+
+  const result = await generateText({
+    model: openai("gpt-4-turbo"),
+    system: `
+      You are a technical documentation expert specialized in analyzing and documenting development guidelines, coding standards, and best practices. Your primary task is to generate comprehensive development guidelines by analyzing the repository's actual code patterns and conventions.
+      You are to note that you are doing this to help a new contributer understand the codebase guidelines so explain the concept into detail.
+      The name of the repository is: ${repo}
+
+
+
+      **Role and Capabilities:**
+      - You analyze code patterns and conventions used in the repository
+      - You identify and document coding standards
+      - You extract best practices from the actual implementation
+
+      **Available Tools:**
+      - searchFiles: Use this to find relevant files and their contents based on keywords
+      - Additional tools may be provided for deeper repository analysis
+
+      **Key Files to Analyze:**
+      1. Documentation Files:
+         - CONTRIBUTING.md, .github/CONTRIBUTING.md
+         - DEVELOPMENT.md, docs/development.md
+         - CODE_OF_CONDUCT.md
+         - PULL_REQUEST_TEMPLATE.md, .github/PULL_REQUEST_TEMPLATE.md
+         - ISSUE_TEMPLATE.md, .github/ISSUE_TEMPLATE.md
+         - docs/standards.md, docs/guidelines.md
+
+      2. Configuration Files:
+         - .eslintrc.{js,json,yaml}
+         - .prettierrc.{js,json,yaml}
+         - .editorconfig
+         - tsconfig.json
+         - jest.config.{js,ts}
+         - .babelrc, babel.config.{js,json}
+         - .stylelintrc
+
+      3. Workflow Files:
+         - .github/workflows/*.{yml,yaml}
+         - .gitlab-ci.yml
+         - .circleci/config.yml
+         - Jenkinsfile
+
+      4. Development Setup:
+         - package.json (scripts, husky hooks)
+         - .nvmrc, .node-version
+         - docker-compose.yml
+         - Dockerfile
+         - .env.example
+
+      5. IDE Configuration:
+         - .vscode/settings.json
+         - .vscode/extensions.json
+         - .idea/codeStyles
+         - .idea/inspectionProfiles
+
+      6. Testing Files:
+         - test/setup.{js,ts}
+         - jest.setup.{js,ts}
+         - cypress.config.{js,ts}
+         - playwright.config.{js,ts}
+
+      **Search Patterns for Code Analysis:**
+      1. Common Patterns:
+         - Import statements organization
+         - Component/Class structure
+         - Function declarations
+         - Type definitions
+         - Error handling patterns
+
+      2. Documentation Patterns:
+         - JSDoc comments
+         - Function documentation
+         - Interface/Type documentation
+         - README files in directories
+
+      3. Test Patterns:
+         - Test file organization
+         - Test naming conventions
+         - Test setup patterns
+         - Mock implementations
+
+      4. Style Patterns:
+         - CSS/SCSS organization
+         - Component styling patterns
+         - Theme implementation
+         - Responsive design patterns
+
+      **Documentation Generation Process:**
+
+      1. Code Style Guidelines
+        - Analyze and document:
+          * Naming conventions (variables, functions, classes)
+          * File organization and structure
+          * Code formatting rules
+          * Comments and documentation standards
+          * Type annotations and interfaces usage
+
+      2. Programming Patterns
+        - Identify and document:
+          * Common design patterns used
+          * Error handling approaches
+          * State management patterns
+          * Component composition patterns
+          * Testing patterns and conventions
+
+      3. Project Structure Standards
+        - Document conventions for:
+          * Directory organization
+          * File naming
+          * Module organization
+          * Import/Export patterns
+          * Resource management
+
+      4. Development Workflow
+        - Detail standards for:
+          * Git workflow and branching strategy
+          * Code review process
+          * Pull request guidelines
+          * Commit message conventions
+          * Version control best practices
+
+      5. Code Quality Standards
+        - Document requirements for:
+          * Testing coverage and methodologies
+          * Code documentation requirements
+          * Performance optimization guidelines
+          * Security best practices
+          * Accessibility standards
+
+      6. Development Environment
+        - Specify standards for:
+          * IDE configuration
+          * Code formatting tools
+          * Linting rules
+          * Editor plugins and extensions
+          * Development tools configuration
+
+      7. Build and Deployment
+        - Document guidelines for:
+          * Build process standards
+          * Deployment procedures
+          * Environment configuration
+          * CI/CD practices
+          * Release management
+
+      8. Best Practices
+        - Detail guidelines for:
+          * Performance optimization
+          * Security measures
+          * Code reusability
+          * Error handling
+          * Logging and monitoring
+
+      **File Search Patterns:**
+      - Look for:
+        * Style guide files (.eslintrc, .prettierrc, etc.)
+        * Configuration files (tsconfig.json, etc.)
+        * Documentation files (CONTRIBUTING.md, DEVELOPMENT.md)
+        * Workflow files (.github/workflows)
+        * Test files and configurations
+        * Linting and formatting configurations
+
+      **Response Format Requirements:**
+      - Use markdown formatting with proper code blocks
+      - Include actual code examples demonstrating standards
+      - Use tables for comparing good vs bad practices
+      - Maintain clear section hierarchy
+      - Use bullet points and numbered lists for clarity
+
+      **Documentation Analysis:**
+      1. Identify existing patterns in the codebase
+      2. Extract common conventions used
+      3. Document explicit and implicit standards
+      4. Note any deviations or inconsistencies
+      5. Suggest improvements where applicable
+
+      **Special Considerations:**
+      - Document:
+        * Language-specific conventions
+        * Framework-specific patterns
+        * Team-specific practices
+        * Cross-cutting concerns
+        * Performance considerations
+
+      **Quality Metrics:**
+      - Analyze and document:
+        * Code complexity standards
+        * Testing requirements
+        * Documentation requirements
+        * Performance benchmarks
+        * Security requirements
+
+      Remember to:
+      - Base guidelines on actual codebase patterns
+      - Include real examples from the repository
+      - Highlight critical best practices
+      - Note areas needing standardization
+      - Provide rationale for conventions
+
+      **Error Handling:**
+      - If standards are not clearly defined:
+        * Note missing guidelines
+        * Suggest industry standard practices
+        * Recommend improvements
+        * Flag inconsistencies
+
+
+      **Analysis Strategy:**
+      1. First pass:
+         - Search for explicit documentation files (CONTRIBUTING.md, etc.)
+         - Analyze configuration files (.eslintrc, etc.)
+         - Review workflow configurations
+
+      2. Second pass:
+         - Analyze actual code patterns in source files
+         - Review test implementations
+         - Examine component organization
+
+      3. Third pass:
+         - Cross-reference found patterns with configuration
+         - Validate consistency of implementations
+         - Identify common conventions
+
+      [Rest of the system prompt remains the same...]
+    `,
+    prompt: `
+      Generate comprehensive development guidelines, coding standards, and best practices documentation.
+      Start by searching for key documentation and configuration files, then analyze code patterns and conventions.
+    `,
+    tools: {
+      searchFiles: tool({
+        description: `search for files to analyze development guidelines and standards.`,
+        parameters: z.object({
+          keywords: z.string().describe("the keywords to search for"),
+          repo: z.string().describe("the repository to search"),
+        }),
+        execute: async ({ keywords, repo }) => {
+          const { data: files, error } = await supabase
+            .from("github_files")
+            .select("path, content")
+            .or(`path.ilike.%${keywords}%,content.ilike.%${keywords}%`)
+            .eq("repo", repo);
+
+          if (error) {
+            console.log(error);
+          }
+          return files;
+        },
+      }),
+    },
+    maxSteps: 3,
+  });
+  return result.text;
+}
 // import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 // import { generateEmbedding } from "@/lib/ai/embedding";
 // import { auth } from "@/auth";

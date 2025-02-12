@@ -105,8 +105,7 @@ export function EmptyChatState({ repoName }: EmptyChatStateProps) {
         transition={{ delay: 0.7 }}
         className="text-white/50 text-sm"
       >
-        Try asking about architecture, dependencies, or how to implement new
-        features
+        Try asking about architecture, dependencies, or how a feature works.
       </motion.div>
     </div>
   );

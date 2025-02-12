@@ -12,6 +12,7 @@ import {
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -79,6 +80,7 @@ export default function RepoDetails({ repo }: RepoDetailsProps) {
         </Button>
       </SheetTrigger>
       <SheetContent className="w-[600px] bg-[#1a1f1a] border-l border-white/10">
+        <SheetDescription hidden />
         <SheetHeader>
           <SheetTitle className="text-white flex items-center gap-2">
             <GitFork className="h-5 w-5 text-[#CCFF00]" />

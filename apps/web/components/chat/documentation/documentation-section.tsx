@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import { FileText } from "lucide-react";
 import { ScrollArea } from "@workspace/ui/components/scroll-area";
 import { Separator } from "@workspace/ui/components/separator";
-import ReactMarkdown from "react-markdown";
+import { MemoizedMarkdown } from "@/lib/Markdown";
 
 interface DocumentationPageProps {
   title: string;
@@ -47,8 +47,10 @@ export function DocumentationPage({ title, content }: DocumentationPageProps) {
             transition={{ delay: 0.3 }}
             className="space-y-4"
           >
-            <div className="prose prose-invert max-w-none text-white/90 text-wrap">
-              <ReactMarkdown>{content}</ReactMarkdown>
+            <div className="prose prose-invert max-w-full w-full overflow-hidden text-white/90">
+              <div className="w-full max-w-[750px] overflow-hidden break-words">
+                <MemoizedMarkdown content={content || ""} id={title} />
+              </div>
             </div>
           </motion.div>
         </div>

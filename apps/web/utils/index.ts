@@ -30,7 +30,7 @@ export function extractOwnerAndRepo(repoUrl: string): {
   owner: string;
   repo: string;
 } {
-  const match = repoUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+  const match = repoUrl?.match(/github\.com\/([^\/]+)\/([^\/]+)/);
   if (!match) {
     return { owner: "", repo: "" };
   }
@@ -40,3 +40,14 @@ export function extractOwnerAndRepo(repoUrl: string): {
 const alphabet =
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 export const nanoid = customAlphabet(alphabet, 10);
+
+export const getDocsColumnName = (title: string) => {
+  switch (title) {
+    case "Getting Started":
+      return "get_started";
+    case "Development Guidelines":
+      return "development_guidelines";
+    default:
+      return "get_started";
+  }
+};

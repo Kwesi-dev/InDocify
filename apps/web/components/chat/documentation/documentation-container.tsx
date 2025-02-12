@@ -1,77 +1,64 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
 import { GeneratingAnimation } from "./generating-animation";
 import { DocumentationPage } from "./documentation-section";
-import { generateGetStartedDocs } from "@/app/agents/new/actions";
 import { useSearchParams } from "next/navigation";
 import { useSupabaseClient } from "@/lib/SupabaseClientProvider";
 import { useSession } from "next-auth/react";
+import { useDocumentationStore } from "@/lib/stores";
 import { useQuery } from "@tanstack/react-query";
+import { getDocsColumnName } from "@/utils";
+import { useEffect } from "react";
 
 interface DocumentationContainerProps {
   title: string;
 }
 
-export function DocumentationContainer({ title }: DocumentationContainerProps) {
-  const [isGenerating, setIsGenerating] = useState(true);
-  const [documentation, setDocumentation] = useState<string | null>(null);
+export function DocumentationContainer({
+  title: docsTitle,
+}: DocumentationContainerProps) {
+  const { documentation, setDocumentation, isGenerating } =
+    useDocumentationStore();
   const searchParams = useSearchParams();
-  const repoName = searchParams.get("repo") as string;
-  const docsTitle = searchParams.get("doc") as string;
+  const repoName = searchParams.get("repo");
   const supabase = useSupabaseClient();
   const { data: session } = useSession();
 
-  const { data, isLoading } = useQuery({
-    enabled: !!repoName && !!session?.user?.email && !!docsTitle,
+  const { isLoading } = useQuery({
+    enabled:
+      !!repoName &&
+      !!session?.user?.email &&
+      !!docsTitle &&
+      !!supabase &&
+      !documentation &&
+      !isGenerating,
     queryKey: ["github_docs", session?.user?.email, repoName, documentation],
     queryFn: async () => {
       if (!supabase) return null;
+      const column = getDocsColumnName(docsTitle);
       const { data, error } = await supabase
         .from("github_docs")
-        .select("get_started")
+        .select(column)
         .eq("email", session?.user?.email)
         .eq("repo", repoName)
         .single();
-      if (error) {
-        throw error;
-        console.log("error", error);
-      }
 
-      setIsGenerating(false);
-      return data?.get_started;
+      if (error) {
+        console.log(error);
+      }
+      setDocumentation(
+        data?.[column as keyof typeof data] as unknown as string
+      );
+      return data?.[column as keyof typeof data] as unknown as string;
     },
   });
 
-  const fetchDocumentation = useCallback(async () => {
-    setIsGenerating(true);
-    const response = await generateGetStartedDocs(repoName);
-    setDocumentation(response);
-    setIsGenerating(false);
-    //save the text to the database
-    if (!supabase) return;
-    await supabase.from("github_docs").upsert(
-      {
-        get_started: response,
-        repo: repoName,
-        email: session?.user?.email as string,
-      },
-      { onConflict: "email, repo" }
-    );
-  }, [repoName, session?.user?.email, supabase]);
-
-  useEffect(() => {
-    if (!data && !documentation && !isLoading) {
-      fetchDocumentation();
-    }
-  }, [data, documentation, fetchDocumentation, isLoading]);
-
   return (
     <div className="min-h-[calc(100vh-4rem)]">
-      {isGenerating ? (
+      {isGenerating || isLoading || !documentation ? (
         <GeneratingAnimation />
-      ) : documentation || data ? (
-        <DocumentationPage title={title} content={data ?? documentation} />
+      ) : documentation ? (
+        <DocumentationPage title={docsTitle} content={documentation} />
       ) : null}
     </div>
   );
