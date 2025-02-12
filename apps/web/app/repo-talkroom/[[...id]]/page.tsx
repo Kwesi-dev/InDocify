@@ -15,8 +15,6 @@ export default function ChatPage() {
   const selectedRepo = searchParams.get("repo");
   const owner = searchParams.get("owner");
 
-  console.log("documentation", documentation);
-
   useEffect(() => {
     setMounted(true);
   }, []);

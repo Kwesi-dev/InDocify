@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Send, Copy, Check, Loader2 } from "lucide-react";
+import { Send, Loader2 } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { ScrollArea } from "@workspace/ui/components/scroll-area";
 import { Textarea } from "@workspace/ui/components/textarea";
@@ -59,10 +59,9 @@ export function ChatInterface() {
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const _ = useQuery({
-    enabled: !!currentThread && !!repo && !!session,
+    enabled: !!currentThread && !!repo && !!session && !isLoading,
     queryKey: ["messages", session?.user?.email, repo, currentThread],
     queryFn: async () => {
       if (!supabase) return null;
@@ -114,105 +113,17 @@ export function ChatInterface() {
     }
   };
 
-  const copyToClipboard = async (text: string, id: string) => {
-    await navigator.clipboard.writeText(text);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
-  };
-
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       {/* Messages */}
       <ScrollArea ref={scrollAreaRef} className="flex-[0.85] p-4">
-        <div className="max-w-3xl mx-auto space-y-6">
+        <div className="max-w-3xl mx-auto space-y-6 ">
           <AnimatePresence initial={false}>
             {messages.length === 0 ? <EmptyChatState repoName={repo!} /> : null}
-
-            {messages.map((message, index) => {
-              console.log("message", message.id);
-              if (message.content === "") return null;
-              return (
-                <motion.div
-                  key={`${message.id}-${index}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className={cn(
-                    "flex items-start gap-4 rounded-lg p-4",
-                    message.role === "assistant" ? "bg-white/5" : ""
-                  )}
-                >
-                  {/* Avatar */}
-                  <div
-                    className={cn(
-                      "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
-                      message.role === "assistant"
-                        ? "bg-[#CCFF00]"
-                        : "bg-white/10"
-                    )}
-                  >
-                    {message.role === "assistant" ? (
-                      <Bot className="w-5 h-5 text-black" />
-                    ) : (
-                      <User className="w-5 h-5 text-white" />
-                    )}
-                  </div>
-
-                  {/* Message Content */}
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-white/50">
-                        {message.role === "assistant" ? "AI Assistant" : "You"}
-                      </span>
-                    </div>
-                    <div className="prose prose-invert max-w-full w-full overflow-hidden text-white/90">
-                      <div className="w-full max-w-[650px] overflow-hidden break-words">
-                        <MemoizedMarkdown
-                          id={message.id}
-                          content={message.content}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Message Actions */}
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-white/50 hover:text-white"
-                        onClick={() =>
-                          copyToClipboard(message.content, message.id)
-                        }
-                      >
-                        {copiedId === message.id ? (
-                          <Check className="w-4 h-4" />
-                        ) : (
-                          <Copy className="w-4 h-4" />
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
           </AnimatePresence>
 
+          <Messages messages={messages} isLoading={isLoading} />
           {/* Typing Indicator */}
-          <AnimatePresence>
-            {isLoading && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                className="flex flex-col items-center gap-4 rounded-lg p-4 bg-white/5"
-              >
-                <LoadingAnimation />
-                <p className="text-sm text-white/50">
-                  AI Assistant is thinking...
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
       </ScrollArea>
 
@@ -257,3 +168,84 @@ export function ChatInterface() {
     </div>
   );
 }
+
+const Messages = ({
+  messages,
+  isLoading,
+}: {
+  messages: Message[];
+  isLoading: boolean;
+}) => {
+  const lastMessageRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (lastMessageRef.current) {
+      lastMessageRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
+  }, [messages]);
+
+  return (
+    <>
+      {messages.map((message, index) => {
+        if (message.content === "") return null;
+
+        return (
+          <div
+            key={`${message.id}-${index}`}
+            className={cn(
+              "flex items-start gap-4 rounded-lg p-4",
+              message.role === "assistant" ? "bg-white/5" : ""
+            )}
+          >
+            {/* Avatar */}
+            <div
+              className={cn(
+                "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
+                message.role === "assistant" ? "bg-[#CCFF00]" : "bg-white/10"
+              )}
+            >
+              {message.role === "assistant" ? (
+                <Bot className="w-5 h-5 text-black" />
+              ) : (
+                <User className="w-5 h-5 text-white" />
+              )}
+            </div>
+            {/* Message Content */}
+            <div className="flex-1 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-white/50">
+                  {message.role === "assistant" ? "AI Assistant" : "You"}
+                </span>
+              </div>
+              <div className="prose prose-invert max-w-full w-full overflow-hidden text-white/90">
+                <div className="w-full max-w-[650px] overflow-hidden break-words">
+                  <MemoizedMarkdown id={message.id} content={message.content} />
+                </div>
+              </div>
+
+              {/* Message Actions */}
+            </div>
+          </div>
+        );
+      })}
+      <AnimatePresence>
+        {isLoading && (
+          <motion.div
+            ref={lastMessageRef}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="flex flex-col items-center gap-4 rounded-lg p-4 bg-white/5"
+          >
+            <LoadingAnimation />
+            <p className="text-sm text-white/50">AI Assistant is thinking...</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <div ref={lastMessageRef} />
+    </>
+  );
+};

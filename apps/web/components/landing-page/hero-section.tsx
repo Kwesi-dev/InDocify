@@ -5,29 +5,6 @@ import { AnimatedStripes } from "./animated-stripes";
 import { Sparkles } from "lucide-react";
 import RepoExtractor from "./repo-extractor";
 
-const exampleProjects = [
-  {
-    name: "Repository Analysis",
-    description:
-      "Quickly understand any repository with AI insights and structured data.",
-  },
-  {
-    name: "Interactive Q&A",
-    description:
-      "Ask detailed questions about the codebase and get precise, contextual answers.",
-  },
-  {
-    name: "Codebase Overview",
-    description:
-      "Generate a high-level summary of the repository for easy comprehension.",
-  },
-  {
-    name: "Contributor Onboarding",
-    description:
-      "Streamline onboarding with tailored guides for new contributors.",
-  },
-];
-
 export default function HeroSection() {
   return (
     <div className="relative min-h-screen bg-[#1a1f1a] overflow-hidden">
@@ -50,30 +27,17 @@ export default function HeroSection() {
           </div>
 
           <h1 className="text-2xl md:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-tight">
-            Understand Any Repository
+            No More Digging Through
             <br />
-            <span className="text-[#CCFF00]">with AI-Powered Insights.</span>
+            <span className="text-[#CCFF00]">Code, Just Ask</span>
           </h1>
 
           <p className="text-white/70 text-md  md:text-xl mb-12 max-w-lg md:max-w-2xl mx-auto">
-            Analyze, navigate, and ask questions about any codebase—your own or
-            others’—with AI-powered insights and documentation.
+            Navigate any repo, ask questions, and get AI-powered answers—no
+            cloning needed, just instant insights.
           </p>
 
           <RepoExtractor />
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
-            {exampleProjects.map((project) => (
-              <button
-                key={project.name}
-                className="bg-white/5 backdrop-blur-sm p-4 rounded-xl hover:bg-white/10 transition-all group"
-              >
-                <Sparkles className="w-6 h-6 text-[#CCFF00] mb-2" />
-                <h3 className="text-white font-medium mb-1">{project.name}</h3>
-                <p className="text-white/50 text-sm">{project.description}</p>
-              </button>
-            ))}
-          </div>
           <div className="space-y-6">
             <div className="flex items-center justify-center gap-2 text-white/90">
               <span>Join</span>
