@@ -82,6 +82,7 @@ export function FileUploadZone({
         onChange={handleFileInput}
         className="hidden"
         id="file-upload"
+        disabled
       />
 
       {!selectedFile ? (
