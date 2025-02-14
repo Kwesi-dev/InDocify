@@ -96,7 +96,6 @@ const RepoExtractor = () => {
     setExtractingRepo(true);
     try {
       const { owner, repo } = extractOwnerAndRepo(repoUrl);
-      console.log(owner, repo);
       //get repo zip size
       const response = await fetch(
         `/api/repo/size?owner=${owner}&repo=${repo}`
@@ -131,7 +130,6 @@ const RepoExtractor = () => {
       setExtractingRepo(false);
       setAnalysingRepo(true);
       const files = await fetchAndProcessZipRepo(owner, repo);
-      console.log("files", files);
       const unsavedFiles = files?.map((file) => {
         return {
           path: file.path,
@@ -159,8 +157,6 @@ const RepoExtractor = () => {
 
       const metadata = await data.json();
 
-      console.log("metadata", metadata);
-
       setProgress(50);
       //find the readme file
       const readmeFile = files?.find(
@@ -185,9 +181,9 @@ const RepoExtractor = () => {
           }),
         });
 
-        if (docError) {
-          console.log("error saving docs", docError);
-        }
+        // if (docError) {
+        //   console.log("error saving docs", docError);
+        // }
 
         const { error } = await supabase.from("github_repos").upsert(
           {
@@ -202,9 +198,9 @@ const RepoExtractor = () => {
           }
         );
 
-        if (error) {
-          console.log("error saving repo", error);
-        }
+        // if (error) {
+        //   console.log("error saving repo", error);
+        // }
       }
 
       setProgress(100);
@@ -351,11 +347,13 @@ const RepoExtractor = () => {
               onChange={(e) => setRepoUrl(e.target.value)}
               placeholder="Enter public repository URL"
               className="flex-1 bg-black/20 text-white placeholder-white/50 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#CCFF00]"
+              disabled
             />
             <button
               type="submit"
               className="bg-[#CCFF00] text-black px-6 py-3 rounded-xl hover:bg-[#CCFF00]/90 transition-colors font-medium flex items-center justify-center gap-2 w-[80px] md:w-[125px]"
-              disabled={repoUrl === "" || extractingRepo}
+              // disabled={repoUrl === "" || extractingRepo}
+              disabled
             >
               {extractingRepo ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
