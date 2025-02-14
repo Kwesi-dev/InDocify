@@ -156,6 +156,7 @@ async function fetchRepoZip(owner: string, repo: string) {
       "User-Agent": "InDocify",
     },
   });
+  console.log("response", response.arrayBuffer);
   return await response.arrayBuffer();
 }
 

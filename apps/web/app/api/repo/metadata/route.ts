@@ -10,7 +10,9 @@ export async function GET(req: Request) {
   }
 
   const user = await auth();
-  const accessToken = user?.githubAccessToken as string;
+  const accessToken =
+    (user?.githubAccessToken as string) ||
+    (process.env.GITHUB_API_KEY as string);
 
   async function getRepoMetadata(
     owner: string,

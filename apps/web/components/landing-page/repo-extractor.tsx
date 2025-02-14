@@ -96,6 +96,7 @@ const RepoExtractor = () => {
     setExtractingRepo(true);
     try {
       const { owner, repo } = extractOwnerAndRepo(repoUrl);
+      console.log(owner, repo);
       //get repo zip size
       const response = await fetch(
         `/api/repo/size?owner=${owner}&repo=${repo}`
@@ -130,6 +131,7 @@ const RepoExtractor = () => {
       setExtractingRepo(false);
       setAnalysingRepo(true);
       const files = await fetchAndProcessZipRepo(owner, repo);
+      console.log("files", files);
       const unsavedFiles = files?.map((file) => {
         return {
           path: file.path,
@@ -143,13 +145,21 @@ const RepoExtractor = () => {
 
       if (!supabase) return;
       //save file to db
-      await supabase.from("github_files").insert(unsavedFiles);
+      const { error } = await supabase
+        .from("github_files")
+        .insert(unsavedFiles);
+      if (error) {
+        console.log("error saving files", error);
+      }
 
       setProgress(25);
       const data = await fetch(
         `/api/repo/metadata?owner=${owner}&repo=${repo}`
       );
+
       const metadata = await data.json();
+
+      console.log("metadata", metadata);
 
       setProgress(50);
       //find the readme file
@@ -164,7 +174,7 @@ const RepoExtractor = () => {
 
       //save readme to database
       if (supabase) {
-        await supabase.from("github_docs").insert({
+        const { error: docError } = await supabase.from("github_docs").insert({
           owner: owner,
           repo: repo,
           readme: docsRes,
@@ -174,6 +184,10 @@ const RepoExtractor = () => {
             totalFiles: files?.length,
           }),
         });
+
+        if (docError) {
+          console.log("error saving docs", docError);
+        }
 
         const { error } = await supabase.from("github_repos").upsert(
           {

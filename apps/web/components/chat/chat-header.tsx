@@ -38,8 +38,8 @@ export function RepoHeader() {
     <div className="border-b border-white/10">
       <div className="px-6 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-lg bg-[#CCFF00]/10 flex items-center justify-center">
+          <div className="flex items-start gap-3">
+            <div className="h-8 w-8 rounded-lg bg-[#CCFF00]/10 flex items-center justify-center shrink-0">
               <GitFork className="h-4 w-4 text-[#CCFF00]" />
             </div>
             <div>
