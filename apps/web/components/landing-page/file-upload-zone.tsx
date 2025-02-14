@@ -66,12 +66,9 @@ export function FileUploadZone({
 
   return (
     <div
-      // onDragOver={handleDragOver}
-      // onDragLeave={handleDragLeave}
-      // onDrop={handleDrop}
-      onDragOver={(e) => e.preventDefault()}
-      onDragLeave={(e) => e.preventDefault()}
-      onDrop={(e) => e.preventDefault()}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
       className={`
         p-8 border-2 border-dashed rounded-xl mt-3 text-center transition-all duration-200
         ${isDragging ? "border-[#CCFF00] bg-[#CCFF00]/10" : "border-white/10 hover:border-white/20"}
@@ -85,7 +82,6 @@ export function FileUploadZone({
         onChange={handleFileInput}
         className="hidden"
         id="file-upload"
-        disabled
       />
 
       {!selectedFile ? (

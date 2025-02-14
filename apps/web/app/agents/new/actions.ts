@@ -434,7 +434,7 @@ export async function fetchAndProcessZipRepo(owner: string, repo: string) {
 
 export async function generateDocs(readmeFileContent: string) {
   const result = await generateText({
-    model: openai("gpt-3.5-turbo"),
+    model: openai("gpt-4o-mini"),
     system: `
         You are to generate a project overview based on the provided README file content.
         The project overview must be a summarized version of the projects readme content.
@@ -455,7 +455,7 @@ export async function generateGetStartedDocs(repo: string) {
   const supabase = createSupabaseClient(session?.supabaseAccessToken as string);
 
   const result = await generateText({
-    model: openai("gpt-3.5-turbo"),
+    model: openai("gpt-4o-mini"),
     system: `
        You are a technical documentation expert specialized in creating "Getting Started" guides by analyzing repository content through a database interface. Your primary task is to generate comprehensive setup documentation using the repository's actual files and content.
       The name of the repository is: ${repo}
@@ -791,7 +791,7 @@ export async function generateDevelopmentGuidelines(repo: string) {
   const supabase = createSupabaseClient(session?.supabaseAccessToken as string);
 
   const result = await generateText({
-    model: openai("gpt-3.5-turbo"),
+    model: openai("gpt-4o-mini"),
     system: `
       You are a technical documentation expert specialized in analyzing and documenting development guidelines, coding standards, and best practices. Your primary task is to generate comprehensive development guidelines by analyzing the repository's actual code patterns and conventions.
       You are to note that you are doing this to help a new contributer understand the codebase guidelines so explain the concept into detail.
