@@ -1,9 +1,13 @@
 import { GitFork, GitBranch, FileText } from "lucide-react";
-import RepoDetails from "./repo-sheet";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useSupabaseClient } from "@/lib/SupabaseClientProvider";
 import { useSession } from "next-auth/react";
+import dynamic from "next/dynamic";
+
+const RepoDetails = dynamic(() => import("./repo-sheet"), {
+  ssr: false,
+});
 
 export function RepoHeader() {
   const supabase = useSupabaseClient();
