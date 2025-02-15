@@ -1,8 +1,9 @@
-import { memo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import { ClipboardIcon, CheckIcon } from "@heroicons/react/24/outline";
+import { marked } from "marked";
 
 const CodeBlock = ({
   language,
@@ -45,8 +46,13 @@ const CodeBlock = ({
   );
 };
 
-export const MemoizedMarkdown = memo(
-  ({ content, id }: { content: string; id: string }) => {
+function parseMarkdownIntoBlocks(markdown: string): string[] {
+  const tokens = marked.lexer(markdown);
+  return tokens.map((token) => token.raw);
+}
+
+const MemoizedMarkdownBlock = memo(
+  ({ content }: { content: string }) => {
     return (
       <ReactMarkdown
         components={{
@@ -87,6 +93,22 @@ export const MemoizedMarkdown = memo(
         {content}
       </ReactMarkdown>
     );
+  },
+  (prevProps, nextProps) => {
+    if (prevProps.content !== nextProps.content) return false;
+    return true;
+  }
+);
+
+MemoizedMarkdownBlock.displayName = "MemoizedMarkdownBlock";
+
+export const MemoizedMarkdown = memo(
+  ({ content, id }: { content: string; id: string }) => {
+    const blocks = useMemo(() => parseMarkdownIntoBlocks(content), [content]);
+
+    return blocks.map((block, index) => (
+      <MemoizedMarkdownBlock content={block} key={`${id}-block_${index}`} />
+    ));
   }
 );
 
