@@ -61,16 +61,16 @@ function convertTime(dateString: string) {
 }
 
 export default function RepoDetails({ repo }: RepoDetailsProps) {
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
+  const [dateCreated, setDateCreated] = useState("");
+  const [dateUpdated, setDateUpdated] = useState("");
 
   useEffect(() => {
-    setDate(convertDate(repo.stats.pushed_at));
-  }, [repo.stats.pushed_at]);
+    setDateCreated(convertDate(repo.stats.metadata.created));
+  }, [repo.stats.metadata.created]);
 
   useEffect(() => {
-    setTime(convertTime(repo.stats.pushed_at));
-  }, [repo.stats.pushed_at]);
+    setDateUpdated(convertTime(repo.stats.metadata.lastUpdated));
+  }, [repo.stats.metadata.lastUpdated]);
 
   return (
     <Sheet>
@@ -144,14 +144,14 @@ export default function RepoDetails({ repo }: RepoDetailsProps) {
                   <Calendar className="h-4 w-4" />
                   Created
                 </div>
-                <span className="text-sm text-white">{date}</span>
+                <span className="text-sm text-white">{dateCreated}</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm text-white/70">
                   <Clock className="h-4 w-4" />
                   Last updated
                 </div>
-                <span className="text-sm text-white">{time}</span>
+                <span className="text-sm text-white">{dateUpdated}</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm text-white/70">
