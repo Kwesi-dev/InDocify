@@ -47,7 +47,7 @@ export function RepoHeader() {
                 {selectedRepo}
               </h1>
               <p className="text-sm text-white/50">
-                {repoStats?.metadata?.about}
+                {repoStats?.metadata?.about.slice(0, 140) + "..."}
               </p>
             </div>
           </div>
