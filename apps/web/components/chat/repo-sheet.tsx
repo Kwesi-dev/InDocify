@@ -65,12 +65,12 @@ export default function RepoDetails({ repo }: RepoDetailsProps) {
   const [dateUpdated, setDateUpdated] = useState("");
 
   useEffect(() => {
-    setDateCreated(convertDate(repo.stats.metadata.created));
-  }, [repo.stats.metadata.created]);
+    setDateCreated(convertDate(repo.stats.metadata?.created));
+  }, [repo.stats.metadata?.created]);
 
   useEffect(() => {
-    setDateUpdated(convertTime(repo.stats.metadata.lastUpdated));
-  }, [repo.stats.metadata.lastUpdated]);
+    setDateUpdated(convertTime(repo.stats.metadata?.lastUpdated));
+  }, [repo.stats.metadata?.lastUpdated]);
 
   return (
     <Sheet>
