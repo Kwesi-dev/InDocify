@@ -14,14 +14,14 @@ const fontMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "inDocify - AI-Powered Repository Documentation & Understanding",
+  title: "inDocify - Code to Answers in Seconds - AI-Powered",
   description:
     "Transform how you understand codebases with inDocify. Our AI-powered platform provides instant insights, real-time documentation, and comprehensive code analysis, helping developers save 70% of time in repository onboarding.",
   metadataBase: new URL("https://www.indocify.com"),
   openGraph: {
-    title: "inDocify - AI-Powered Repository Documentation & Understanding",
+    title: "inDocify - Code to Answers in Seconds - AI-Powered",
     description:
-      "Understand any repository instantly with AI-powered insights. Generate comprehensive documentation, get real-time explanations, and navigate complex codebases effortlessly.",
+      "Navigate any repo, ask questions, and get AI-powered answers—no cloning needed, just instant insights.",
     url: "https://www.indocify.com",
     siteName: "inDocify",
     images: [
