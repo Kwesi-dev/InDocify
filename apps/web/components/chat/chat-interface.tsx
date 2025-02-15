@@ -76,7 +76,7 @@ export function ChatInterface() {
         .eq("email", session?.user?.email)
         .single();
       if (error) {
-        console.log(error);
+        // console.log(error);
       }
       setMessages(JSON.parse(data?.messages || "[]"));
       return data?.messages || [];

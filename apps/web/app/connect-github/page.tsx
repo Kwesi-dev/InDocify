@@ -21,7 +21,6 @@ const page = async () => {
       .eq("email", session?.user?.email)
       .limit(1)
       .single();
-    console.log("dataaa", data);
     if (data.data?.id) {
       redirect("/repo-talkroom");
     }

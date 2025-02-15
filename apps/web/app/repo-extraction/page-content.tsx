@@ -69,9 +69,6 @@ const PageContent = () => {
         (file: any) =>
           file.path.includes("README.md") || file.path.includes("readme.md")
       );
-      console.log(readmeFile, "readmeFile");
-      console.log(files, "files");
-
       setProgress(75);
 
       const docsRes = await generateDocs(readmeFile?.content as string);

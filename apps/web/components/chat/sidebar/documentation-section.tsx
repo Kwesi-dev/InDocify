@@ -75,7 +75,7 @@ export default function DocumentationSection({
         .eq("repo", repoName)
         .single();
 
-      if (data) {
+      if (data?.[column as keyof typeof data]) {
         setDocumentation(data?.[column as keyof typeof data]);
         setIsGenerating(false);
         return;
@@ -84,7 +84,6 @@ export default function DocumentationSection({
         console.log(error);
       }
     }
-
     const agent =
       column === "get_started"
         ? generateGetStartedDocs
@@ -106,7 +105,7 @@ export default function DocumentationSection({
         { onConflict: "email, repo" }
       );
     } catch (error) {
-      console.log("error", error);
+      // console.log(error);
     } finally {
       setIsGenerating(false);
     }

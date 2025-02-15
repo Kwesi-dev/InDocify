@@ -31,8 +31,6 @@ async function findRelevantChunks(
     })
     .select("file_path, content");
 
-  console.log("data", data);
-
   if (error) {
     console.error("Error querying embeddings:", error);
     return [];
