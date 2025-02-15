@@ -8,7 +8,6 @@ import { useSession } from "next-auth/react";
 import { useDocumentationStore } from "@/lib/stores";
 import { useQuery } from "@tanstack/react-query";
 import { getDocsColumnName } from "@/utils";
-import { useEffect } from "react";
 
 interface DocumentationContainerProps {
   title: string;

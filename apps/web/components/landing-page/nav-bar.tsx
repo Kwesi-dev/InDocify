@@ -40,7 +40,7 @@ export function NavBar({ authButtons }: { authButtons?: React.ReactNode }) {
           >
             PRICING
           </li>
-          {/* <li>{authButtons}</li> */}
+          <li>{authButtons}</li>
           <li>
             <Link href="/demo">
               <button className="bg-[#CCFF00] text-black px-6 py-2 rounded-full hover:bg-[#CCFF00]/90 transition-colors">
@@ -74,7 +74,7 @@ const Drawer = () => {
         <DialogTitle className="hidden" />
         <div className="flex flex-col h-full mt-5">
           <div className="p-6 border-b border-white/10">
-            {/* {session ? (
+            {session ? (
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-10 h-10 rounded-full bg-[#CCFF00]/20 flex items-center justify-center shrink-0">
                   <User className="w-5 h-5 text-[#CCFF00]" />
@@ -85,7 +85,7 @@ const Drawer = () => {
                   </p>
                 </div>
               </div>
-            ) : null} */}
+            ) : null}
             <Button
               asChild
               className="w-full bg-[#CCFF00] text-black hover:bg-[#CCFF00]/90"
@@ -93,7 +93,7 @@ const Drawer = () => {
               <Link href="/demo">REQUEST A DEMO</Link>
             </Button>
           </div>
-          {/* <div className="flex-1 overflow-auto py-4">
+          <div className="flex-1 overflow-auto py-4">
             {session ? (
               <nav className="flex flex-col space-y-1">
                 <Link
@@ -136,8 +136,8 @@ const Drawer = () => {
                 </Button>
               </div>
             )}
-          </div> */}
-          {/* {session ? (
+          </div>
+          {session ? (
             <div className="p-6 border-t border-white/10">
               <button
                 onClick={() => setIsOpen(false)}
@@ -147,7 +147,7 @@ const Drawer = () => {
                 Logout
               </button>
             </div>
-          ) : null} */}
+          ) : null}
         </div>
       </SheetContent>
     </Sheet>
