@@ -47,7 +47,7 @@ export async function POST(req: Request) {
   const supabase = createSupabaseClient(session?.supabaseAccessToken as string);
 
   const result = streamText({
-    model: openai("gpt-4o-mini"),
+    model: openai("gpt-4o"),
     onFinish: async (result) => {
       //save the text to the database
       const history = [
@@ -156,7 +156,6 @@ export async function POST(req: Request) {
           repo: z.string().describe("the repository to search"),
         }),
         execute: async ({ keywords, repo }) => {
-          console.log("keywords", keywords);
           const { data: files, error } = await supabase
             .from("github_files")
             .select("path, content")
@@ -166,14 +165,11 @@ export async function POST(req: Request) {
           if (error) {
             console.log(error);
           }
-          console.log("files", files);
           return files;
         },
       }),
     },
   });
-
-  console.log("result", result);
 
   return result.toDataStreamResponse();
 }

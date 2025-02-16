@@ -60,6 +60,12 @@ export function ChatInterface() {
     },
   });
 
+  useEffect(() => {
+    if (!currentThread) {
+      newThread.current = nanoid();
+    }
+  }, [currentThread]);
+
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -125,7 +131,9 @@ export function ChatInterface() {
       <ScrollArea ref={scrollAreaRef} className="flex-[0.85] p-4">
         <div className="max-w-3xl mx-auto space-y-6 ">
           <AnimatePresence initial={false}>
-            {messages.length === 0 ? <EmptyChatState repoName={repo!} /> : null}
+            {messages.length === 0 && !isLoading ? (
+              <EmptyChatState repoName={repo!} />
+            ) : null}
           </AnimatePresence>
 
           <Messages messages={messages} isLoading={isLoading} />
