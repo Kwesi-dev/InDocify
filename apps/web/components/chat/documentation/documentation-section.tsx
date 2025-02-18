@@ -49,7 +49,11 @@ export function DocumentationPage({ title, content }: DocumentationPageProps) {
           >
             <div className="prose prose-invert max-w-full w-full overflow-hidden text-white/90">
               <div className="w-full max-w-[750px] overflow-hidden break-words">
-                <MemoizedMarkdown content={content || ""} id={title} />
+                <MemoizedMarkdown
+                  content={content || ""}
+                  id={title}
+                  isLoading={false}
+                />
               </div>
             </div>
           </motion.div>
