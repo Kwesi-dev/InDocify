@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { Toaster } from "@workspace/ui/components/toaster";
 import "./globals.css";
+import Script from "next/script";
 
 const fontSans = Geist({
   subsets: ["latin"],
@@ -46,6 +47,21 @@ export default function RootLayout({
       <body
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased flex flex-col min-h-screen`}
       >
+        {process.env.NODE_ENV === "production" ? (
+          <Script
+            type="text/javascript"
+            id="ms-clarity-script"
+            strategy="afterInteractive"
+          >
+            {`
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+      })(window, document, "clarity", "script", "${process.env.CLARITY_ID}");
+      `}
+          </Script>
+        ) : null}
         <Toaster />
         <Providers>{children}</Providers>
       </body>
