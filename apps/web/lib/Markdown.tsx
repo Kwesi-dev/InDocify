@@ -1,18 +1,33 @@
-import { memo, useMemo, useState } from "react";
+import { memo, useMemo, useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import { ClipboardIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { marked } from "marked";
 
 const CodeBlock = ({
   language,
   value,
+  isLoading,
 }: {
   language: string;
   value: string;
+  isLoading: boolean;
 }) => {
   const [copied, setCopied] = useState(false);
+  const [SyntaxHighlighter, setSyntaxHighlighter] = useState<any>(null);
+  const [highlighterStyle, setHighlighterStyle] = useState<any>(null);
+
+  useEffect(() => {
+    const loadHighlighter = async () => {
+      const [{ Prism }, { oneDark }] = await Promise.all([
+        import("react-syntax-highlighter"),
+        import("react-syntax-highlighter/dist/cjs/styles/prism"),
+      ]);
+      setSyntaxHighlighter(() => Prism);
+      setHighlighterStyle(oneDark);
+    };
+
+    loadHighlighter().catch(console.error);
+  }, []);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(value);
@@ -21,7 +36,7 @@ const CodeBlock = ({
   };
 
   return (
-    <div className="relative group rounded-lg overflow-hidden">
+    <div className="relative group rounded-lg overflow-scroll">
       <div className="flex items-center justify-between px-4 py-2 bg-gray-800 text-gray-200 text-sm">
         <span>{language}</span>
         <button
@@ -35,24 +50,33 @@ const CodeBlock = ({
           )}
         </button>
       </div>
-      <SyntaxHighlighter
-        language={language}
-        style={oneDark}
-        customStyle={{ margin: 0, borderRadius: 0 }}
-      >
-        {value}
-      </SyntaxHighlighter>
+      {!isLoading && SyntaxHighlighter ? (
+        <SyntaxHighlighter
+          language={language}
+          style={highlighterStyle}
+          customStyle={{ margin: 0, borderRadius: 0 }}
+        >
+          {value}
+        </SyntaxHighlighter>
+      ) : (
+        <pre className="p-4 bg-gray-900 text-gray-100 text-xs overflow-x-auto">
+          <code>{value}</code>
+        </pre>
+      )}
     </div>
   );
 };
 
-function parseMarkdownIntoBlocks(markdown: string): string[] {
+function parseMarkdownIntoBlocks(
+  markdown: string,
+  isLoading: boolean
+): string[] {
   const tokens = marked.lexer(markdown);
   return tokens.map((token) => token.raw);
 }
 
 const MemoizedMarkdownBlock = memo(
-  ({ content }: { content: string }) => {
+  ({ content, isLoading }: { content: string; isLoading: boolean }) => {
     return (
       <ReactMarkdown
         components={{
@@ -83,6 +107,7 @@ const MemoizedMarkdownBlock = memo(
             // Triple backticks with language
             return (
               <CodeBlock
+                isLoading={isLoading}
                 language={language as string}
                 value={String(children).replace(/\n$/, "")}
               />
@@ -103,11 +128,26 @@ const MemoizedMarkdownBlock = memo(
 MemoizedMarkdownBlock.displayName = "MemoizedMarkdownBlock";
 
 export const MemoizedMarkdown = memo(
-  ({ content, id }: { content: string; id: string }) => {
-    const blocks = useMemo(() => parseMarkdownIntoBlocks(content), [content]);
+  ({
+    content,
+    id,
+    isLoading,
+  }: {
+    content: string;
+    id: string;
+    isLoading: boolean;
+  }) => {
+    const blocks = useMemo(
+      () => parseMarkdownIntoBlocks(content, isLoading),
+      [content]
+    );
 
     return blocks.map((block, index) => (
-      <MemoizedMarkdownBlock content={block} key={`${id}-block_${index}`} />
+      <MemoizedMarkdownBlock
+        content={block}
+        key={`${id}-block_${index}`}
+        isLoading={isLoading}
+      />
     ));
   }
 );

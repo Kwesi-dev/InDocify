@@ -53,6 +53,7 @@ export function ChatInterface() {
       currentThread: currentThread ?? newThread.current,
       owner,
     }),
+    experimental_throttle: 50,
     onFinish: () => {
       query.invalidateQueries({
         queryKey: ["threads", session?.user?.email, repo],
@@ -237,7 +238,11 @@ const Messages = ({
               </div>
               <div className="prose prose-invert max-w-full w-full overflow-hidden text-white/90">
                 <div className="w-full max-w-[650px] overflow-hidden break-words">
-                  <MemoizedMarkdown id={message.id} content={message.content} />
+                  <MemoizedMarkdown
+                    id={message.id}
+                    content={message.content}
+                    isLoading={isLoading}
+                  />
                 </div>
               </div>
 
