@@ -8,12 +8,12 @@ const timeline = [
   {
     title: "The Problem",
     description:
-      "Understanding complex repositories has always been a barrier for developers, especially when contributing to new projects or onboarding to unfamiliar codebases.",
+      "Understanding complex repositories has always been a barrier for developers, especially when contributing to new projects or onboarding to unfamiliar codebases or searching for specific features in a repository.",
   },
   {
     title: "The Breakthrough",
     description:
-      "We created an AI-driven platform that analyzes any repository, answers questions in real-time, and provides clear, concise documentation to accelerate understanding.",
+      "We created an AI-driven platform that analyzes any repository, answers questions in real-time, and provides clear, concise reports to accelerate understanding.",
   },
   {
     title: "The Transformation",
@@ -45,8 +45,8 @@ export default function StorySection() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-white/70 text-xl max-w-2xl mx-auto"
           >
-            From Complexity to Clarity: How InDocify Enhances Repository
-            Understanding
+            From Complexity to Clarity: How InDocify Enhances understanding of
+            features in GitHub repositories
           </motion.p>
         </div>
 
@@ -150,19 +150,16 @@ export default function StorySection() {
 
             <div className="space-y-6 text-lg text-white/70">
               <p>
-                Every developer knows the challenge: joining a new team or
-                contributing to a project often means spending weeks trying to
-                navigate the codebase. Documentation is frequently outdated,
-                incomplete, or nonexistent. Developers waste valuable time
-                deciphering code or seeking explanations instead of focusing on
-                innovation.
+                Every developer has faced this challenge: searching for how a
+                feature is implemented in a repository they find online or
+                trying to understand a new codebase when joining a team or
+                contributing to a project.
               </p>
 
               <p>
-                I’ve faced this myself. Across multiple projects, I realized
-                that understanding a codebase shouldn’t be a struggle.
-                Documentation should be a dynamic, accessible resource for every
-                developer, no matter the repository.
+                I’ve faced this myself. Across multiple repositories, I realized
+                that understanding a codebase shouldn’t be a struggle. Finding
+                the answers you need can be overwhelming or time-consuming.
               </p>
 
               <blockquote className="border-l-4 border-[#CCFF00] pl-6 my-8 italic">
@@ -171,10 +168,11 @@ export default function StorySection() {
               </blockquote>
 
               <p>
-                Today, InDocify empowers developers by providing instant
-                insights into any repository. My AI-powered platform analyzes
-                code, generates real-time explanations allowing developers to
-                understand, learn, and innovate faster.
+                Today, InDocify empowers developers with instant insights into
+                any repository, helping them quickly understand how features are
+                implemented. Our AI-powered platform analyzes code and provides
+                real-time explanations, enabling developers to navigate, learn,
+                and innovate more efficiently.
               </p>
             </div>
           </div>
