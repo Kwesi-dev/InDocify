@@ -33,8 +33,8 @@ export default function HeroSection() {
           </h1>
 
           <p className="text-white/70 text-md  md:text-xl mb-12 max-w-lg md:max-w-2xl mx-auto">
-            Navigate any repo, ask questions, and get AI-powered answers—no
-            cloning needed, just instant insights.
+            Search for how features are implemented in a repo you found online
+            and get AI-powered answers instantly—no cloning, no manual digging.
           </p>
 
           <RepoExtractor />

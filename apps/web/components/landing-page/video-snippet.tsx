@@ -78,8 +78,8 @@ export function VideoSnippet() {
           How inDocify Works
         </h3>
         <p className="text-sm text-white">
-          Watch this quick demo to see how inDocify can revolutionize your
-          documentation process.
+          Watch this quick demo to see how InDocify simplifies understanding
+          repositories and finding feature implementations instantly.
         </p>
       </div>
     </motion.div>

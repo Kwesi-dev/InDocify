@@ -19,7 +19,7 @@ const result = NextAuth({
       clientSecret: process.env.AUTH_GITHUB_SECRET,
       authorization: {
         url: "https://github.com/login/oauth/authorize",
-        params: { scope: "user:email public_repo" },
+        params: { scope: "user:email repos" },
       },
     }),
     Google({

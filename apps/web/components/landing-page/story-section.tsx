@@ -8,17 +8,17 @@ const timeline = [
   {
     title: "The Problem",
     description:
-      "Understanding complex repositories has always been a barrier for developers, especially when contributing to new projects or onboarding to unfamiliar codebases or searching for specific features in a repository.",
+      "Finding how specific features are implemented in a repository is often time-consuming, requiring manual code exploration or cloning just to search through files.",
   },
   {
     title: "The Breakthrough",
     description:
-      "We created an AI-driven platform that analyzes any repository, answers questions in real-time, and provides clear, concise reports to accelerate understanding.",
+      "InDocify eliminates this friction by providing an AI-powered platform that lets developers instantly search for feature implementations and get clear, real-time answers—without cloning or digging through code manually.",
   },
   {
     title: "The Transformation",
     description:
-      "Developers using InDocify spend 70% less time deciphering codebases and gain instant insights, empowering them to contribute effectively and innovate faster.",
+      "With InDocify, developers find feature implementations in seconds, reducing wasted time and enabling them to focus on learning, building, and innovating faster.",
   },
 ];
 
@@ -45,8 +45,8 @@ export default function StorySection() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-white/70 text-xl max-w-2xl mx-auto"
           >
-            From Complexity to Clarity: How InDocify Enhances understanding of
-            features in GitHub repositories
+            From Complexity to Clarity: How InDocify Helps You Instantly
+            Understand Feature Implementations in GitHub Repositories.
           </motion.p>
         </div>
 
@@ -151,28 +151,27 @@ export default function StorySection() {
             <div className="space-y-6 text-lg text-white/70">
               <p>
                 Every developer has faced this challenge: searching for how a
-                feature is implemented in a repository they find online or
-                trying to understand a new codebase when joining a team or
-                contributing to a project.
+                feature is implemented in a repository they find online, often
+                spending hours manually digging through code.
               </p>
 
               <p>
                 I’ve faced this myself. Across multiple repositories, I realized
-                that understanding a codebase shouldn’t be a struggle. Finding
-                the answers you need can be overwhelming or time-consuming.
+                that finding specific feature implementations shouldn’t be a
+                struggle. The process should be seamless and instant.
               </p>
 
               <blockquote className="border-l-4 border-[#CCFF00] pl-6 my-8 italic">
-                “InDocify is about transforming how developers explore,
-                understand, and collaborate on codebases.”
+                “InDocify transforms how developers search for and understand
+                feature implementations in any repository.”
               </blockquote>
 
               <p>
-                Today, InDocify empowers developers with instant insights into
-                any repository, helping them quickly understand how features are
-                implemented. Our AI-powered platform analyzes code and provides
-                real-time explanations, enabling developers to navigate, learn,
-                and innovate more efficiently.
+                Today, InDocify empowers developers with instant, AI-powered
+                insights into repositories, helping them quickly find and
+                understand how features are implemented—without cloning or
+                manual exploration. Just search, ask, and get answers in real
+                time.
               </p>
             </div>
           </div>

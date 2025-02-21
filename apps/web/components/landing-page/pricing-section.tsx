@@ -17,10 +17,9 @@ const features = [
   },
   {
     name: "Generate Documentation Guide",
-    pro: "Generate Custom Documentation Guides",
+    pro: "Generate Documentation Guide",
   },
-  { name: "Code Push Updates", free: false, pro: "Pull Updates from GitHub" },
-  { name: "Large Repos eg. Mono-Repo Support", free: false, pro: true },
+  { name: "Code Updates", free: false, pro: "Pull Updates from GitHub" },
   { name: "Connect your GitHub Account", free: false, pro: true },
   { name: "Unlimited Chat Experience", free: false, pro: true },
   { name: "Priority Support", free: false, pro: true },
@@ -52,7 +51,7 @@ export default function PricingSection() {
             <div className="bg-white/5 rounded-xl p-8">
               <h3 className="text-2xl font-bold text-white mb-2">Free Tier</h3>
               <p className="text-white/70 mb-4">
-                Perfect for small projects and individual developers
+                Ideal for looking to explore InDocify.
               </p>
               <div className="text-4xl font-bold text-white mb-8">$0</div>
               <button className="w-full bg-white/10 text-white px-6 py-3 rounded-full mb-8">
@@ -88,10 +87,10 @@ export default function PricingSection() {
               </div>
               <h3 className="text-2xl font-bold text-white mb-2">Pro Tier</h3>
               <p className="text-white/70 mb-4">
-                For teams that need more power and flexibility
+                Access to all advance features
               </p>
               <div className="text-4xl font-bold text-white mb-8">
-                $ To Be Added
+                $ 8
                 <span className="text-lg font-normal text-white/70">
                   /month
                 </span>
