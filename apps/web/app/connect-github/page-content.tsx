@@ -208,7 +208,7 @@ export default function PageContent() {
               transition={{ delay: 0.1 }}
               className="text-xl text-white/70"
             >
-              Understand your repo in just a few steps
+              Uncover how features are implemented in any repository.
             </motion.p>
           </div>
 
@@ -369,21 +369,12 @@ export default function PageContent() {
             </AnimatePresence>
           </div>
 
-          {/* Footer */}
-          <div className="text-center space-y-4">
-            <p className="text-white/50">
-              To use other methods kindly click{" "}
-              <Link href="/" className="text-[#CCFF00] hover:underline">
-                Home
-              </Link>
-            </p>
-            <p className="text-white/50">
-              Need help?{" "}
-              <Link href="/support" className="text-[#CCFF00] hover:underline">
-                Contact support
-              </Link>
-            </p>
-          </div>
+          <p className="text-white/50 text-center">
+            Need help?{" "}
+            <Link href="/support" className="text-[#CCFF00] hover:underline">
+              Contact support
+            </Link>
+          </p>
         </div>
       </div>
     </div>

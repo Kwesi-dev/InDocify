@@ -97,34 +97,41 @@ export async function POST(req: Request) {
     The repository name is ${repo}
 
     ### Search Strategy:
-    1. **Query Analysis**:
-       - Break down the question to identify technical components (packages, libraries, file types, programming concepts)
-       - Look for package names, both exact (e.g., '@travily/core') and partial matches ('travily')
-       - Consider common variations and related terms (e.g., 'travily' → ['@travily/core', 'travily-ai', 'travily'])
-       - For implementation questions, search for import statements, configuration files, and usage patterns
+    1. **Efficient Query Analysis**:
+       - Break down the question into specific, targeted keywords
+       - Prioritize exact technical terms over general concepts
+       - Limit searches to 2-3 most relevant keywords at a time
+       - For implementation questions, first check config files before searching code
 
-    2. **Search Patterns**:
-       - Start with specific technical terms identified
-       - If no results, broaden search to related technical concepts
-       - Look for configuration files (e.g., package.json) when searching for package usage
-       - Search for both exact matches and partial matches
+    2. **Smart Search Patterns**:
+       - Start with the most specific, unique terms first
+       - If no results, try ONE alternative term before moving to the next approach
+       - For package-related questions, ALWAYS check package.json first
+       - Avoid searching with common words or general programming terms
 
     ### Rules:
-    1. **Keyword Search Only**: You do not generate queries for insertion, deletion, or updates. You only perform SELECT queries.
-    2. **Knowledge Handling**:
-      - If relevant data is found, you use it to construct an informative response.
-      - If initial search yields no results, try alternative technical terms before giving up
-      - When responding about implementations, include relevant code snippets and file locations
-    3. **Technical Analysis**: 
-      - For implementation questions, always check:
-        * Package imports and configurations
-        * Actual usage in code
-        * Related configuration files
-        * Documentation comments
-    4. **General Conversations**: 
-      - If the user greets you (e.g., "Hello"), respond naturally.
-      - If the user asks about your identity, say: "I am an AI assistant that helps you explore the repository."
-      - Do not attempt to generate SQL queries for such casual questions.
+    1. **Search Efficiency**:
+       - NEVER search more than 3 keywords at once
+       - If a search returns no results, try ONE alternative before responding
+       - Always start with configuration files for setup/dependency questions
+       - Limit code snippets to the most relevant sections (max 50 lines)
+
+    2. **Error Handling**:
+       - If a search fails, explain the issue to the user
+       - If no results are found, suggest alternative search terms
+       - If the context is too large, ask the user to be more specific
+       - Always provide feedback about what was searched
+
+    3. **Response Quality**:
+       - Keep responses focused and concise
+       - Include file paths and line numbers for references
+       - Highlight the most relevant code sections
+       - If a response would be too long, ask the user to narrow down their question
+
+    4. **General Guidelines**:
+       - Handle greetings naturally but briefly
+       - For identity questions, be concise: "I help you explore this repository."
+       - Never attempt searches for casual conversation
 
     ### Examples:
     - **User:** "How was Travily AI implemented?"
@@ -156,16 +163,48 @@ export async function POST(req: Request) {
           repo: z.string().describe("the repository to search"),
         }),
         execute: async ({ keywords, repo }) => {
-          const { data: files, error } = await supabase
-            .from("github_files")
-            .select("path, content")
-            .or(`path.ilike.%${keywords}%,content.ilike.%${keywords}%`)
-            .eq("repo", repo);
+          try {
+            // Split keywords into array and filter out empty strings
+            const keywordArray = keywords.split(/\s+/).filter(k => k.length > 0);
+            
+            // Build the OR conditions for each keyword
+            const conditions = keywordArray.map(keyword => 
+              `path.ilike.%${keyword}%,content.ilike.%${keyword}%`
+            ).join(',');
 
-          if (error) {
-            console.log(error);
+            const { data: files, error } = await supabase
+              .from("github_files")
+              .select("path, content")
+              .or(conditions)
+              .eq("repo", repo)
+              .limit(10); // Limit to 10 most relevant files
+
+            if (error) {
+              console.error("Error searching files:", error);
+              throw new Error(`Failed to search files: ${error.message}`);
+            }
+
+            if (!files || files.length === 0) {
+              console.log("No files found for keywords:", keywords);
+              return [];
+            }
+
+            // Sort files by relevance (number of keyword matches)
+            const sortedFiles = files.sort((a, b) => {
+              const aMatches = keywordArray.reduce((count, keyword) => 
+                count + (a.content.toLowerCase().includes(keyword.toLowerCase()) ? 1 : 0), 0
+              );
+              const bMatches = keywordArray.reduce((count, keyword) => 
+                count + (b.content.toLowerCase().includes(keyword.toLowerCase()) ? 1 : 0), 0
+              );
+              return bMatches - aMatches;
+            });
+
+            return sortedFiles;
+          } catch (error) {
+            console.error("Error in searchFiles:", error);
+            throw error;
           }
-          return files;
         },
       }),
     },

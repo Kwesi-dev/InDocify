@@ -11,14 +11,41 @@ import { createSupabaseClient } from "@/lib/supabaseClient";
 async function fetchRepoZip(owner: string, repo: string) {
   const session = await auth();
   const accessToken = session?.githubAccessToken || process.env.GITHUB_API_KEY;
-  const zipUrl = `https://github.com/${owner}/${repo}/archive/main.zip`;
+
+  // First, get the default branch
+  const repoInfoResponse = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "User-Agent": "InDocify",
+      },
+    }
+  );
+
+  if (!repoInfoResponse.ok) {
+    throw new Error(
+      `Failed to fetch repository info: ${repoInfoResponse.statusText}`
+    );
+  }
+
+  const repoInfo = await repoInfoResponse.json();
+  const defaultBranch = repoInfo.default_branch;
+  console.log("defaultBranch", defaultBranch);
+
+  // Then fetch the ZIP using the default branch
+  const zipUrl = `https://github.com/${owner}/${repo}/archive/${defaultBranch}.zip`;
   const response = await fetch(zipUrl, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
       "User-Agent": "InDocify",
     },
   });
-  console.log("response", response.arrayBuffer);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch repository ZIP: ${response.statusText}`);
+  }
+
   return await response.arrayBuffer();
 }
 
@@ -65,7 +92,6 @@ async function extractZip(zipData: ArrayBuffer) {
 
 export async function fetchAndProcessZipRepo(owner: string, repo: string) {
   try {
-    console.log("Fetching and processing repository:", owner, repo);
     // Step 1: Fetch the repository ZIP
     const zipData = await fetchRepoZip(owner, repo);
     // Step 2: Extract files from the ZIP

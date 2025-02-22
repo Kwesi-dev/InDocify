@@ -53,8 +53,8 @@ export function EmptyChatState({ repoName }: EmptyChatStateProps) {
           Welcome to <span className="text-[#CCFF00]">{repoName}</span> RepoTalk
         </h1>
         <p className="text-lg text-white/70 mb-8">
-          Your AI-powered guide to understanding and contributing to this
-          codebase with confidence.
+          Your AI-powered guide to exploring and understanding how features are
+          implemented in any repository with confidence.
         </p>
       </motion.div>
 
@@ -105,7 +105,7 @@ export function EmptyChatState({ repoName }: EmptyChatStateProps) {
         transition={{ delay: 0.7 }}
         className="text-white/50 text-sm"
       >
-        Try asking about architecture, dependencies, or how a feature works.
+        Try asking about how a feature is implemented.
       </motion.div>
     </div>
   );

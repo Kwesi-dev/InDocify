@@ -73,7 +73,8 @@ export default function HeroSection() {
             </div>
 
             <div className="text-white/50 text-sm">
-              Next-level speed for understanding code.
+              Next-level speed for searching for feature implementations in a
+              repository.
             </div>
             <div className="py-[100px]">
               <VideoSnippet />

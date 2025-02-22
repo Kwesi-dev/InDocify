@@ -14,6 +14,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { extractOwnerAndRepo } from "@/utils";
 import { ProcessingDialog } from "../processing-dialog";
+import { RepoActions } from "./repo-actions";
 import {
   MAX_SIZE_LIMIT_FOR_FREE_PLAN,
   MAX_SIZE_LIMIT_FOR_PRO_PLAN,
@@ -71,11 +72,7 @@ export function RepoSelector({
           .select("name,description,url,owner")
           .eq("email", session?.user?.email);
         if (savedRepos) {
-          repos = [...savedRepos, ...repos];
-        } else {
-          const response = await fetch("/api/repo");
-          const data = await response.json();
-          repos = data;
+          repos = savedRepos;
         }
       }
       return repos ?? [];
@@ -92,6 +89,7 @@ export function RepoSelector({
               name: repo.name,
               description: repo.description,
               url: repo.html_url,
+              owner: repo.owner,
             };
           })
       : [];
@@ -293,35 +291,37 @@ export function RepoSelector({
             ) : (
               <div className="p-2">
                 {filteredRepos.map((repo: Repo) => (
-                  <Button
-                    key={repo.name}
-                    variant="ghost"
-                    className={cn(
-                      "w-full justify-start gap-2 text-left hover:bg-white/5",
-                      selectedRepo === repo.name && "bg-white/10"
-                    )}
-                    disabled={selectedRepo === repo.name}
-                    onClick={() => {
-                      setActiveRepo(repo);
-                      handleRepoSelect(repo);
-                      setOpen(false);
-                    }}
-                  >
-                    <GitFork className="w-4 h-4 shrink-0 text-white/50" />
-                    <div className="flex-1 truncate">
-                      <div className="font-medium text-white/50">
-                        {repo.name}
+                  <div className="flex items-center space-x-1" key={repo.name}>
+                    <Button
+                      variant="ghost"
+                      className={cn(
+                        "w-full justify-start gap-2 text-left hover:bg-white/5",
+                        selectedRepo === repo.name && "bg-white/10"
+                      )}
+                      disabled={selectedRepo === repo.name}
+                      onClick={() => {
+                        setActiveRepo(repo);
+                        handleRepoSelect(repo);
+                        setOpen(false);
+                      }}
+                    >
+                      <GitFork className="w-4 h-4 shrink-0 text-white/50" />
+                      <div className="flex-1 truncate">
+                        <div className="font-medium text-white/50">
+                          {repo.name}
+                        </div>
+                        <div className="text-xs text-white/30 truncate">
+                          {repo.description
+                            ? repo.description?.substring(0, 30) + "..."
+                            : "no description"}
+                        </div>
                       </div>
-                      <div className="text-xs text-white/30 truncate">
-                        {repo.description
-                          ? repo.description?.substring(0, 30) + "..."
-                          : "no description"}
-                      </div>
-                    </div>
-                    {selectedRepo === repo.name && (
-                      <Check className="w-4 h-4 shrink-0 text-white" />
-                    )}
-                  </Button>
+                    </Button>
+                    <RepoActions
+                      repoName={repo.name}
+                      owner={repo.owner as string}
+                    />
+                  </div>
                 ))}
               </div>
             )}

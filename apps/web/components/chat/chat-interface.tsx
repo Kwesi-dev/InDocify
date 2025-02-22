@@ -19,6 +19,7 @@ import { useSession } from "next-auth/react";
 import { useSupabaseClient } from "@/lib/SupabaseClientProvider";
 import { MemoizedMarkdown } from "@/lib/Markdown";
 import { RateLimitDialog } from "./rate-limit-dialog";
+import { ChatActions } from "./chat-actions";
 import useQuestionLimit from "@/hooks/useQuestionLimit";
 
 export function ChatInterface() {
@@ -40,6 +41,8 @@ export function ChatInterface() {
     handleSubmit,
     isLoading,
     setMessages,
+    error,
+    reload,
   } = useChat({
     maxSteps: 3,
     api: "/api/chat",
@@ -59,6 +62,9 @@ export function ChatInterface() {
         queryKey: ["threads", session?.user?.email, repo],
       });
     },
+    onError: (error) => {
+      console.error("Chat error:", error);
+    },
   });
 
   useEffect(() => {
@@ -70,7 +76,7 @@ export function ChatInterface() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const _ = useQuery({
+  useQuery({
     enabled: !!currentThread && !!repo && !!session && !isLoading,
     queryKey: ["messages", session?.user?.email, repo, currentThread],
     queryFn: async () => {
@@ -131,13 +137,27 @@ export function ChatInterface() {
       {/* Messages */}
       <ScrollArea ref={scrollAreaRef} className="flex-[0.85] p-4">
         <div className="max-w-3xl mx-auto space-y-6 ">
-          <AnimatePresence initial={false}>
-            {messages.length === 0 && !isLoading ? (
-              <EmptyChatState repoName={repo!} />
-            ) : null}
-          </AnimatePresence>
+          <div className="flex items-center justify-between">
+            <AnimatePresence initial={false}>
+              {messages.length === 0 && !isLoading ? (
+                <EmptyChatState repoName={repo!} />
+              ) : null}
+            </AnimatePresence>
+            {currentThread && (
+              <ChatActions
+                threadId={currentThread}
+                repo={repo!}
+                owner={owner!}
+              />
+            )}
+          </div>
 
-          <Messages messages={messages} isLoading={isLoading} />
+          <Messages
+            messages={messages}
+            isLoading={isLoading}
+            error={error}
+            onRetry={reload}
+          />
           {/* Typing Indicator */}
         </div>
       </ScrollArea>
@@ -188,9 +208,13 @@ export function ChatInterface() {
 const Messages = ({
   messages,
   isLoading,
+  error,
+  onRetry,
 }: {
   messages: Message[];
   isLoading: boolean;
+  error: Error | undefined;
+  onRetry: () => void;
 }) => {
   const lastMessageRef = useRef<HTMLDivElement>(null);
 
@@ -262,6 +286,29 @@ const Messages = ({
           >
             <LoadingAnimation />
             <p className="text-sm text-white/50">AI Assistant is thinking...</p>
+          </motion.div>
+        )}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="flex flex-col items-center gap-4 rounded-lg p-4 bg-red-500/10 border border-red-500/20"
+          >
+            <div className="text-red-400">
+              {error.message === "timeout"
+                ? "Request timed out. Please try again."
+                : "An error occurred while processing your request."}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onRetry}
+              className="flex items-center gap-2 bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
+            >
+              <Loader2 className="h-4 w-4" />
+              Retry
+            </Button>
           </motion.div>
         )}
       </AnimatePresence>
