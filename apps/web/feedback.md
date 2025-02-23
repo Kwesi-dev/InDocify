@@ -2,13 +2,11 @@
 
 Let's improve the app based:
 
-## First Issue: when to save repo files, repos, and github_docs
-- Before saving repo files after extraction, check if a repo with the same name already exists in the database
-- if it does, do not save the repo files again same for github_docs
-  
-- but then for github repos, if it does exist , alert the user that the repo has already exists
-
+## First Issue: Pull Latest Changes in Repo
+- Add a button to the chat header in repo-talkroom to pull latest changes in a repo
+- This will check for changes in the repo and update the database if changes are found
 ## Second Issue: Response Processing
+
 - Some prompts showed as "processing" but then stopped without any feedback
 - No UI indication of errors or retry options
 
