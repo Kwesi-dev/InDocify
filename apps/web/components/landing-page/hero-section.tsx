@@ -7,7 +7,7 @@ import { VideoSnippet } from "./video-snippet";
 
 export default function HeroSection() {
   return (
-    <div className="relative min-h-screen bg-[#1a1f1a] overflow-hidden">
+    <div className="relative min-h-[calc(100vh-80px)] pt-[60px] bg-[#1a1f1a] overflow-hidden">
       <AnimatedBackground />
       <AnimatedStripes />
       <div className="relative z-10 container mx-auto px-6 pt-32 pb-24">
