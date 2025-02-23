@@ -17,6 +17,8 @@ import { useSupabaseClient } from "@/lib/SupabaseClientProvider";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { toast } from "@workspace/ui/hooks/use-toast";
+import useShallowRouter from "@/hooks/useShallowRouter";
+import { useSearchParams } from "next/navigation";
 
 interface RepoActionsProps {
   repoName: string;
@@ -28,6 +30,8 @@ export function RepoActions({ repoName, owner, setOpen }: RepoActionsProps) {
   const supabase = useSupabaseClient();
   const queryClient = useQueryClient();
   const { data: session } = useSession();
+  const shallowRoute = useShallowRouter();
+  const currentRepo = useSearchParams().get("repo");
 
   const handleDelete = async () => {
     setOpen(false);
@@ -57,6 +61,9 @@ export function RepoActions({ repoName, owner, setOpen }: RepoActionsProps) {
         .delete()
         .match({ repo: repoName, owner, email: session?.user?.email });
 
+      if (currentRepo === repoName) {
+        shallowRoute(`/repo-talkroom`);
+      }
       // Invalidate queries to refresh UI
       queryClient.invalidateQueries({
         queryKey: ["repos", session?.user?.email],
