@@ -7,7 +7,7 @@ import { ScrollArea } from "@workspace/ui/components/scroll-area";
 import IndocifyLogo from "@/components/indocify-logo";
 import { cn } from "@workspace/ui/lib/utils";
 import { RecentChats } from "./recent-chats";
-import DocumentationSection from "./documentation-section";
+// import DocumentationSection from "./documentation-section";
 import { RepoSelector } from "./repo-selector";
 import { UserProfile } from "./user-profile";
 import { useSession } from "next-auth/react";
@@ -78,10 +78,10 @@ export default function Sidebar({ selectedRepo, owner }: SidebarProps) {
           <RepoSelector selectedRepo={selectedRepo} isCollapsed={isCollapsed} />
         </div>
 
-        {/* Documentation Section */}
+        {/* Documentation Section
         <div className="space-y-4">
           <DocumentationSection isCollapsed={isCollapsed} />
-        </div>
+        </div> */}
 
         <ScrollArea className="flex-1">
           {/* Recent Chats Section */}
