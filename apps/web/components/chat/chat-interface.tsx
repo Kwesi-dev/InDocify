@@ -76,24 +76,40 @@ export function ChatInterface() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useQuery({
+  const { refetch } = useQuery({
     enabled: !!currentThread && !!repo && !!session && !isLoading,
     queryKey: ["messages", session?.user?.email, repo, currentThread],
     queryFn: async () => {
       if (!supabase) return null;
-      const { data, error } = await supabase
-        .from("threads")
-        .select("messages")
-        .eq("thread_id", currentThread)
-        .eq("repo", repo)
-        .eq("email", session?.user?.email)
-        .single();
-      if (error) {
-        // console.log(error);
+      try {
+        const { data, error } = await supabase
+          .from("threads")
+          .select("messages")
+          .eq("thread_id", currentThread)
+          .eq("repo", repo)
+          .eq("email", session?.user?.email)
+          .single();
+
+        if (error) {
+          console.error("Error fetching messages:", error);
+          return [];
+        }
+
+        if (!data?.messages) {
+          return [];
+        }
+
+        const parsedMessages = JSON.parse(data.messages);
+        setMessages(parsedMessages);
+        return parsedMessages;
+      } catch (error) {
+        console.error(error);
+        return [];
       }
-      setMessages(JSON.parse(data?.messages || "[]"));
-      return data?.messages || [];
     },
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    retry: 2,
   });
 
   useEffect(() => {
@@ -102,14 +118,21 @@ export function ChatInterface() {
     }
   }, [currentThread, setMessages]);
 
-  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+      const scrollArea = scrollAreaRef.current;
+      setTimeout(() => {
+        scrollArea.scrollTop = scrollArea.scrollHeight;
+      }, 100);
     }
-  }, []);
+  }, [messages]);
 
-  // Auto-resize textarea
+  useEffect(() => {
+    if (session && repo && currentThread) {
+      refetch();
+    }
+  }, [currentThread, refetch, repo, session]);
+
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "inherit";
@@ -143,7 +166,7 @@ export function ChatInterface() {
                 <EmptyChatState repoName={repo!} />
               ) : null}
             </AnimatePresence>
-            {currentThread && (
+            {currentThread && messages.length > 0 && (
               <ChatActions
                 threadId={currentThread}
                 repo={repo!}
