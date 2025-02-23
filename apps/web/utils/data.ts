@@ -49,8 +49,5 @@ export const validCodeFiles = [
   "tests/",
 ];
 
-export const MAX_SIZE_LIMIT_FOR_FREE_PLAN = 5;
-export const MAX_SIZE_LIMIT_FOR_PRO_PLAN = 50;
-
-export const MAX_SIZE_LIMIT_FOR_FREE_PLAN_ZIP = 2;
-export const MAX_SIZE_LIMIT_FOR_PRO_PLAN_ZIP = 50;
+export const MAX_SIZE_LIMIT_FOR_FREE_PLAN = 180;
+export const MAX_SIZE_LIMIT_FOR_PRO_PLAN = 180;
