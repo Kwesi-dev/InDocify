@@ -135,7 +135,7 @@ export function ChatInterface() {
         <RateLimitDialog isOpen={isLimited} onClose={() => {}} />
       ) : null}
       {/* Messages */}
-      <ScrollArea ref={scrollAreaRef} className="flex-[0.85] p-4">
+      <ScrollArea ref={scrollAreaRef} className="flex-[0.76] p-4">
         <div className="max-w-3xl mx-auto space-y-6 ">
           <div className="flex items-center justify-between">
             <AnimatePresence initial={false}>
@@ -163,7 +163,7 @@ export function ChatInterface() {
       </ScrollArea>
 
       {/* Input Area */}
-      <div className="border-t border-white/10 p-4">
+      <div className="border-t border-white/10 p-4 flex-[0.24]">
         <form
           onSubmit={(e) => {
             if (!currentThread) {

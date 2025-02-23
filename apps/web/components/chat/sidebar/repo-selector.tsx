@@ -12,15 +12,7 @@ import {
 import { ScrollArea } from "@workspace/ui/components/scroll-area";
 import { cn } from "@workspace/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { extractOwnerAndRepo } from "@/utils";
-import { ProcessingDialog } from "../processing-dialog";
 import { RepoActions } from "./repo-actions";
-import {
-  MAX_SIZE_LIMIT_FOR_FREE_PLAN,
-  MAX_SIZE_LIMIT_FOR_PRO_PLAN,
-} from "@/utils/data";
-import { SizeLimitAlert } from "@/components/size-limit-alert";
-import { fetchAndProcessZipRepo, generateDocs } from "@/app/agents/new/actions";
 import { useSession } from "next-auth/react";
 import useCreateQueryString from "@/hooks/useCreateQueryString";
 import useShallowRouter from "@/hooks/useShallowRouter";
@@ -42,24 +34,12 @@ export function RepoSelector({
   isCollapsed = false,
 }: RepoSelectorProps) {
   const [search, setSearch] = useState("");
-  const [activeRepo, setActiveRepo] = useState<Repo | null>(null);
   const [open, setOpen] = useState(false);
-  const [processing, setProcessing] = useState(false);
-  const [sizeLimitExceeded, setSizeLimitExceeded] = useState({
-    status: false,
-    fileSize: 0,
-    sizeLimit: 0,
-  });
   const { data: session } = useSession();
   const supabase = useSupabaseClient();
-  const [progress, setProgress] = useState({
-    label: "",
-    value: 0,
-  });
-  const { addQueryString } = useCreateQueryString();
+
+  useCreateQueryString();
   const shallowRoute = useShallowRouter();
-  const sub = "pro";
-  const user = sub === "pro" ? "pro" : "free";
 
   const { data: repos, isLoading } = useQuery({
     enabled: !!supabase,
@@ -155,7 +135,6 @@ export function RepoSelector({
                       )}
                       disabled={selectedRepo === repo.name}
                       onClick={() => {
-                        setActiveRepo(repo);
                         handleRepoSelect(repo);
                         setOpen(false);
                       }}
@@ -184,25 +163,6 @@ export function RepoSelector({
           </ScrollArea>
         </PopoverContent>
       </Popover>
-      {processing ? (
-        <ProcessingDialog
-          isOpen={processing}
-          onOpenChange={setProcessing}
-          repoName={activeRepo?.name as string}
-          progress={progress}
-        />
-      ) : null}
-      {sizeLimitExceeded.status ? (
-        <SizeLimitAlert
-          isOpen={sizeLimitExceeded.status}
-          onClose={() =>
-            setSizeLimitExceeded({ status: false, fileSize: 0, sizeLimit: 0 })
-          }
-          fileSize={sizeLimitExceeded.fileSize}
-          sizeLimit={sizeLimitExceeded.sizeLimit}
-          buttonText="Try Another Repository"
-        />
-      ) : null}
     </>
   );
 }

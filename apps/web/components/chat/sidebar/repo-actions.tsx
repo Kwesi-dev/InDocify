@@ -58,8 +58,12 @@ export function RepoActions({ repoName, owner, setOpen }: RepoActionsProps) {
         .match({ repo: repoName, owner, email: session?.user?.email });
 
       // Invalidate queries to refresh UI
-      queryClient.invalidateQueries({ queryKey: ["repos"] });
-      queryClient.invalidateQueries({ queryKey: ["threads"] });
+      queryClient.invalidateQueries({
+        queryKey: ["repos", session?.user?.email],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["threads", session?.user?.email, repoName],
+      });
 
       toast({
         title: "Repository deleted",
