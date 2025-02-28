@@ -18,9 +18,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useSupabaseClient } from "@/lib/SupabaseClientProvider";
 import { MemoizedMarkdown } from "@/lib/Markdown";
-import { RateLimitDialog } from "./rate-limit-dialog";
+import { QuestionLimitDialog } from "./question-limit-dialog";
 import { ChatActions } from "./chat-actions";
 import useQuestionLimit from "@/hooks/useQuestionLimit";
+import { useSubscription } from "@/hooks/use-subscription";
 
 export function ChatInterface() {
   const params = useSearchParams();
@@ -33,6 +34,7 @@ export function ChatInterface() {
   const supabase = useSupabaseClient();
   const query = useQueryClient();
   const { questionCount, isLimited, updateQuestionCount } = useQuestionLimit();
+  const { isSubscribed } = useSubscription();
 
   const {
     messages,
@@ -155,7 +157,7 @@ export function ChatInterface() {
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       {isLimited ? (
-        <RateLimitDialog isOpen={isLimited} onClose={() => {}} />
+        <QuestionLimitDialog isOpen={isLimited} onClose={() => {}} />
       ) : null}
       {/* Messages */}
       <ScrollArea ref={scrollAreaRef} className="flex-[0.76] p-4">
@@ -188,14 +190,19 @@ export function ChatInterface() {
       {/* Input Area */}
       <div className="border-t border-white/10 p-4 flex-[0.24]">
         <form
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
+            e.preventDefault();
             if (!currentThread) {
               shallowRoute(
                 `/repo-talkroom/${newThread.current}?repo=${repo}&owner=${owner}`
               );
             }
+            // Only update question count for free tier users
+            if (!isSubscribed) {
+              const currentCount = questionCount || 0;
+              await updateQuestionCount(currentCount + 1);
+            }
             handleSubmit(e);
-            updateQuestionCount(questionCount + 1);
           }}
           className="max-w-3xl mx-auto"
         >

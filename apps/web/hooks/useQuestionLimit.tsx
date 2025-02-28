@@ -50,7 +50,7 @@ const useQuestionLimit = () => {
 
   return {
     questionCount: data,
-    isLimited: data >= 5,
+    isLimited: data >= 10,
     fetchingCount: isLoading,
     updateQuestionCount,
   };

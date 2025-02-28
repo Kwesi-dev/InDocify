@@ -19,6 +19,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { useSubscription } from "@/hooks/use-subscription";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -59,6 +60,7 @@ export function NavBar({ authButtons }: { authButtons?: React.ReactNode }) {
 const Drawer = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { data: session } = useSession();
+  const { isSubscribed } = useSubscription();
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild className="md:hidden">
@@ -104,14 +106,16 @@ const Drawer = () => {
                   <MessageSquare className="w-4 h-4" />
                   RepoTalk Room
                 </Link>
-                <Link
-                  href="/connect-github"
-                  className="px-6 py-3 text-white/90 hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <Github className="w-4 h-4" />
-                  Connect to Github
-                </Link>
+                {isSubscribed && (
+                  <Link
+                    href="/connect-github"
+                    className="px-6 py-3 text-white/90 hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <Github className="w-4 h-4" />
+                    Connect to Github
+                  </Link>
+                )}
                 <Link
                   href="/subscription"
                   className="px-6 py-3 text-white/90 hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2"

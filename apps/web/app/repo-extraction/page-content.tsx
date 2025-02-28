@@ -7,6 +7,10 @@ import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useSupabaseClient } from "@/lib/SupabaseClientProvider";
+import useRepoLimit from "@/hooks/useRepoLimit";
+import { useSubscription } from "@/hooks/use-subscription";
+import { RepoLimitDialog } from "@/components/repo-limit-dialog";
+import { ProRepoLimitDialog } from "@/components/pro-repo-limit-dialog";
 
 const PageContent = () => {
   const searchParams = useSearchParams();
@@ -17,8 +21,24 @@ const PageContent = () => {
   const router = useRouter();
   const supabase = useSupabaseClient();
   const { data: session } = useSession();
+  const { updateRepoCounts, repoCounts: repoLimitData } = useRepoLimit();
+  const { isSubscribed } = useSubscription();
+  const [showLimitDialog, setShowLimitDialog] = useState(false);
+  const [showProLimitDialog, setShowProLimitDialog] = useState(false);
 
   const prepareRepoForExtraction = useCallback(async () => {
+    // Check repository limits
+    if (!isSubscribed && repoLimitData?.isLimited) {
+      setShowLimitDialog(true);
+      return;
+    }
+
+    // For pro users, check private repo limit
+    const isPrivateRepo = nextRepoUrl?.includes('private=true');
+    if (isSubscribed && isPrivateRepo && repoLimitData?.isProLimited) {
+      setShowProLimitDialog(true);
+      return;
+    }
     let files: { path: string; content: string }[] = [];
     try {
       if (nextRepoUrl?.includes("zip-file")) {
@@ -63,6 +83,12 @@ const PageContent = () => {
           `/api/repo/metadata?owner=${owner}&repo=${repo}`
         );
         metadata = await data.json();
+        // Update repo counts based on visibility
+        const isPrivate = metadata.metadata.visibility === "Private";
+        await updateRepoCounts(isPrivate);
+      } else {
+        // For uploaded zip files, count as public repos
+        await updateRepoCounts(false);
       }
 
       const readmeFile = files?.find(
@@ -106,17 +132,37 @@ const PageContent = () => {
     } catch (error) {
       console.log(error);
     }
-  }, [nextRepoUrl, owner, repo, router, session?.user?.email, supabase]);
+  }, [
+    isSubscribed,
+    nextRepoUrl,
+    owner,
+    repo,
+    repoLimitData?.isLimited,
+    router,
+    session?.user?.email,
+    supabase,
+    updateRepoCounts,
+  ]);
 
   useEffect(() => {
     prepareRepoForExtraction();
   }, [prepareRepoForExtraction]);
 
   return (
-    <AnalysingRepoAnimation
-      progress={progress}
-      stepsType={nextRepoUrl?.includes("zip-file") ? "zipSteps" : "urlSteps"}
-    />
+    <>
+      <RepoLimitDialog
+        isOpen={showLimitDialog}
+        onClose={() => setShowLimitDialog(false)}
+      />
+      <ProRepoLimitDialog
+        isOpen={showProLimitDialog}
+        onClose={() => setShowProLimitDialog(false)}
+      />
+      <AnalysingRepoAnimation
+        progress={progress}
+        stepsType={nextRepoUrl?.includes("zip-file") ? "zipSteps" : "urlSteps"}
+      />
+    </>
   );
 };
 
