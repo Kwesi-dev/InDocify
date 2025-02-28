@@ -112,6 +112,14 @@ const Drawer = () => {
                   <Github className="w-4 h-4" />
                   Connect to Github
                 </Link>
+                <Link
+                  href="/subscription"
+                  className="px-6 py-3 text-white/90 hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <Lock className="w-4 h-4" />
+                  Manage Subscription
+                </Link>
               </nav>
             ) : (
               <div className="grid gap-y-5 p-6">

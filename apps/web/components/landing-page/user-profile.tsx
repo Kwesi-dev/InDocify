@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Github, LogOut, MessageSquare, User } from "lucide-react";
+import {
+  ChevronDown,
+  Github,
+  Lock,
+  LogOut,
+  MessageSquare,
+  User,
+} from "lucide-react";
 import Link from "next/link";
 import { Session } from "next-auth";
 import { logout } from "@/app/actions";
@@ -24,7 +31,7 @@ const UserLandingProfile = ({ session }: { session: Session }) => {
       </button>
 
       {isUserMenuOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-[#1a1f1a] border border-white/10 rounded-xl shadow-xl py-2">
+        <div className="absolute right-0 mt-2 w-[250px] bg-[#1a1f1a] border border-white/10 rounded-xl shadow-xl py-2">
           <Link
             href="/repo-talkroom"
             className="flex items-center gap-2 px-4 py-2 text-white hover:bg-white/5 transition-colors"
@@ -40,6 +47,14 @@ const UserLandingProfile = ({ session }: { session: Session }) => {
           >
             <Github className="w-4 h-4" />
             <span>Connect to Github</span>
+          </Link>
+          <div className="border-t border-white/10 my-1" />
+          <Link
+            href="/subscription"
+            className="px-4 py-3 text-white/90 hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2"
+          >
+            <Lock className="w-4 h-4 shrink-0" />
+            <span>Manage Subscription</span>
           </Link>
           <div className="border-t border-white/10 my-1" />
           <button

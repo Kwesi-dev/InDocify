@@ -1,31 +1,275 @@
 "use client";
 
-import { Check, CreditCard, X, Bell } from "lucide-react";
+import { Check, CreditCard, X, Loader2, Crown } from "lucide-react";
 import TitleTag from "./title-tag";
-import type React from "react"; // Added import for React
+import {
+  checkout,
+  updateActiveSubscription,
+} from "@/lib/lemon-squeezy/actions";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { toast } from "@workspace/ui/hooks/use-toast";
+import { useSubscription } from "@/hooks/use-subscription";
 
 const features = [
+  {
+    name: "Repositories Count Limit",
+    free: "2 repos",
+    pro: "Unlimited",
+    enterprise: "Unlimited",
+  },
+  {
+    name: "Private Repositories",
+    free: false,
+    pro: "Up to 5",
+    enterprise: "Unlimited",
+  },
   {
     name: "Repo Integration",
     free: "Public Repos Only",
     pro: "Public and Private Repos",
+    enterprise: "Public and Private Repos",
   },
   {
-    name: "Size",
-    free: "Up to 5MB",
-    pro: "Up to 100MB",
+    name: "Repo Size Limit",
+    free: "Up to 50MB",
+    pro: "Up to 200MB",
+    enterprise: "Up to 500MB",
   },
   {
-    name: "Generate Documentation Guide",
-    pro: "Generate Documentation Guide",
+    name: "Pull Repo Updates",
+    free: false,
+    pro: "Pull Updates from GitHub",
+    enterprise: "Pull Updates from GitHub",
   },
-  { name: "Code Updates", free: false, pro: "Pull Updates from GitHub" },
-  { name: "Connect your GitHub Account", free: false, pro: true },
-  { name: "Unlimited Chat Experience", free: false, pro: true },
-  { name: "Priority Support", free: false, pro: true },
+  {
+    name: "Connect your GitHub Account",
+    free: false,
+    pro: true,
+    enterprise: true,
+  },
+  {
+    name: "Unlimited Chat Experience",
+    free: false,
+    pro: true,
+    enterprise: true,
+  },
+  {
+    name: "Priority Support",
+    free: false,
+    pro: true,
+    enterprise: "Advanced Priority Support",
+  },
 ];
 
 export default function PricingSection() {
+  const router = useRouter();
+  const { data: session } = useSession();
+  const {
+    subscription,
+    isSubscribed,
+    loading: subscriptionLoading,
+  } = useSubscription();
+
+  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">(
+    "monthly"
+  );
+  const [loadingPro, setLoadingPro] = useState(false);
+  const [loadingEnterprise, setLoadingEnterprise] = useState(false);
+
+  const handleProCheckout = async () => {
+    if (!session) {
+      router.push("/signup");
+      return;
+    }
+
+    setLoadingPro(true);
+    try {
+      // If already subscribed, update the subscription (handles both upgrade and downgrade)
+      if (isSubscribed && subscription?.lemon_squeezy_subscription_id) {
+        const response = await updateActiveSubscription(
+          subscription.lemon_squeezy_subscription_id,
+          "pro",
+          billingPeriod
+        );
+
+        if (response.success) {
+          toast({
+            title: "Success",
+            description: response.message,
+          });
+          window.location.reload();
+          return;
+        } else {
+          toast({
+            title: "Error",
+            description: response.message || "Failed to update subscription",
+            variant: "destructive",
+          });
+        }
+        return;
+      }
+
+      // Only create new checkout if not subscribed
+      const response = await checkout(billingPeriod, "pro");
+      if (typeof response === "string") {
+        window.location.href = response;
+      } else {
+        toast({
+          title: "Error",
+          description: response.message || "Failed to process checkout",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingPro(false);
+    }
+  };
+
+  const handleEnterpriseCheckout = async () => {
+    if (!session) {
+      router.push("/signup");
+      return;
+    }
+
+    setLoadingEnterprise(true);
+    try {
+      // If already subscribed, update the subscription (handles both upgrade and downgrade)
+      if (isSubscribed && subscription?.lemon_squeezy_subscription_id) {
+        const response = await updateActiveSubscription(
+          subscription.lemon_squeezy_subscription_id,
+          "enterprise",
+          billingPeriod
+        );
+
+        if (response.success) {
+          toast({
+            title: "Success",
+            description: response.message,
+          });
+          window.location.reload();
+          return;
+        } else {
+          toast({
+            title: "Error",
+            description: response.message || "Failed to update subscription",
+            variant: "destructive",
+          });
+        }
+        return;
+      }
+
+      // Only create new checkout if not subscribed
+      const response = await checkout(billingPeriod, "enterprise");
+      if (typeof response === "string") {
+        window.location.href = response;
+      } else {
+        toast({
+          title: "Error",
+          description: response.message || "Failed to process checkout",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingEnterprise(false);
+    }
+  };
+
+  const getProButtonText = () => {
+    if (loadingPro) {
+      return (
+        <span className="flex items-center justify-center gap-2">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Processing...
+        </span>
+      );
+    }
+
+    if (subscriptionLoading) {
+      return (
+        <span className="flex items-center justify-center gap-2">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Loading...
+        </span>
+      );
+    }
+
+    if (isSubscribed) {
+      if (subscription?.tier === "enterprise") {
+        return "Downgrade to Pro";
+      }
+      if (
+        subscription?.tier === "pro" &&
+        subscription.plan_type !== billingPeriod
+      ) {
+        return `Switch to ${billingPeriod === "monthly" ? "Monthly" : "Annual"} Plan`;
+      }
+      if (subscription?.tier === "pro") {
+        return "Current Plan";
+      }
+    }
+
+    return "Get Started with Pro";
+  };
+
+  const getEnterpriseButtonText = () => {
+    if (loadingEnterprise) {
+      return (
+        <span className="flex items-center justify-center gap-2">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Processing...
+        </span>
+      );
+    }
+
+    if (subscriptionLoading) {
+      return (
+        <span className="flex items-center justify-center gap-2">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Loading...
+        </span>
+      );
+    }
+
+    if (isSubscribed) {
+      if (subscription?.tier === "pro") {
+        return "Upgrade to Enterprise";
+      }
+      if (
+        subscription?.tier === "enterprise" &&
+        subscription.plan_type !== billingPeriod
+      ) {
+        return `Switch to ${billingPeriod === "monthly" ? "Monthly" : "Annual"} Plan`;
+      }
+      if (subscription?.tier === "enterprise") {
+        return "Current Plan";
+      }
+    }
+
+    return "Get Started with Enterprise";
+  };
+  const isButtonDisabled = (tier: "pro" | "enterprise") => {
+    if (loadingPro || loadingEnterprise || subscriptionLoading) return true;
+    if (!isSubscribed) return false;
+
+    return (
+      subscription?.tier === tier && subscription?.plan_type === billingPeriod
+    );
+  };
+
   return (
     <section className="bg-[#1a1f1a] py-24 relative" id="pricing">
       <div className="container mx-auto px-6">
@@ -39,14 +283,37 @@ export default function PricingSection() {
               Simple, Transparent Pricing
             </h2>
             <p className="text-white/70 text-xl max-w-2xl mx-auto">
-              Choose the plan that best fits your team&apos;s needs
+              Choose the plan that best fits your needs
             </p>
+          </div>
+
+          {/* Billing Toggle */}
+          <div className="flex items-center gap-4 mb-8">
+            <button
+              onClick={() => setBillingPeriod("monthly")}
+              className={`px-4 py-2 rounded-lg ${
+                billingPeriod === "monthly"
+                  ? "bg-[#CCFF00] text-black"
+                  : "text-white/70"
+              }`}
+            >
+              Monthly
+            </button>
+            <button
+              onClick={() => setBillingPeriod("annual")}
+              className={`px-4 py-2 rounded-lg ${
+                billingPeriod === "annual"
+                  ? "bg-[#CCFF00] text-black"
+                  : "text-white/70"
+              }`}
+            >
+              Yearly
+            </button>
           </div>
         </div>
 
-        <div className="relative max-w-5xl mx-auto">
-          {/* Pricing Cards - Blurred */}
-          <div className="grid md:grid-cols-2 gap-8 filter blur-sm pointer-events-none">
+        <div className="relative mx-auto">
+          <div className="grid md:grid-cols-3 gap-8">
             {/* Free Tier */}
             <div className="bg-white/5 rounded-xl p-8">
               <h3 className="text-2xl font-bold text-white mb-2">Free Tier</h3>
@@ -54,9 +321,9 @@ export default function PricingSection() {
                 Ideal for looking to explore InDocify.
               </p>
               <div className="text-4xl font-bold text-white mb-8">$0</div>
-              <button className="w-full bg-white/10 text-white px-6 py-3 rounded-full mb-8">
+              {/* <button className="w-full bg-white/10 text-white px-6 py-3 rounded-full mb-8">
                 Get Started
-              </button>
+              </button> */}
               <div className="space-y-4">
                 {features.map((feature, index) => (
                   <div key={index} className="flex items-start gap-3">
@@ -79,24 +346,44 @@ export default function PricingSection() {
                 ))}
               </div>
             </div>
-
             {/* Pro Tier */}
-            <div className="bg-[#CCFF00]/10 rounded-xl p-8 relative overflow-hidden">
-              <div className="absolute top-4 right-4 bg-[#CCFF00] text-black px-3 py-1 rounded-full text-sm font-medium">
+            <div className="bg-white/5 rounded-xl p-8 relative overflow-hidden">
+              <div className="absolute top-6 right-6 bg-[#CCFF00] text-black text-xs px-3 py-1 rounded-full">
                 Popular
               </div>
-              <h3 className="text-2xl font-bold text-white mb-2">Pro Tier</h3>
-              <p className="text-white/70 mb-4">
-                Access to all advance features
-              </p>
-              <div className="text-4xl font-bold text-white mb-8">
-                $ 8
-                <span className="text-lg font-normal text-white/70">
-                  /month
-                </span>
+              <h3 className="text-2xl font-bold text-white mb-2">Pro</h3>
+              <div className="text-4xl font-bold text-white mb-2">
+                {billingPeriod === "monthly" ? (
+                  <>
+                    $6.99
+                    <span className="text-lg font-normal text-white/70">
+                      /month
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    $75
+                    <span className="text-lg font-normal text-white/70">
+                      /year
+                    </span>
+                  </>
+                )}
               </div>
-              <button className="w-full bg-[#CCFF00] text-black px-6 py-3 rounded-full mb-8 font-medium">
-                Start Free Trial
+              {billingPeriod === "annual" && (
+                <p className="text-white/70 mb-6 text-sm">
+                  <span className="line-through">$84</span>{" "}
+                  <span className="text-[#CCFF00]">Save $9 (11% off)</span>
+                </p>
+              )}
+              <p className="text-white/70 mb-6">Perfect for small teams</p>
+              <button
+                disabled={isButtonDisabled("pro")}
+                className={`w-full px-6 py-3 rounded-full mb-8 font-medium relative transition-colors bg-[#CCFF00] text-black hover:bg-[#CCFF00]/90 ${
+                  isButtonDisabled("pro") ? "opacity-70 cursor-not-allowed" : ""
+                }`}
+                onClick={handleProCheckout}
+              >
+                {getProButtonText()}
               </button>
               <div className="space-y-4">
                 {features.map((feature, index) => (
@@ -112,20 +399,67 @@ export default function PricingSection() {
                 ))}
               </div>
             </div>
-          </div>
-
-          {/* Coming Soon Overlay */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="bg-[#1a1f1a]/95 backdrop-blur-lg p-8 rounded-2xl border border-white/10 max-w-md w-full text-center">
-              <div className="w-16 h-16 rounded-full bg-[#CCFF00]/20 flex items-center justify-center mx-auto mb-6">
-                <Bell className="w-8 h-8 text-[#CCFF00]" />
+            {/* Enterprise Tier */}
+            <div className="relative bg-white/5 rounded-xl p-8">
+              <div className="absolute top-6 right-6">
+                <TitleTag
+                  icon={<Crown className="w-4 h-4 text-purple-400" />}
+                  title="Enterprise"
+                />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-2">
-                Pricing Coming Soon
-              </h3>
+              <h3 className="text-2xl font-bold text-white mb-2">Enterprise</h3>
+              <div className="text-4xl font-bold text-white mb-2">
+                {billingPeriod === "monthly" ? (
+                  <>
+                    $10
+                    <span className="text-lg font-normal text-white/70">
+                      /month
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    $100
+                    <span className="text-lg font-normal text-white/70">
+                      /year
+                    </span>
+                  </>
+                )}
+              </div>
+              {billingPeriod === "annual" && (
+                <p className="text-white/70 mb-6 text-sm">
+                  <span className="line-through">$120</span>{" "}
+                  <span className="text-[#CCFF00]">Save $20 (16.7% off)</span>
+                </p>
+              )}
               <p className="text-white/70 mb-6">
-                We&apos;re finalizing our pricing plans.
+                Increased imported repo size limit
               </p>
+              <button
+                disabled={isButtonDisabled("enterprise")}
+                className={`w-full px-6 py-3 rounded-full mb-8 font-medium relative transition-colors bg-purple-500 text-white hover:bg-purple-600 ${
+                  isButtonDisabled("enterprise")
+                    ? "opacity-70 cursor-not-allowed"
+                    : ""
+                }`}
+                onClick={handleEnterpriseCheckout}
+              >
+                {getEnterpriseButtonText()}
+              </button>
+              <div className="space-y-4">
+                {features.map((feature, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-[#CCFF00] shrink-0 mt-1" />
+                    <div>
+                      <p className="text-white">{feature.name}</p>
+                      {typeof feature.enterprise === "string" && (
+                        <p className="text-white/50 text-sm">
+                          {feature.enterprise}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

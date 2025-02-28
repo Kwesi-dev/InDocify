@@ -2,15 +2,18 @@
 
 Let's improve the app based:
 
-## First Issue: Pull Latest Changes in Repo
-- Add a button to the chat header in repo-talkroom to pull latest changes in a repo
-- This will check for changes in the repo and update the database if changes are found
+## First Issue: Pricing
+- How do I keep track of my subscriptions in the user table in supabase?
+- How do I know a user is subscribed?
+- How do I allow a user to cancel their subscription?
+
 ## Second Issue: Response Processing
 
 - Some prompts showed as "processing" but then stopped without any feedback
 - No UI indication of errors or retry options
 
 ### Resolution Plan for Second Issue
+
 - Root cause: Search query tool fetching too many files and content, overwhelming the model context
 - Proposed solutions:
   1. Reduce the amount of files and content that the search query tool fetches

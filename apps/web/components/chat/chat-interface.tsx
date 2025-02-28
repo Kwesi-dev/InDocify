@@ -63,7 +63,7 @@ export function ChatInterface() {
       });
     },
     onError: (error) => {
-      console.error("Chat error:", error);
+      // console.error("Chat error:", error);
     },
   });
 
@@ -91,7 +91,7 @@ export function ChatInterface() {
           .single();
 
         if (error) {
-          console.error("Error fetching messages:", error);
+          // console.error("Error fetching messages:", error);
           return [];
         }
 
@@ -103,7 +103,7 @@ export function ChatInterface() {
         setMessages(parsedMessages);
         return parsedMessages;
       } catch (error) {
-        console.error(error);
+        //console.error(error);
         return [];
       }
     },
