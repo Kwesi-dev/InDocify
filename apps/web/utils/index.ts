@@ -1,5 +1,5 @@
 import { customAlphabet } from "nanoid";
-
+import crypto from "crypto";
 /**
  * Scrolls to a section of the page
  * @param sectionId The id of the section to scroll to
@@ -50,4 +50,38 @@ export const getDocsColumnName = (title: string) => {
     default:
       return "get_started";
   }
+};
+
+export const encryptToken = (token: string) => {
+  const algorithm = "aes-256-cbc";
+  // Create a 32-byte key using SHA-256
+  const hash = crypto.createHash("sha256");
+  hash.update(process.env.GITHUB_API_SIGNING_SECRET as string);
+  const key = hash.digest();
+
+  const iv = crypto.randomBytes(16);
+  const cipher = crypto.createCipheriv(algorithm, key, iv);
+
+  let encrypted = cipher.update(token, "utf8", "hex");
+  encrypted += cipher.final("hex");
+
+  // Prepend IV to encrypted data
+  return iv.toString("hex") + encrypted;
+};
+
+export const decryptToken = (encryptedToken: string) => {
+  const algorithm = "aes-256-cbc";
+  // Create a 32-byte key using SHA-256
+  const hash = crypto.createHash("sha256");
+  hash.update(process.env.GITHUB_API_SIGNING_SECRET as string);
+  const key = hash.digest();
+
+  const iv = Buffer.from(encryptedToken.slice(0, 32), "hex");
+  const encryptedText = encryptedToken.slice(32);
+
+  const decipher = crypto.createDecipheriv(algorithm, key, iv);
+  let decrypted = decipher.update(encryptedText, "hex", "utf8");
+  decrypted += decipher.final("utf8");
+
+  return decrypted;
 };

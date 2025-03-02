@@ -4,6 +4,7 @@ import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { auth } from "@/auth";
 import { createSupabaseClient } from "@/lib/supabaseClient";
+import { decryptToken } from "@/utils";
 
 const exemptedFiles = [
   // JavaScript/TypeScript lock files
@@ -96,7 +97,10 @@ export async function fetchGroupedFilesWithContent(
   repo: string
 ) {
   const session = await auth();
-  const accessToken = session?.githubAccessToken as string;
+  const encryptedToken = session?.githubAccessToken as string;
+  const accessToken = encryptedToken
+    ? decryptToken(encryptedToken)
+    : process.env.GITHUB_API_KEY;
 
   const repoContentsUrl = `https://api.github.com/repos/${owner}/${repo}/contents`;
 

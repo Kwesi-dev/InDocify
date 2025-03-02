@@ -33,6 +33,7 @@ const features = {
     "Public and private repos",
     "Up to 500MB repository size",
     "All Pro tier features",
+    "User Organization Repositories",
     "Advanced support",
   ],
 };

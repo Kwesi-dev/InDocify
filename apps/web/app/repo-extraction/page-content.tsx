@@ -84,7 +84,6 @@ const PageContent = () => {
         );
         metadata = await data.json();
         // Update repo counts based on visibility
-        console.log("metadata", metadata.metadata.visibility);
         const isPrivate = metadata.metadata.visibility === "Private";
         await updateRepoCounts(isPrivate);
       } else {

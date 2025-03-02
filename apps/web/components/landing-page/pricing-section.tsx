@@ -26,6 +26,12 @@ const features = [
     enterprise: "Unlimited",
   },
   {
+    name: "User Organization Repositories",
+    free: false,
+    pro: false,
+    enterprise: true,
+  },
+  {
     name: "Repo Integration",
     free: "Public Repos Only",
     pro: "Public and Private Repos",
@@ -388,7 +394,15 @@ export default function PricingSection() {
               <div className="space-y-4">
                 {features.map((feature, index) => (
                   <div key={index} className="flex items-start gap-3">
-                    <Check className="w-5 h-5 text-[#CCFF00] shrink-0 mt-1" />
+                    {typeof feature.pro === "boolean" ? (
+                      feature.pro ? (
+                        <Check className="w-5 h-5 text-[#CCFF00] shrink-0 mt-1" />
+                      ) : (
+                        <X className="w-5 h-5 text-red-500 shrink-0 mt-1" />
+                      )
+                    ) : (
+                      <Check className="w-5 h-5 text-[#CCFF00] shrink-0 mt-1" />
+                    )}{" "}
                     <div>
                       <p className="text-white">{feature.name}</p>
                       {typeof feature.pro === "string" && (

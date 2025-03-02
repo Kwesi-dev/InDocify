@@ -7,10 +7,14 @@ import { auth } from "@/auth";
 import { EXCLUDED_FILES } from "@/utils/data";
 import { z } from "zod";
 import { createSupabaseClient } from "@/lib/supabaseClient";
+import { decryptToken } from "@/utils";
 
 async function fetchRepoZip(owner: string, repo: string) {
   const session = await auth();
-  const accessToken = session?.githubAccessToken || process.env.GITHUB_API_KEY;
+  const encryptedToken = session?.githubAccessToken as string;
+  const accessToken = encryptedToken
+    ? decryptToken(encryptedToken)
+    : process.env.GITHUB_API_KEY;
 
   if (!accessToken) {
     throw new Error(

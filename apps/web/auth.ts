@@ -7,6 +7,7 @@ import Google from "next-auth/providers/google";
 // import { render } from "@react-email/render";
 import jwt from "jsonwebtoken";
 import { createSupabaseClient } from "./lib/supabaseClient";
+import { encryptToken } from "./utils";
 
 const result = NextAuth({
   adapter: SupabaseAdapter({
@@ -19,7 +20,7 @@ const result = NextAuth({
       clientSecret: process.env.AUTH_GITHUB_SECRET,
       authorization: {
         url: "https://github.com/login/oauth/authorize",
-        params: { scope: "user:email read:repo" },
+        params: { scope: "user:email repo read:org" },
       },
     }),
     Google({
@@ -85,7 +86,10 @@ const result = NextAuth({
           .eq("email", user.email)
           .single();
 
-        session.githubAccessToken = data?.github_access_token;
+        if (data?.github_access_token) {
+          // Encrypt the token before storing in session
+          session.githubAccessToken = encryptToken(data.github_access_token);
+        }
       }
 
       return session;

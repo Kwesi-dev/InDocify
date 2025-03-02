@@ -31,6 +31,7 @@ import useRepoLimit from "@/hooks/useRepoLimit";
 import { ProRepoLimitDialog } from "@/components/pro-repo-limit-dialog";
 import { useSubscription } from "@/hooks/use-subscription";
 import { ErrorAlert } from "@/components/error-alert";
+import { OrganizationRepoDialog } from "@/components/organization-repo-dialog";
 
 export default function PageContent() {
   const [step, setStep] = useState(1);
@@ -62,6 +63,7 @@ export default function PageContent() {
   const { updateRepoCounts, repoCounts: repoLimitData } = useRepoLimit();
   const [showLimitDialog, setShowLimitDialog] = useState(false);
   const { subscription, isSubscribed } = useSubscription();
+  const [showOrgRepoDialog, setShowOrgRepoDialog] = useState(false);
 
   const { data: repos, isLoading: isLoadingRepos } = useQuery({
     enabled: !!githubAccessToken,
@@ -170,6 +172,24 @@ export default function PageContent() {
 
       setProgress(20);
 
+      const data = await fetch(
+        `/api/repo/metadata?owner=${selectedRepo?.owner}&repo=${selectedRepo?.repo}`
+      );
+      const metadata = await data.json();
+      const isPrivate = metadata.metadata.visibility === "Private";
+      const isOrgRepo = metadata.metadata.owner.type === "Organization";
+      await updateRepoCounts(isPrivate);
+
+      if (
+        isOrgRepo &&
+        (!isSubscribed || subscription?.tier !== "enterprise") &&
+        isPrivate
+      ) {
+        setShowOrgRepoDialog(true);
+        setIsAnalyzing(false);
+        return;
+      }
+
       // Check if repo files and docs already exist (imported by another user)
       const { data: existingFiles } = await supabase
         .from("github_files")
@@ -207,13 +227,6 @@ export default function PageContent() {
         });
       }
       setProgress(40);
-
-      const data = await fetch(
-        `/api/repo/metadata?owner=${selectedRepo?.owner}&repo=${selectedRepo?.repo}`
-      );
-      const metadata = await data.json();
-      const isPrivate = metadata.metadata.visibility === "Private";
-      await updateRepoCounts(isPrivate);
 
       setProgress(60);
 
@@ -378,38 +391,40 @@ export default function PageContent() {
                           </div>
                         ) : (
                           <>
-                            {filteredRepos?.map((repo: any) => (
-                              <motion.button
-                                key={repo.id}
-                                whileTap={{ scale: 0.99 }}
-                                onClick={() => {
-                                  handleSelectRepo(
-                                    repo.owner?.login ?? "",
-                                    repo.name,
-                                    repo.clone_url
-                                  );
-                                }}
-                                className="w-full bg-white/5 hover:bg-white/10 rounded-lg p-4 text-left transition-colors"
-                              >
-                                <div className="flex items-start justify-between">
-                                  <div>
-                                    <h3 className="text-white font-medium flex items-center gap-2">
-                                      <Code2 className="w-4 h-4 text-[#CCFF00]" />
-                                      {repo.name}
-                                    </h3>
-                                    <p className="text-white/50 text-sm mt-1">
-                                      {repo.description}
-                                    </p>
+                            {filteredRepos?.map(
+                              (repo: Record<string, any>, index: number) => (
+                                <motion.button
+                                  key={repo.name + index}
+                                  whileTap={{ scale: 0.99 }}
+                                  onClick={() => {
+                                    handleSelectRepo(
+                                      repo.owner?.login ?? "",
+                                      repo.name,
+                                      repo.clone_url
+                                    );
+                                  }}
+                                  className="w-full bg-white/5 hover:bg-white/10 rounded-lg p-4 text-left transition-colors"
+                                >
+                                  <div className="flex items-start justify-between">
+                                    <div>
+                                      <h3 className="text-white font-medium flex items-center gap-2">
+                                        <Code2 className="w-4 h-4 text-[#CCFF00]" />
+                                        {repo.name}
+                                      </h3>
+                                      <p className="text-white/50 text-sm mt-1">
+                                        {repo.description}
+                                      </p>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-white/50 text-sm">
+                                      <span className="flex items-center gap-1">
+                                        <GitBranch className="w-4 h-4" />
+                                        {repo.language}
+                                      </span>
+                                    </div>
                                   </div>
-                                  <div className="flex items-center gap-2 text-white/50 text-sm">
-                                    <span className="flex items-center gap-1">
-                                      <GitBranch className="w-4 h-4" />
-                                      {repo.language}
-                                    </span>
-                                  </div>
-                                </div>
-                              </motion.button>
-                            ))}
+                                </motion.button>
+                              )
+                            )}
                           </>
                         )}
                       </>
@@ -468,6 +483,10 @@ export default function PageContent() {
           <ProRepoLimitDialog
             isOpen={showLimitDialog}
             onClose={() => setShowLimitDialog(false)}
+          />
+          <OrganizationRepoDialog
+            isOpen={showOrgRepoDialog}
+            onClose={() => setShowOrgRepoDialog(false)}
           />
           <ErrorAlert
             isOpen={showError}

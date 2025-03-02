@@ -21,6 +21,7 @@ import useRepoLimit from "@/hooks/useRepoLimit";
 import { RepoLimitDialog } from "../repo-limit-dialog";
 import { ProRepoLimitDialog } from "../pro-repo-limit-dialog";
 import { PrivateRepoAccessDialog } from "./private-repo-access-dialog";
+import { OrganizationRepoDialog } from "../organization-repo-dialog";
 
 export const getValidFiles = async (unzippedFiles: JSZip) => {
   const extractedFiles = await Promise.all(
@@ -82,6 +83,7 @@ const RepoExtractor = ({ className }: { className?: string }) => {
   const [showLimitDialog, setShowLimitDialog] = useState(false);
   const [showPrivateRepoAccessDialog, setShowPrivateRepoAccessDialog] =
     useState(false);
+  const [showOrgRepoDialog, setShowOrgRepoDialog] = useState(false);
 
   //FUNCTIONS
   const handleRetry = () => {
@@ -170,8 +172,20 @@ const RepoExtractor = ({ className }: { className?: string }) => {
 
       const metadata = await data.json();
       const isPrivate = metadata.metadata.visibility === "Private";
+      const isOrgRepo = metadata.metadata.owner.type === "Organization";
+
       if (!isSubscribed && isPrivate) {
         setShowPrivateRepoAccessDialog(true);
+        setExtractingRepo(false);
+        return;
+      }
+
+      if (
+        isOrgRepo &&
+        (!isSubscribed || subscription?.tier !== "enterprise") &&
+        isPrivate
+      ) {
+        setShowOrgRepoDialog(true);
         setExtractingRepo(false);
         return;
       }
@@ -368,6 +382,10 @@ const RepoExtractor = ({ className }: { className?: string }) => {
         />
       ) : null}
       {analysingRepo ? <AnalysingRepoAnimation progress={progress} /> : null}
+      <OrganizationRepoDialog
+        isOpen={showOrgRepoDialog}
+        onClose={() => setShowOrgRepoDialog(false)}
+      />
     </>
   );
 };

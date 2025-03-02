@@ -61,6 +61,7 @@ const Drawer = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { data: session } = useSession();
   const { isSubscribed } = useSubscription();
+
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild className="md:hidden">

@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { decryptToken } from "@/utils";
 
 export async function GET(req: Request) {
   const params = new URL(req.url).searchParams;
@@ -10,9 +11,10 @@ export async function GET(req: Request) {
   }
 
   const user = await auth();
-  const accessToken =
-    (user?.githubAccessToken as string) ||
-    (process.env.GITHUB_API_KEY as string);
+  const encryptedToken = user?.githubAccessToken as string;
+  const accessToken = encryptedToken
+    ? decryptToken(encryptedToken)
+    : (process.env.GITHUB_API_KEY as string);
 
   async function getRepoMetadata(
     owner: string,
@@ -24,12 +26,15 @@ export async function GET(req: Request) {
     const response = await fetch(url, { headers });
     const data = await response.json();
 
+    console.log("meta data", data);
+
     return {
       visibility: data.private ? "Private" : "Public",
       created: data.created_at,
       lastUpdated: data.pushed_at,
       language: data.language,
       about: data.description,
+      owner: data.owner,
     };
   }
 
