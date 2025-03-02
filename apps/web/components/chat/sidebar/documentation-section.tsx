@@ -73,7 +73,7 @@ export default function DocumentationSection({
         .select(column)
         .eq("email", session?.user?.email)
         .eq("repo", repoName)
-        .single();
+        .maybeSingle();
 
       if (data?.[column as keyof typeof data]) {
         setDocumentation(data?.[column as keyof typeof data]);

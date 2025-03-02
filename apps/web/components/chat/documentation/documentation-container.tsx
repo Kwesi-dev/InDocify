@@ -40,7 +40,7 @@ export function DocumentationContainer({
         .select(column)
         .eq("email", session?.user?.email)
         .eq("repo", repoName)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.log(error);

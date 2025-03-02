@@ -16,11 +16,14 @@ interface ProRepoLimitDialogProps {
   onClose: () => void;
 }
 
-export function ProRepoLimitDialog({ isOpen, onClose }: ProRepoLimitDialogProps) {
+export function ProRepoLimitDialog({
+  isOpen,
+  onClose,
+}: ProRepoLimitDialogProps) {
   const router = useRouter();
 
   const handleUpgrade = () => {
-    router.push("/subscription");
+    router.push("#pricing");
     onClose();
   };
 
@@ -31,10 +34,13 @@ export function ProRepoLimitDialog({ isOpen, onClose }: ProRepoLimitDialogProps)
           <DialogContent className="sm:max-w-[425px] bg-[#1a1f1a] text-white border-white/10">
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-                <span className="text-[#CCFF00]">Private Repository</span> Limit Reached
+                <span className="text-[#CCFF00]">Private Repository</span> Limit
+                Reached
               </DialogTitle>
               <DialogDescription className="text-white/70">
-                You've reached the Pro tier limit of 5 private repositories. Upgrade to our Enterprise plan for unlimited private repositories and advanced features!
+                You've reached the Pro tier limit of 5 private repositories.
+                Upgrade to our Enterprise plan for unlimited private
+                repositories and advanced features!
               </DialogDescription>
             </DialogHeader>
             <motion.div
@@ -52,7 +58,7 @@ export function ProRepoLimitDialog({ isOpen, onClose }: ProRepoLimitDialogProps)
               <Button
                 onClick={onClose}
                 variant="outline"
-                className="w-full border-white/10 text-white hover:bg-white/5"
+                className="w-full border-white/10 text-white hbg-white/5"
               >
                 Maybe Later
               </Button>

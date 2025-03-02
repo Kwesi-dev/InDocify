@@ -20,12 +20,17 @@ import { useRouter } from "next/navigation";
 import { generateDocs } from "../agents/new/actions";
 import AnalysingRepoAnimation from "@/components/analysing-repo-animation";
 import {
+  MAX_SIZE_LIMIT_FOR_ENTERPRISE_PLAN,
   MAX_SIZE_LIMIT_FOR_FREE_PLAN,
   MAX_SIZE_LIMIT_FOR_PRO_PLAN,
 } from "@/utils/data";
 import { fetchAndProcessZipRepo } from "../agents/new/actions";
 import { SizeLimitAlert } from "@/components/size-limit-alert";
 import { useSupabaseClient } from "@/lib/SupabaseClientProvider";
+import useRepoLimit from "@/hooks/useRepoLimit";
+import { ProRepoLimitDialog } from "@/components/pro-repo-limit-dialog";
+import { useSubscription } from "@/hooks/use-subscription";
+import { ErrorAlert } from "@/components/error-alert";
 
 export default function PageContent() {
   const [step, setStep] = useState(1);
@@ -43,12 +48,20 @@ export default function PageContent() {
   const router = useRouter();
   const githubAccessToken = session?.githubAccessToken;
   const supabase = useSupabaseClient();
-  const user = session?.user?.email ? "free" : "pro";
   const [sizeLimitExceeded, setSizeLimitExceeded] = useState({
     status: false,
     fileSize: 0,
     sizeLimit: 0,
   });
+  const [showError, setShowError] = useState(false);
+  const [errorDetails, setErrorDetails] = useState({
+    title: "",
+    description: "",
+    showRetry: false,
+  });
+  const { updateRepoCounts, repoCounts: repoLimitData } = useRepoLimit();
+  const [showLimitDialog, setShowLimitDialog] = useState(false);
+  const { subscription, isSubscribed } = useSubscription();
 
   const { data: repos, isLoading: isLoadingRepos } = useQuery({
     enabled: !!githubAccessToken,
@@ -76,7 +89,15 @@ export default function PageContent() {
     setStep(3);
   };
 
-  const handleGenerateDocs = async () => {
+  const handleRetry = () => {
+    setShowError(false);
+  };
+
+  const handleRepoSubmit = async () => {
+    if (repoLimitData?.isLimited || repoLimitData?.isProLimited) {
+      setShowLimitDialog(true);
+      return;
+    }
     setIsAnalyzing(true);
     try {
       //get repo zip size
@@ -84,19 +105,37 @@ export default function PageContent() {
         `/api/repo/size?owner=${selectedRepo?.owner}&repo=${selectedRepo?.repo}`
       );
       const size = await response.json();
-      if (user === "free" && size > MAX_SIZE_LIMIT_FOR_FREE_PLAN) {
+      if (!isSubscribed && size > MAX_SIZE_LIMIT_FOR_FREE_PLAN) {
         setSizeLimitExceeded({
           status: true,
           fileSize: size,
           sizeLimit: MAX_SIZE_LIMIT_FOR_FREE_PLAN,
         });
+        setIsAnalyzing(false);
         return;
-      } else if (user === "pro" && size > MAX_SIZE_LIMIT_FOR_PRO_PLAN) {
+      } else if (
+        isSubscribed &&
+        subscription?.tier === "pro" &&
+        size > MAX_SIZE_LIMIT_FOR_PRO_PLAN
+      ) {
         setSizeLimitExceeded({
           status: true,
           fileSize: size,
           sizeLimit: MAX_SIZE_LIMIT_FOR_PRO_PLAN,
         });
+        setIsAnalyzing(false);
+        return;
+      } else if (
+        isSubscribed &&
+        subscription?.tier === "enterprise" &&
+        size > MAX_SIZE_LIMIT_FOR_ENTERPRISE_PLAN
+      ) {
+        setSizeLimitExceeded({
+          status: true,
+          fileSize: size,
+          sizeLimit: MAX_SIZE_LIMIT_FOR_ENTERPRISE_PLAN,
+        });
+        setIsAnalyzing(false);
         return;
       } else {
         if (sizeLimitExceeded.status === true)
@@ -106,52 +145,103 @@ export default function PageContent() {
             sizeLimit: 0,
           });
       }
-      setProgress(20);
-      const files = await fetchAndProcessZipRepo(
-        selectedRepo?.owner as string,
-        selectedRepo?.repo as string
-      );
 
-      //save files to database
-      files?.map(async (file) => {
-        if (!supabase) return;
-        //save file to db
-        await supabase.from("github_files").insert({
-          path: file.path,
-          content: file.content,
-          repo: selectedRepo?.repo,
-          owner: selectedRepo?.owner,
-          email: session?.user?.email,
+      if (!supabase) return;
+
+      // Check if the current user has already imported this repo
+      const { data: existingRepo } = await supabase
+        .from("github_repos")
+        .select("*")
+        .eq("name", selectedRepo?.repo)
+        .eq("email", session?.user?.email)
+        .maybeSingle();
+
+      if (existingRepo) {
+        setIsAnalyzing(false);
+        setErrorDetails({
+          title: "Repository Already Exists",
+          description:
+            "You have already imported this repository. You can access it from your repository list.",
+          showRetry: false,
         });
-      });
+        setShowError(true);
+        return;
+      }
+
+      setProgress(20);
+
+      // Check if repo files and docs already exist (imported by another user)
+      const { data: existingFiles } = await supabase
+        .from("github_files")
+        .select("*")
+        .eq("repo", selectedRepo?.repo)
+        .eq("email", session?.user?.email)
+        .maybeSingle();
+
+      const { data: existingDocs } = await supabase
+        .from("github_docs")
+        .select("*")
+        .eq("repo", selectedRepo?.repo)
+        .eq("email", session?.user?.email)
+        .maybeSingle();
+
+      let files;
+
+      if (!existingFiles) {
+        files = await fetchAndProcessZipRepo(
+          selectedRepo?.owner as string,
+          selectedRepo?.repo as string
+        );
+
+        //save files to database
+        files?.map(async (file) => {
+          if (!supabase) return;
+          //save file to db
+          await supabase.from("github_files").insert({
+            path: file.path,
+            content: file.content,
+            repo: selectedRepo?.repo,
+            owner: selectedRepo?.owner,
+            email: session?.user?.email,
+          });
+        });
+      }
       setProgress(40);
+
       const data = await fetch(
         `/api/repo/metadata?owner=${selectedRepo?.owner}&repo=${selectedRepo?.repo}`
       );
       const metadata = await data.json();
+      const isPrivate = metadata.metadata.visibility === "Private";
+      await updateRepoCounts(isPrivate);
 
       setProgress(60);
-      //find the readme file
-      const readmeFile = files?.find(
-        (file: any) =>
-          file.path.includes("README.md") || file.path.includes("readme.md")
-      ); //save the files to the database
-      const docsRes = await generateDocs(readmeFile?.content as string);
 
-      setProgress(80);
+      let docsRes;
+      if (!existingDocs) {
+        const _files = files || [];
+        //find the readme file
+        const readmeFile = files?.find(
+          (file: any) =>
+            file.path.includes("README.md") || file.path.includes("readme.md")
+        ); //save the files to the database
 
-      if (!supabase) return;
-      //save readme to database
-      await supabase.from("github_docs").insert({
-        owner: selectedRepo?.owner,
-        repo: selectedRepo?.repo,
-        readme: docsRes,
-        email: session?.user?.email,
-        metadata: JSON.stringify({
-          ...metadata,
-          totalFiles: files?.length,
-        }),
-      });
+        docsRes = await generateDocs(readmeFile?.content as string);
+
+        setProgress(80);
+
+        //save readme to database
+        await supabase.from("github_docs").insert({
+          owner: selectedRepo?.owner,
+          repo: selectedRepo?.repo,
+          readme: docsRes,
+          email: session?.user?.email,
+          metadata: JSON.stringify({
+            ...metadata,
+            totalFiles: _files?.length,
+          }),
+        });
+      }
 
       setProgress(100);
 
@@ -294,7 +384,7 @@ export default function PageContent() {
                                 whileTap={{ scale: 0.99 }}
                                 onClick={() => {
                                   handleSelectRepo(
-                                    repo.owner.login,
+                                    repo.owner?.login ?? "",
                                     repo.name,
                                     repo.clone_url
                                   );
@@ -351,7 +441,7 @@ export default function PageContent() {
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={handleGenerateDocs}
+                    onClick={handleRepoSubmit}
                     className="w-full bg-[#CCFF00] text-black px-6 py-3 rounded-lg hover:bg-[#CCFF00]/90 transition-colors flex items-center justify-center gap-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isLoading ? (
@@ -375,6 +465,18 @@ export default function PageContent() {
               Contact support
             </Link>
           </p>
+          <ProRepoLimitDialog
+            isOpen={showLimitDialog}
+            onClose={() => setShowLimitDialog(false)}
+          />
+          <ErrorAlert
+            isOpen={showError}
+            onClose={() => setShowError(false)}
+            onRetry={handleRetry}
+            title={errorDetails.title}
+            description={errorDetails.description}
+            showRetry={errorDetails.showRetry}
+          />
         </div>
       </div>
     </div>

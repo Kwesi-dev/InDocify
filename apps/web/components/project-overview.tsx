@@ -9,7 +9,7 @@ export default async function ProjectOverview() {
     .select("project_overview")
     .eq("owner", "Kwesi-ops")
     .eq("repo", "blogify-portal")
-    .single();
+    .maybeSingle();
 
   const markdown = repoDocs?.project_overview;
 

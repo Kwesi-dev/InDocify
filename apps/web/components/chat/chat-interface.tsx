@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Send, Loader2 } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
@@ -23,6 +23,8 @@ import { ChatActions } from "./chat-actions";
 import useQuestionLimit from "@/hooks/useQuestionLimit";
 import { useSubscription } from "@/hooks/use-subscription";
 
+const FREE_TIER_LIMIT = 10;
+
 export function ChatInterface() {
   const params = useSearchParams();
   const repo = params.get("repo");
@@ -35,6 +37,9 @@ export function ChatInterface() {
   const query = useQueryClient();
   const { questionCount, isLimited, updateQuestionCount } = useQuestionLimit();
   const { isSubscribed } = useSubscription();
+  const [isQuestionCountDialogOpen, setIsQuestionCountDialogOpen] =
+    useState(false);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const {
     messages,
@@ -75,7 +80,6 @@ export function ChatInterface() {
     }
   }, [currentThread]);
 
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const { refetch } = useQuery({
@@ -90,14 +94,16 @@ export function ChatInterface() {
           .eq("thread_id", currentThread)
           .eq("repo", repo)
           .eq("email", session?.user?.email)
-          .single();
+          .maybeSingle();
 
         if (error) {
+          setMessages([]);
           // console.error("Error fetching messages:", error);
           return [];
         }
 
         if (!data?.messages) {
+          setMessages([]);
           return [];
         }
 
@@ -121,15 +127,6 @@ export function ChatInterface() {
   }, [currentThread, setMessages]);
 
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      const scrollArea = scrollAreaRef.current;
-      setTimeout(() => {
-        scrollArea.scrollTop = scrollArea.scrollHeight;
-      }, 100);
-    }
-  }, [messages]);
-
-  useEffect(() => {
     if (session && repo && currentThread) {
       refetch();
     }
@@ -142,7 +139,22 @@ export function ChatInterface() {
     }
   }, [input]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (scrollAreaRef.current) {
+        const viewport = scrollAreaRef.current.querySelector(
+          "[data-radix-scroll-area-viewport]"
+        );
+        if (viewport) {
+          viewport.scrollTop = viewport.scrollHeight;
+        }
+      }
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
+  }, [messages]);
+
+  const handleKeyDown = async (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       if (!currentThread) {
@@ -150,14 +162,23 @@ export function ChatInterface() {
           `/repo-talkroom/${newThread.current}?repo=${repo}&owner=${owner}`
         );
       }
+      if (!isSubscribed) {
+        if (isLimited || questionCount === FREE_TIER_LIMIT)
+          return setIsQuestionCountDialogOpen(true);
+        const currentCount = questionCount || 0;
+        await updateQuestionCount(currentCount + 1);
+      }
       handleSubmit(e);
     }
   };
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
-      {isLimited ? (
-        <QuestionLimitDialog isOpen={isLimited} onClose={() => {}} />
+      {isQuestionCountDialogOpen ? (
+        <QuestionLimitDialog
+          isOpen={isQuestionCountDialogOpen}
+          onClose={() => setIsQuestionCountDialogOpen(false)}
+        />
       ) : null}
       {/* Messages */}
       <ScrollArea ref={scrollAreaRef} className="flex-[0.76] p-4">
@@ -199,6 +220,8 @@ export function ChatInterface() {
             }
             // Only update question count for free tier users
             if (!isSubscribed) {
+              if (isLimited || questionCount === FREE_TIER_LIMIT)
+                return setIsQuestionCountDialogOpen(true);
               const currentCount = questionCount || 0;
               await updateQuestionCount(currentCount + 1);
             }
@@ -246,19 +269,8 @@ const Messages = ({
   error: Error | undefined;
   onRetry: () => void;
 }) => {
-  const lastMessageRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (lastMessageRef.current) {
-      lastMessageRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "end",
-      });
-    }
-  }, [messages]);
-
   return (
-    <>
+    <div className="space-y-6">
       {messages.map((message, index) => {
         if (message.content === "") return null;
 
@@ -308,7 +320,6 @@ const Messages = ({
       <AnimatePresence>
         {isLoading && (
           <motion.div
-            ref={lastMessageRef}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
@@ -342,7 +353,6 @@ const Messages = ({
           </motion.div>
         )}
       </AnimatePresence>
-      <div ref={lastMessageRef} />
-    </>
+    </div>
   );
 };

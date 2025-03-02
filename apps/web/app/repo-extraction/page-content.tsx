@@ -34,7 +34,7 @@ const PageContent = () => {
     }
 
     // For pro users, check private repo limit
-    const isPrivateRepo = nextRepoUrl?.includes('private=true');
+    const isPrivateRepo = nextRepoUrl?.includes("private=true");
     if (isSubscribed && isPrivateRepo && repoLimitData?.isProLimited) {
       setShowProLimitDialog(true);
       return;
@@ -48,7 +48,7 @@ const PageContent = () => {
           .from("standby_files")
           .select("content")
           .eq("file_id", file_id)
-          .single();
+          .maybeSingle();
         if (error) {
           return;
         }
@@ -84,6 +84,7 @@ const PageContent = () => {
         );
         metadata = await data.json();
         // Update repo counts based on visibility
+        console.log("metadata", metadata.metadata.visibility);
         const isPrivate = metadata.metadata.visibility === "Private";
         await updateRepoCounts(isPrivate);
       } else {
@@ -138,6 +139,7 @@ const PageContent = () => {
     owner,
     repo,
     repoLimitData?.isLimited,
+    repoLimitData?.isProLimited,
     router,
     session?.user?.email,
     supabase,
@@ -158,10 +160,7 @@ const PageContent = () => {
         isOpen={showProLimitDialog}
         onClose={() => setShowProLimitDialog(false)}
       />
-      <AnalysingRepoAnimation
-        progress={progress}
-        stepsType={nextRepoUrl?.includes("zip-file") ? "zipSteps" : "urlSteps"}
-      />
+      <AnalysingRepoAnimation progress={progress} />
     </>
   );
 };

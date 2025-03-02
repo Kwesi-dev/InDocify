@@ -11,14 +11,14 @@ const useQuestionLimit = () => {
 
   const { data, isLoading } = useQuery({
     enabled: !!(supabase && session),
-    queryKey: ["user_count", session?.user.email],
+    queryKey: ["user_question_count", session?.user.email],
     queryFn: async () => {
       if (!supabase || !session) return;
       const { data } = await supabase
         .from("users")
         .select("question_count")
         .eq("email", session?.user.email)
-        .single();
+        .maybeSingle();
 
       if (!data) {
         return null;
@@ -31,20 +31,19 @@ const useQuestionLimit = () => {
   const updateQuestionCount = async (limit: number) => {
     if (!supabase || !session) return;
 
-    const { error } = await supabase.from("users").upsert(
-      { question_count: limit, email: session?.user.email },
-      {
-        ignoreDuplicates: false,
-        onConflict: "email",
-      }
-    );
+    const { error } = await supabase
+      .from("users")
+      .update({ question_count: limit })
+      .eq("email", session?.user.email);
+
     if (error) {
-      // console.error(error);
+      console.error(error);
       return null;
     }
 
-    queryClient.invalidateQueries({
-      queryKey: ["user_count", session?.user.email],
+    // Invalidate and refetch
+    await queryClient.invalidateQueries({
+      queryKey: ["user_question_count", session?.user.email],
     });
   };
 

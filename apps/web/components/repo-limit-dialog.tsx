@@ -20,7 +20,7 @@ export function RepoLimitDialog({ isOpen, onClose }: RepoLimitDialogProps) {
   const router = useRouter();
 
   const handleUpgrade = () => {
-    router.push("/subscription");
+    router.push("#pricing");
     onClose();
   };
 
@@ -34,7 +34,8 @@ export function RepoLimitDialog({ isOpen, onClose }: RepoLimitDialogProps) {
                 <span className="text-[#CCFF00]">Repository</span> Limit Reached
               </DialogTitle>
               <DialogDescription className="text-white/70">
-                You've reached the free tier limit of 2 repositories. Upgrade to our Pro or Enterprise plan to import unlimited repositories!
+                You've reached the free tier limit of 2 repositories. Upgrade to
+                our Pro or Enterprise plan to import unlimited repositories!
               </DialogDescription>
             </DialogHeader>
             <motion.div
@@ -52,7 +53,7 @@ export function RepoLimitDialog({ isOpen, onClose }: RepoLimitDialogProps) {
               <Button
                 onClick={onClose}
                 variant="outline"
-                className="w-full border-white/10 text-white hover:bg-white/5"
+                className="w-full border-white/10 text-white bg-white/5"
               >
                 Maybe Later
               </Button>

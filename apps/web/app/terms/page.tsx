@@ -20,7 +20,8 @@ export default function TermsPage() {
                   <p className="text-white/70">
                     By accessing or using inDocify's services, you agree to be
                     bound by these Terms of Service and all applicable laws and
-                    regulations.
+                    regulations. If you disagree with any part of these terms,
+                    you may not access our service.
                   </p>
                 </section>
 
@@ -29,38 +30,96 @@ export default function TermsPage() {
                     2. Description of Service
                   </h2>
                   <p className="text-white/70">
-                    inDocify provides an AI-powered platform that helps it's
-                    users to understand codebases of any repository with
-                    AI-Powered Insights. Our services include:
+                    inDocify is an AI-powered platform that helps developers
+                    understand and navigate codebases through intelligent
+                    documentation and interactive exploration. Our services
+                    include:
                   </p>
                   <ul className="list-disc pl-6 text-white/70 space-y-2 mt-4">
-                    <li>Repository analysis</li>
-                    <li>Interactive Q/A</li>
-                    <li>Codebase Overview</li>
-                    <li>Contributor Onboarding</li>
+                    <li>
+                      AI-powered repository analysis and documentation
+                      generation
+                    </li>
+                    <li>Interactive Q&A with AI about your codebase</li>
+                    <li>Repository import and management</li>
+                    <li>
+                      Tiered access to features (Free, Pro, and Enterprise
+                      plans)
+                    </li>
                   </ul>
                 </section>
 
                 <section>
                   <h2 className="text-2xl font-bold text-white mb-4">
-                    3. User Responsibilities
+                    3. Service Limitations
                   </h2>
                   <div className="space-y-4">
-                    <p className="text-white/70">You agree to:</p>
+                    <p className="text-white/70">
+                      Our service has the following limitations:
+                    </p>
                     <ul className="list-disc pl-6 text-white/70 space-y-2">
-                      <li>Provide accurate account information</li>
-                      <li>Maintain the security of your account</li>
                       <li>
-                        Use the service in compliance with all applicable laws
+                        Free tier users are limited to:
+                        <ul className="list-disc pl-6 mt-2">
+                          <li>5 questions per repository</li>
+                          <li>Public repositories only</li>
+                          <li>Maximum repository size of 50MB</li>
+                        </ul>
                       </li>
-                      <li>Not misuse or abuse the service</li>
+                      <li>
+                        Pro tier users are limited to:
+                        <ul className="list-disc pl-6 mt-2">
+                          <li>Private repository access</li>
+                          <li>Maximum repository size of 200MB</li>
+                        </ul>
+                      </li>
+                      <li>
+                        Enterprise users have access to:
+                        <ul className="list-disc pl-6 mt-2">
+                          <li>Unlimited repositories</li>
+                          <li>Maximum repository size of 500MB</li>
+                          <li>Advanced features and support</li>
+                        </ul>
+                      </li>
                     </ul>
                   </div>
                 </section>
 
                 <section>
                   <h2 className="text-2xl font-bold text-white mb-4">
-                    4. Intellectual Property
+                    4. User Responsibilities
+                  </h2>
+                  <div className="space-y-4">
+                    <p className="text-white/70">You agree to:</p>
+                    <ul className="list-disc pl-6 text-white/70 space-y-2">
+                      <li>
+                        Only import repositories you have permission to access
+                      </li>
+                      <li>Not attempt to circumvent service limitations</li>
+                      <li>
+                        Not use our service for any illegal or unauthorized
+                        purpose
+                      </li>
+                      <li>Not share or transfer your account access</li>
+                    </ul>
+                  </div>
+                </section>
+
+                <section>
+                  <h2 className="text-2xl font-bold text-white mb-4">
+                    5. GitHub Integration
+                  </h2>
+                  <p className="text-white/70">
+                    Our service integrates with GitHub using read-only access to
+                    your repositories. We do not modify your repositories or
+                    their contents. You are responsible for ensuring you have
+                    the necessary rights to the repositories you import.
+                  </p>
+                </section>
+
+                <section>
+                  <h2 className="text-2xl font-bold text-white mb-4">
+                    6. Intellectual Property
                   </h2>
                   <p className="text-white/70">
                     You retain all rights to your content. By using our service,
@@ -71,7 +130,7 @@ export default function TermsPage() {
 
                 <section>
                   <h2 className="text-2xl font-bold text-white mb-4">
-                    5. Payment Terms
+                    7. Payment Terms
                   </h2>
                   <ul className="list-disc pl-6 text-white/70 space-y-2">
                     <li>Subscription fees are billed in advance</li>
@@ -83,7 +142,7 @@ export default function TermsPage() {
 
                 <section>
                   <h2 className="text-2xl font-bold text-white mb-4">
-                    6. Termination
+                    8. Termination
                   </h2>
                   <p className="text-white/70">
                     We reserve the right to suspend or terminate your account
@@ -94,7 +153,7 @@ export default function TermsPage() {
 
                 <section>
                   <h2 className="text-2xl font-bold text-white mb-4">
-                    7. Limitation of Liability
+                    9. Limitation of Liability
                   </h2>
                   <p className="text-white/70">
                     inDocify is provided "as is" without warranties of any kind.
@@ -105,7 +164,7 @@ export default function TermsPage() {
 
                 <section>
                   <h2 className="text-2xl font-bold text-white mb-4">
-                    8. Changes to Terms
+                    10. Changes to Terms
                   </h2>
                   <p className="text-white/70">
                     We may modify these terms at any time. Continued use of the
@@ -115,7 +174,7 @@ export default function TermsPage() {
 
                 <section>
                   <h2 className="text-2xl font-bold text-white mb-4">
-                    9. Contact
+                    11. Contact
                   </h2>
                   <p className="text-white/70">
                     For questions about these terms, please contact us at{" "}

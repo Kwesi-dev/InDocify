@@ -16,7 +16,10 @@ interface QuestionLimitDialogProps {
   onClose: () => void;
 }
 
-export function QuestionLimitDialog({ isOpen, onClose }: QuestionLimitDialogProps) {
+export function QuestionLimitDialog({
+  isOpen,
+  onClose,
+}: QuestionLimitDialogProps) {
   const router = useRouter();
 
   const handleUpgrade = () => {
@@ -34,7 +37,9 @@ export function QuestionLimitDialog({ isOpen, onClose }: QuestionLimitDialogProp
                 <span className="text-[#CCFF00]">Question</span> Limit Reached
               </DialogTitle>
               <DialogDescription className="text-white/70">
-                You've reached the free tier limit of 10 questions. Upgrade to our Pro or Enterprise plan to continue asking unlimited questions!
+                You've reached the free tier limit of 10 questions. Upgrade to
+                our Pro or Enterprise plan to continue asking unlimited
+                questions!
               </DialogDescription>
             </DialogHeader>
             <motion.div
@@ -52,7 +57,7 @@ export function QuestionLimitDialog({ isOpen, onClose }: QuestionLimitDialogProp
               <Button
                 onClick={onClose}
                 variant="outline"
-                className="w-full border-white/10 text-white hover:bg-white/5"
+                className="w-full border-white/10 text-white bg-white/5"
               >
                 Maybe Later
               </Button>

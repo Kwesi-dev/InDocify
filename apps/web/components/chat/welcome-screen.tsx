@@ -1,7 +1,6 @@
 "use client";
 
-import { GitFork, Upload, Github } from "lucide-react";
-import { useSubscription } from "@/hooks/use-subscription";
+import { GitFork, Github } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useSupabaseClient } from "@/lib/SupabaseClientProvider";
@@ -22,7 +21,6 @@ type Repo = {
 
 export function WelcomeScreen() {
   const { data: session } = useSession();
-  const { isSubscribed } = useSubscription();
   const supabase = useSupabaseClient();
   const shallowRoute = useShallowRouter();
 

@@ -20,8 +20,8 @@ export default function PrivacyPage() {
                   <p className="text-white/70">
                     This Privacy Policy explains how inDocify ("we", "our", or
                     "us") collects, uses, and protects your personal information
-                    when you use our documentation platform and related
-                    services.
+                    when you use our AI-powered codebase documentation and
+                    analysis platform.
                   </p>
                 </section>
 
@@ -34,19 +34,31 @@ export default function PrivacyPage() {
                       2.1 Personal Information
                     </h3>
                     <ul className="list-disc pl-6 text-white/70 space-y-2">
-                      <li>Name and email address</li>
-                      <li>Company information</li>
-                      <li>GitHub account information (when connected)</li>
-                      <li>Payment information</li>
+                      <li>Email address (through authentication providers)</li>
+                      <li>
+                        GitHub account information (read-only access to
+                        repositories and email)
+                      </li>
+                      <li>
+                        Google account information (when using Google
+                        authentication)
+                      </li>
+                      <li>
+                        Payment information (processed securely by our payment
+                        provider)
+                      </li>
                     </ul>
 
                     <h3 className="text-xl font-bold text-white">
-                      2.2 Usage Information
+                      2.2 Repository Information
                     </h3>
                     <ul className="list-disc pl-6 text-white/70 space-y-2">
-                      <li>Log data and analytics</li>
-                      <li>Documentation access patterns</li>
-                      <li>Feature usage statistics</li>
+                      <li>Repository content and metadata</li>
+                      <li>Documentation generated from your repositories</li>
+                      <li>
+                        Chat history and queries related to your repositories
+                      </li>
+                      <li>Repository access patterns and usage statistics</li>
                     </ul>
                   </div>
                 </section>
@@ -56,11 +68,29 @@ export default function PrivacyPage() {
                     3. How We Use Your Information
                   </h2>
                   <ul className="list-disc pl-6 text-white/70 space-y-2">
-                    <li>To provide and improve our services</li>
-                    <li>To communicate with you about your account</li>
-                    <li>To send important updates and announcements</li>
-                    <li>To analyze and optimize our platform</li>
-                    <li>To protect our legal rights and prevent abuse</li>
+                    <li>
+                      To authenticate and identify you when you use our platform
+                    </li>
+                    <li>
+                      To access and analyze your GitHub repositories (with your
+                      permission)
+                    </li>
+                    <li>
+                      To generate and maintain documentation for your
+                      repositories
+                    </li>
+                    <li>
+                      To provide AI-powered insights and answers about your
+                      codebase
+                    </li>
+                    <li>
+                      To track repository and question limits based on your
+                      subscription
+                    </li>
+                    <li>
+                      To improve our AI models and documentation generation
+                    </li>
+                    <li>To send important updates about our service</li>
                   </ul>
                 </section>
 
@@ -69,10 +99,22 @@ export default function PrivacyPage() {
                     4. Data Security
                   </h2>
                   <p className="text-white/70">
-                    We implement appropriate technical and organizational
-                    measures to protect your personal information against
-                    unauthorized access, alteration, disclosure, or destruction.
+                    We implement industry-standard security measures to protect
+                    your data:
                   </p>
+                  <ul className="list-disc pl-6 text-white/70 space-y-2 mt-4">
+                    <li>
+                      All repository data is encrypted at rest and in transit
+                    </li>
+                    <li>
+                      We use read-only GitHub access to ensure repository safety
+                    </li>
+                    <li>
+                      Authentication is handled through secure providers
+                      (GitHub, Google)
+                    </li>
+                    <li>Regular security audits and updates</li>
+                  </ul>
                 </section>
 
                 <section>

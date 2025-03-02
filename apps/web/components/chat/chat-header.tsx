@@ -32,7 +32,7 @@ export function RepoHeader() {
         .select("readme, metadata")
         .eq("repo", selectedRepo)
         .eq("email", email)
-        .single();
+        .maybeSingle();
       if (error) {
         throw error;
       }
@@ -52,9 +52,11 @@ export function RepoHeader() {
               <h1 className="text-lg font-semibold text-white">
                 {selectedRepo}
               </h1>
-              <p className="text-sm text-white/50">
-                {repoStats?.metadata?.about.slice(0, 140) + "..."}
-              </p>
+              {repoStats?.metadata?.about ? (
+                <p className="text-sm text-white/50">
+                  {repoStats?.metadata?.about.slice(0, 140) + "..."}
+                </p>
+              ) : null}
             </div>
           </div>
           <RepoDetails

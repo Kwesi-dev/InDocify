@@ -51,4 +51,4 @@ export const validCodeFiles = [
 
 export const MAX_SIZE_LIMIT_FOR_FREE_PLAN = 50;
 export const MAX_SIZE_LIMIT_FOR_PRO_PLAN = 200;
-export const MAX_REPOSITORIES_FOR_FREE_PLAN = 500;
+export const MAX_SIZE_LIMIT_FOR_ENTERPRISE_PLAN = 500;

@@ -26,7 +26,7 @@ const page = async ({
       .select("id")
       .eq("email", session?.user?.email)
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (nextRepoUrl && repo) {
       if (owner) {

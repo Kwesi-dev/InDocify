@@ -5,6 +5,11 @@ export async function GET(req: Request) {
   const owner = params.get("owner");
   const repo = params.get("repo");
 
+  console.log(
+    `https://api.github.com/repos/${owner}/${repo}`,
+    "fetching repo size"
+  );
+
   if (!owner || !repo) {
     return new Response("Missing parameters", { status: 400 });
   }
@@ -23,6 +28,10 @@ export async function GET(req: Request) {
 
     return new Response(JSON.stringify(sizeInMb));
   } catch (error) {
-    console.log(error);
+    console.log(
+      "error importing repo size ",
+      error,
+      `https://api.github.com/repos/${owner}/${repo}`
+    );
   }
 }

@@ -27,37 +27,17 @@ const urlSteps = [
   },
 ];
 
-const zipSteps = [
-  {
-    icon: Code2,
-    text: "Extracting files",
-    detail: "Extracting the contents of the ZIP file",
-  },
-  {
-    icon: FileText,
-    text: "Analysing your files",
-    detail: "Analyzing the structure and content of your codebase",
-  },
-  {
-    icon: Check,
-    text: "Preparing repoTalk room",
-    detail: "Preparing to redirect you to your inDocify repoTalk room",
-  },
-];
-
 export default function AnalysingRepoAnimation({
   progress,
-  stepsType = "urlSteps",
 }: {
   progress: number;
-  stepsType?: "urlSteps" | "zipSteps";
 }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [positions, setPositions] = useState<{ left: string; top: string }[]>(
     []
   );
 
-  const steps = stepsType === "zipSteps" ? zipSteps : urlSteps;
+  const steps = urlSteps;
 
   const CurrentIcon = steps[currentStep]?.icon;
 
@@ -215,14 +195,10 @@ export default function AnalysingRepoAnimation({
                 exit={{ opacity: 0, y: -20 }}
                 className="text-white/70 text-sm"
               >
-                {currentStep === 0 &&
-                  "Using AI to understand your code structure..."}
-                {currentStep === 1 &&
-                  "Creating clear and concise documentation..."}
-                {currentStep === 2 &&
-                  "Adding finishing touches to your docs..."}
-                {currentStep === 3 &&
-                  "Get ready to explore your new documentation!"}
+                {currentStep === 0 && "Connecting to repository..."}
+                {currentStep === 1 && "Fetching repository details..."}
+                {currentStep === 2 && "Analysing your files..."}
+                {currentStep === 3 && "Preparing repoTalk room..."}
               </motion.p>
             </AnimatePresence>
           </div>

@@ -25,7 +25,6 @@ export async function GET() {
         email: session?.user?.email,
       };
     });
-    console.log("repos", repos);
     //save repos to supabase
     const { error } = await supabase.from("github_repos").upsert(repos, {
       onConflict: "name,email",

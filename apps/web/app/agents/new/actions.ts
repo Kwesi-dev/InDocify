@@ -12,6 +12,12 @@ async function fetchRepoZip(owner: string, repo: string) {
   const session = await auth();
   const accessToken = session?.githubAccessToken || process.env.GITHUB_API_KEY;
 
+  if (!accessToken) {
+    throw new Error(
+      "GitHub authentication required. Please sign in with GitHub."
+    );
+  }
+
   // First, get the default branch
   const repoInfoResponse = await fetch(
     `https://api.github.com/repos/${owner}/${repo}`,
@@ -31,7 +37,6 @@ async function fetchRepoZip(owner: string, repo: string) {
 
   const repoInfo = await repoInfoResponse.json();
   const defaultBranch = repoInfo.default_branch;
-  console.log("defaultBranch", defaultBranch);
 
   // Then fetch the ZIP using the default branch
   const zipUrl = `https://github.com/${owner}/${repo}/archive/${defaultBranch}.zip`;
