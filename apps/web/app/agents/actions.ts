@@ -410,7 +410,6 @@ export const generateProjectOverviewDocs = async (
 ) => {
   // Analyze the tech stack first
   const techStack = analyzeTechStack(files);
-  console.log("techStack", techStack);
 
   const result = await generateText({
     model: openai("gpt-4o-mini"),

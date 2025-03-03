@@ -26,8 +26,6 @@ export async function GET(req: Request) {
     const response = await fetch(url, { headers });
     const data = await response.json();
 
-    console.log("meta data", data);
-
     return {
       visibility: data.private ? "Private" : "Public",
       created: data.created_at,

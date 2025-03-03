@@ -55,12 +55,9 @@ export function RepoSelector({
           repos = savedRepos;
         }
       }
-      console.log("repos supabase", repos);
       return repos ?? [];
     },
   });
-
-  console.log("repos", repos);
 
   const filteredRepos =
     repos && !isLoading

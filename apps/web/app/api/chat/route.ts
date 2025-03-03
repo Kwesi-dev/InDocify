@@ -165,12 +165,17 @@ export async function POST(req: Request) {
         execute: async ({ keywords, repo }) => {
           try {
             // Split keywords into array and filter out empty strings
-            const keywordArray = keywords.split(/\s+/).filter(k => k.length > 0);
-            
+            const keywordArray = keywords
+              .split(/\s+/)
+              .filter((k) => k.length > 0);
+
             // Build the OR conditions for each keyword
-            const conditions = keywordArray.map(keyword => 
-              `path.ilike.%${keyword}%,content.ilike.%${keyword}%`
-            ).join(',');
+            const conditions = keywordArray
+              .map(
+                (keyword) =>
+                  `path.ilike.%${keyword}%,content.ilike.%${keyword}%`
+              )
+              .join(",");
 
             const { data: files, error } = await supabase
               .from("github_files")
@@ -185,17 +190,26 @@ export async function POST(req: Request) {
             }
 
             if (!files || files.length === 0) {
-              console.log("No files found for keywords:", keywords);
               return [];
             }
 
             // Sort files by relevance (number of keyword matches)
             const sortedFiles = files.sort((a, b) => {
-              const aMatches = keywordArray.reduce((count, keyword) => 
-                count + (a.content.toLowerCase().includes(keyword.toLowerCase()) ? 1 : 0), 0
+              const aMatches = keywordArray.reduce(
+                (count, keyword) =>
+                  count +
+                  (a.content.toLowerCase().includes(keyword.toLowerCase())
+                    ? 1
+                    : 0),
+                0
               );
-              const bMatches = keywordArray.reduce((count, keyword) => 
-                count + (b.content.toLowerCase().includes(keyword.toLowerCase()) ? 1 : 0), 0
+              const bMatches = keywordArray.reduce(
+                (count, keyword) =>
+                  count +
+                  (b.content.toLowerCase().includes(keyword.toLowerCase())
+                    ? 1
+                    : 0),
+                0
               );
               return bMatches - aMatches;
             });
