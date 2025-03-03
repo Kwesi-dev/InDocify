@@ -361,14 +361,14 @@ export default function PricingSection() {
               <div className="text-4xl font-bold text-white mb-2">
                 {billingPeriod === "monthly" ? (
                   <>
-                    $6.99
+                    $8
                     <span className="text-lg font-normal text-white/70">
                       /month
                     </span>
                   </>
                 ) : (
                   <>
-                    $75
+                    $80
                     <span className="text-lg font-normal text-white/70">
                       /year
                     </span>
@@ -377,8 +377,8 @@ export default function PricingSection() {
               </div>
               {billingPeriod === "annual" && (
                 <p className="text-white/70 mb-6 text-sm">
-                  <span className="line-through">$84</span>{" "}
-                  <span className="text-[#CCFF00]">Save $9 (11% off)</span>
+                  <span className="line-through">$96</span>{" "}
+                  <span className="text-[#CCFF00]">Save $16 (17% off)</span>
                 </p>
               )}
               <p className="text-white/70 mb-6">Perfect for small teams</p>
@@ -425,14 +425,14 @@ export default function PricingSection() {
               <div className="text-4xl font-bold text-white mb-2">
                 {billingPeriod === "monthly" ? (
                   <>
-                    $10
+                    $12
                     <span className="text-lg font-normal text-white/70">
                       /month
                     </span>
                   </>
                 ) : (
                   <>
-                    $100
+                    $120
                     <span className="text-lg font-normal text-white/70">
                       /year
                     </span>
@@ -441,8 +441,8 @@ export default function PricingSection() {
               </div>
               {billingPeriod === "annual" && (
                 <p className="text-white/70 mb-6 text-sm">
-                  <span className="line-through">$120</span>{" "}
-                  <span className="text-[#CCFF00]">Save $20 (16.7% off)</span>
+                  <span className="line-through">$144</span>{" "}
+                  <span className="text-[#CCFF00]">Save $24 (17% off)</span>
                 </p>
               )}
               <p className="text-white/70 mb-6">
