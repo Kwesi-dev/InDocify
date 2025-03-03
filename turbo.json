@@ -32,7 +32,8 @@
         "ENTERPRISE_MONTHLY_VARIANT_ID",
         "ENTERPRISE_ANNUAL_VARIANT_ID",
         "BASE_URL",
-        "LEMON_SQUEEZY_SIGNING_SECRET"
+        "LEMON_SQUEEZY_SIGNING_SECRET",
+        "GITHUB_API_SIGNING_SECRET"
       ]
     },
     "lint": {

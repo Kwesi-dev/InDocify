@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, CreditCard, X, Loader2, Crown } from "lucide-react";
+import { Check, CreditCard, X, Loader2, Crown, Bell } from "lucide-react";
 import TitleTag from "./title-tag";
 import {
   checkout,
@@ -319,7 +319,7 @@ export default function PricingSection() {
         </div>
 
         <div className="relative mx-auto">
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 filter blur-sm pointer-events-none gap-8">
             {/* Free Tier */}
             <div className="bg-white/5 rounded-xl p-8">
               <h3 className="text-2xl font-bold text-white mb-2">Free Tier</h3>
@@ -474,6 +474,20 @@ export default function PricingSection() {
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+          {/* Coming Soon Overlay */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="bg-[#1a1f1a]/95 backdrop-blur-lg p-8 rounded-2xl border border-white/10 max-w-md w-full text-center">
+              <div className="w-16 h-16 rounded-full bg-[#CCFF00]/20 flex items-center justify-center mx-auto mb-6">
+                <Bell className="w-8 h-8 text-[#CCFF00]" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-2">
+                Pricing Coming Soon
+              </h3>
+              <p className="text-white/70 mb-6">
+                We&apos;re finalizing our pricing plans.
+              </p>
             </div>
           </div>
         </div>
