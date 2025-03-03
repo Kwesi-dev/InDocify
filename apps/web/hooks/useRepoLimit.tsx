@@ -49,7 +49,7 @@ const useRepoLimit = () => {
         repoCount,
         privateRepoCount,
         isLimited: isFreeTier && repoCount >= 2,
-        isProLimited: isProTier && privateRepoCount >= 5,
+        isProLimited: isProTier && privateRepoCount >= 10,
       } as RepoLimitResponse;
     },
   });

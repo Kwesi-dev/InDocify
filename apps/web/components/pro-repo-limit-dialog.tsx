@@ -9,7 +9,7 @@ import {
   DialogDescription,
 } from "@workspace/ui/components/dialog";
 import { Button } from "@workspace/ui/components/button";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 interface ProRepoLimitDialogProps {
   isOpen: boolean;
@@ -21,9 +21,14 @@ export function ProRepoLimitDialog({
   onClose,
 }: ProRepoLimitDialogProps) {
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleUpgrade = () => {
-    router.push("#pricing");
+    if (pathname === "/") {
+      router.push("#pricing");
+    } else {
+      router.push("/#pricing");
+    }
     onClose();
   };
 
@@ -58,7 +63,7 @@ export function ProRepoLimitDialog({
               <Button
                 onClick={onClose}
                 variant="outline"
-                className="w-full border-white/10 text-white hbg-white/5"
+                className="w-full border-white/10 text-white bg-white/5"
               >
                 Maybe Later
               </Button>

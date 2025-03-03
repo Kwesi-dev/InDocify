@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import {
   Dialog,
@@ -21,9 +21,14 @@ export function PrivateRepoAccessDialog({
   onClose,
 }: PrivateRepoAccessDialogProps) {
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleUpgrade = () => {
-    router.push("#pricing");
+    if (pathname === "/") {
+      router.push("#pricing");
+    } else {
+      router.push("/#pricing");
+    }
     onClose();
   };
 

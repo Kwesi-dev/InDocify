@@ -55,9 +55,12 @@ export function RepoSelector({
           repos = savedRepos;
         }
       }
+      console.log("repos supabase", repos);
       return repos ?? [];
     },
   });
+
+  console.log("repos", repos);
 
   const filteredRepos =
     repos && !isLoading
@@ -130,7 +133,7 @@ export function RepoSelector({
                     <Button
                       variant="ghost"
                       className={cn(
-                        "w-full justify-start gap-2 text-left hover:bg-white/5",
+                        "w-full flex-[0.7] justify-start gap-2 text-left hover:bg-white/5",
                         selectedRepo === repo.name && "bg-white/10"
                       )}
                       disabled={selectedRepo === repo.name}

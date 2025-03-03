@@ -28,13 +28,6 @@ export async function GET() {
         email: session?.user?.email,
       };
     });
-    //save repos to supabase
-    const { error } = await supabase.from("github_repos").upsert(repos, {
-      onConflict: "name,email",
-    });
-    if (error) {
-      console.log("error", error);
-    }
 
     return new Response(JSON.stringify(repos));
   } catch (error) {

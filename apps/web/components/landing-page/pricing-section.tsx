@@ -22,7 +22,7 @@ const features = [
   {
     name: "Private Repositories",
     free: false,
-    pro: "Up to 5",
+    pro: "Up to 10",
     enterprise: "Unlimited",
   },
   {

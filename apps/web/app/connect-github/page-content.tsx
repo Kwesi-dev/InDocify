@@ -67,7 +67,7 @@ export default function PageContent() {
 
   const { data: repos, isLoading: isLoadingRepos } = useQuery({
     enabled: !!githubAccessToken,
-    queryKey: ["repos"],
+    queryKey: ["github repos"],
     queryFn: async () => {
       const res = await fetch("/api/repo");
       const data = await res.json();

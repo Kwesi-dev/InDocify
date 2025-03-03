@@ -42,15 +42,17 @@ const UserLandingProfile = ({ session }: { session: Session }) => {
             <span>RepoTalk Room</span>
           </Link>
 
-          <div className="border-t border-white/10 my-1" />
           {isSubscribed && (
-            <Link
-              href="/connect-github"
-              className="flex items-center gap-2 px-4 py-2 text-white hover:bg-white/5 transition-colors"
-            >
-              <Github className="w-4 h-4" />
-              <span>Connect to Github</span>
-            </Link>
+            <>
+              <div className="border-t border-white/10 my-1" />
+              <Link
+                href="/connect-github"
+                className="flex items-center gap-2 px-4 py-2 text-white hover:bg-white/5 transition-colors"
+              >
+                <Github className="w-4 h-4" />
+                <span>Connect to Github</span>
+              </Link>
+            </>
           )}
           <div className="border-t border-white/10 my-1" />
           <Link

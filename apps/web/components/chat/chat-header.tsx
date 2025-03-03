@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { Button } from "@workspace/ui/components/button";
 import { toast } from "@workspace/ui/hooks/use-toast";
 import { useState } from "react";
+import { useSubscription } from "@/hooks/use-subscription";
 
 const RepoDetails = dynamic(() => import("./repo-sheet"), {
   ssr: false,
@@ -21,6 +22,7 @@ export function RepoHeader() {
   const email = session?.user?.email;
   const [isUpdating, setIsUpdating] = useState(false);
   const queryClient = useQueryClient();
+  const { isSubscribed } = useSubscription();
 
   const { data } = useQuery({
     enabled: !!selectedRepo && !!supabase,
@@ -81,59 +83,61 @@ export function RepoHeader() {
             <div className="h-2 w-2 rounded-full bg-[#CCFF00]" />
             <span>{repoStats?.commits} commits</span>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-white/50 hover:text-white hover:bg-white/10 ml-auto"
-            onClick={async () => {
-              try {
-                if (!selectedRepo || !owner) return;
-                setIsUpdating(true);
+          {isSubscribed ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-white/50 hover:text-white hover:bg-white/10 ml-auto"
+              onClick={async () => {
+                try {
+                  if (!selectedRepo || !owner) return;
+                  setIsUpdating(true);
 
-                const response = await fetch(
-                  `/api/repo/pull-latest?owner=${owner}&repo=${selectedRepo}`
-                );
-                const result = await response.json();
-
-                if (!response.ok) {
-                  throw new Error(
-                    result.error || "Failed to pull latest changes"
+                  const response = await fetch(
+                    `/api/repo/pull-latest?owner=${owner}&repo=${selectedRepo}`
                   );
-                }
+                  const result = await response.json();
 
-                if (result.noUpdates) {
+                  if (!response.ok) {
+                    throw new Error(
+                      result.error || "Failed to pull latest changes"
+                    );
+                  }
+
+                  if (result.noUpdates) {
+                    toast({
+                      title: "No Updates Available",
+                      description: result.message,
+                    });
+                  } else {
+                    await queryClient.invalidateQueries({
+                      queryKey: ["repo", selectedRepo],
+                    });
+                    toast({
+                      title: "Repository Updated",
+                      description: "Successfully pulled the latest changes.",
+                    });
+                  }
+                } catch (error) {
+                  console.error("Error pulling latest changes:", error);
                   toast({
-                    title: "No Updates Available",
-                    description: result.message,
+                    title: "Update Failed",
+                    description:
+                      "Failed to pull latest changes. Please try again.",
+                    variant: "destructive",
                   });
-                } else {
-                  await queryClient.invalidateQueries({
-                    queryKey: ["repo", selectedRepo],
-                  });
-                  toast({
-                    title: "Repository Updated",
-                    description: "Successfully pulled the latest changes.",
-                  });
+                } finally {
+                  setIsUpdating(false);
                 }
-              } catch (error) {
-                console.error("Error pulling latest changes:", error);
-                toast({
-                  title: "Update Failed",
-                  description:
-                    "Failed to pull latest changes. Please try again.",
-                  variant: "destructive",
-                });
-              } finally {
-                setIsUpdating(false);
-              }
-            }}
-            disabled={isUpdating}
-          >
-            <RotateCw
-              className={`h-4 w-4 mr-2 ${isUpdating ? "animate-spin" : ""}`}
-            />
-            {isUpdating ? "Updating..." : "Pull Latest Changes"}
-          </Button>
+              }}
+              disabled={isUpdating}
+            >
+              <RotateCw
+                className={`h-4 w-4 mr-2 ${isUpdating ? "animate-spin" : ""}`}
+              />
+              {isUpdating ? "Updating..." : "Pull Latest Changes"}
+            </Button>
+          ) : null}
         </div>
       </div>
     </div>

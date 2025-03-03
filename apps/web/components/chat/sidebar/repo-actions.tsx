@@ -92,7 +92,7 @@ export function RepoActions({ repoName, owner, setOpen }: RepoActionsProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 text-white/50 hover:text-white hover:bg-white/10"
+          className="h-8 w-8 flex-[0.3] text-white/50 hover:text-white hover:bg-white/10"
         >
           <Trash2 className="h-4 w-4" />
         </Button>
