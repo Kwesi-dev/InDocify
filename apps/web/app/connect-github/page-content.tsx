@@ -62,10 +62,8 @@ export default function PageContent() {
   });
   const { updateRepoCounts, repoCounts: repoLimitData } = useRepoLimit();
   const [showLimitDialog, setShowLimitDialog] = useState(false);
-  const { subscription, isSubscribed } = useSubscription();
+  const { isSubscribed, tier } = useSubscription();
   const [showOrgRepoDialog, setShowOrgRepoDialog] = useState(false);
-
-  console.log("subscription", subscription);
 
   const { data: repos, isLoading: isLoadingRepos } = useQuery({
     enabled: !!githubAccessToken,
@@ -119,7 +117,7 @@ export default function PageContent() {
         return;
       } else if (
         isSubscribed &&
-        subscription?.tier === "pro" &&
+        tier?.includes("PRO") &&
         size > MAX_SIZE_LIMIT_FOR_PRO_PLAN
       ) {
         setSizeLimitExceeded({
@@ -131,7 +129,7 @@ export default function PageContent() {
         return;
       } else if (
         isSubscribed &&
-        subscription?.tier === "enterprise" &&
+        tier?.includes("ENTERPRISE") &&
         size > MAX_SIZE_LIMIT_FOR_ENTERPRISE_PLAN
       ) {
         setSizeLimitExceeded({
@@ -184,7 +182,7 @@ export default function PageContent() {
 
       if (
         isOrgRepo &&
-        (!isSubscribed || subscription?.tier !== "enterprise") &&
+        (!isSubscribed || !tier?.includes("ENTERPRISE")) &&
         isPrivate
       ) {
         setShowOrgRepoDialog(true);

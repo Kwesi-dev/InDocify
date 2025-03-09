@@ -13,8 +13,6 @@ export default async function PricingSectionServer() {
     getSubscription(supabase),
   ]);
 
-  console.log("subscription", subscription);
-
   return (
     <PricingSection
       products={products ?? []}
