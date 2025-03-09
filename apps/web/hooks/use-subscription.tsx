@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { getUserSubscription } from "@/lib/lemon-squeezy/subscription";
-import { toast } from "@workspace/ui/hooks/use-toast";
+import { useSupabaseClient } from "@/lib/SupabaseClientProvider";
 
 export type Subscription = {
   id: string;
@@ -19,14 +18,21 @@ export function useSubscription() {
   const { data: session } = useSession();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(false);
+  const supabase = useSupabaseClient();
 
   useEffect(() => {
     async function fetchSubscription() {
-      if (session) {
+      if (session && supabase) {
         setLoading(true);
         try {
-          const sub = await getUserSubscription();
+          const { data: sub } = await supabase
+            .from("subscriptions")
+            .select("*, prices(*, products(*))")
+            .in("status", ["trialing", "active"])
+            .eq("user_id", session?.user?.id)
+            .maybeSingle();
           setSubscription(sub);
+          console.log("subscription client", sub);
         } catch (error) {
           console.error("Error fetching subscription:", error);
         } finally {
@@ -36,44 +42,11 @@ export function useSubscription() {
     }
 
     fetchSubscription();
-  }, [session]);
-
-  const cancelSubscription = async () => {
-    if (!subscription) return;
-
-    try {
-      const response = await fetch("/api/subscription/cancel", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subscriptionId: subscription.id }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to cancel subscription");
-      }
-
-      // Refresh subscription data
-      const updatedSub = await getUserSubscription();
-      setSubscription(updatedSub);
-
-      toast({
-        title: "Subscription cancelled",
-        description:
-          "Your subscription will remain active until the end of the billing period.",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to cancel subscription. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
+  }, [session, supabase]);
 
   return {
     subscription,
     loading,
     isSubscribed: !!subscription && subscription.status === "active",
-    cancelSubscription,
   };
 }

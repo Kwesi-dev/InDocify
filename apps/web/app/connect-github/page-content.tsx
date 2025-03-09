@@ -65,6 +65,8 @@ export default function PageContent() {
   const { subscription, isSubscribed } = useSubscription();
   const [showOrgRepoDialog, setShowOrgRepoDialog] = useState(false);
 
+  console.log("subscription", subscription);
+
   const { data: repos, isLoading: isLoadingRepos } = useQuery({
     enabled: !!githubAccessToken,
     queryKey: ["github repos"],

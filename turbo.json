@@ -25,15 +25,16 @@
         "OPENAI_API_KEY",
         "GITHUB_API_KEY",
         "CLARITY_ID",
-        "LEMON_SQUEEZY_API_KEY",
         "STORE_ID",
         "PRO_MONTHLY_VARIANT_ID",
         "PRO_ANNUAL_VARIANT_ID",
         "ENTERPRISE_MONTHLY_VARIANT_ID",
         "ENTERPRISE_ANNUAL_VARIANT_ID",
         "BASE_URL",
-        "LEMON_SQUEEZY_SIGNING_SECRET",
-        "GITHUB_API_SIGNING_SECRET"
+        "GITHUB_API_SIGNING_SECRET",
+        "POLAR_ACCESS_TOKEN",
+        "POLAR_WEBHOOK_SECRET",
+        "POLAR_ORGANIZATION_ID"
       ]
     },
     "lint": {

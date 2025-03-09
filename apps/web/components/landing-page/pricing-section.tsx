@@ -1,16 +1,12 @@
 "use client";
 
-import { Check, CreditCard, X, Loader2, Crown, Bell } from "lucide-react";
+import { Check, CreditCard, X, Loader2, Crown } from "lucide-react";
 import TitleTag from "./title-tag";
-import {
-  checkout,
-  updateActiveSubscription,
-} from "@/lib/lemon-squeezy/actions";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useSession } from "next-auth/react";
 import { toast } from "@workspace/ui/hooks/use-toast";
-import { useSubscription } from "@/hooks/use-subscription";
+import { Session } from "next-auth";
+import { createOrRetrieveCustomer } from "@/lib/polar/actions";
 
 const features = [
   {
@@ -69,133 +65,131 @@ const features = [
   },
 ];
 
-export default function PricingSection() {
+export default function PricingSection({
+  products,
+  subscription,
+  session,
+}: {
+  products: Record<string, any>[];
+  subscription: Record<string, any> | null;
+  session: Session | null;
+}) {
   const router = useRouter();
-  const { data: session } = useSession();
-  const {
-    subscription,
-    isSubscribed,
-    loading: subscriptionLoading,
-  } = useSubscription();
 
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">(
     "monthly"
   );
-  const [loadingPro, setLoadingPro] = useState(false);
-  const [loadingEnterprise, setLoadingEnterprise] = useState(false);
 
-  const handleProCheckout = async () => {
-    if (!session) {
-      router.push("/signup");
-      return;
+  const [priceIdLoading, setPriceIdLoading] = useState<string | undefined>();
+
+  // Helper functions to get product and price information
+  const getProductPrice = (productName: string) => {
+    const product = products.find((product) => product.name === productName);
+    if (!product) return null;
+
+    const interval = billingPeriod === "monthly" ? "month" : "year";
+    return product.prices?.find(
+      (price: any) => price.recurring_interval === interval
+    );
+  };
+
+  const formatPrice = (amount: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 0,
+    }).format(amount / 100);
+  };
+
+  // Get Pro and Enterprise product prices
+  const proProductName =
+    billingPeriod === "monthly" ? "PRO_MONTHLY" : "PRO_YEARLY";
+  const enterpriseProductName =
+    billingPeriod === "monthly" ? "ENTERPRISE_MONTHLY" : "ENTERPRISE_YEARLY";
+
+  const proPrice = getProductPrice(proProductName);
+  const enterprisePrice = getProductPrice(enterpriseProductName);
+
+  const handleStripeCheckout = async (price: any, currentSubscription: any) => {
+    if (currentSubscription) {
+      return router.push("/portal");
     }
 
-    setLoadingPro(true);
+    setPriceIdLoading(price.id);
+
+    if (!session?.user) {
+      setPriceIdLoading(undefined);
+      return router.push("/signup");
+    }
+
     try {
-      // If already subscribed, update the subscription (handles both upgrade and downgrade)
-      if (isSubscribed && subscription?.lemon_squeezy_subscription_id) {
-        const response = await updateActiveSubscription(
-          subscription.lemon_squeezy_subscription_id,
-          "pro",
-          billingPeriod
+      const polarCustomerId = await createOrRetrieveCustomer({
+        email: session.user.email || "",
+        uuid: session.user.id || "",
+      });
+      // Create a URL to the checkout page with the necessary parameters
+      const url = new URL("/checkout", window.location.origin);
+      url.searchParams.set("productPriceId", price.id);
+      url.searchParams.set("customerId", polarCustomerId);
+      url.searchParams.set(
+        "metadata",
+        JSON.stringify({ customerId: session.user.id })
+      );
+
+      // Add any additional parameters needed for your checkout process
+      if (session.user.id) {
+        url.searchParams.set(
+          "metadata",
+          JSON.stringify({ customerId: session.user.id })
         );
-
-        if (response.success) {
-          toast({
-            title: "Success",
-            description: response.message,
-          });
-          window.location.reload();
-          return;
-        } else {
-          toast({
-            title: "Error",
-            description: response.message || "Failed to update subscription",
-            variant: "destructive",
-          });
-        }
-        return;
       }
 
-      // Only create new checkout if not subscribed
-      const response = await checkout(billingPeriod, "pro");
-      if (typeof response === "string") {
-        window.location.href = response;
-      } else {
-        toast({
-          title: "Error",
-          description: response.message || "Failed to process checkout",
-          variant: "destructive",
-        });
-      }
+      router.push(url.toString());
     } catch (error) {
       toast({
         title: "Error",
-        description: "An unexpected error occurred",
+        description: "An unexpected error occurred during checkout",
         variant: "destructive",
       });
     } finally {
-      setLoadingPro(false);
+      setPriceIdLoading(undefined);
     }
   };
 
-  const handleEnterpriseCheckout = async () => {
-    if (!session) {
-      router.push("/signup");
-      return;
-    }
-
-    setLoadingEnterprise(true);
-    try {
-      // If already subscribed, update the subscription (handles both upgrade and downgrade)
-      if (isSubscribed && subscription?.lemon_squeezy_subscription_id) {
-        const response = await updateActiveSubscription(
-          subscription.lemon_squeezy_subscription_id,
-          "enterprise",
-          billingPeriod
-        );
-
-        if (response.success) {
-          toast({
-            title: "Success",
-            description: response.message,
-          });
-          window.location.reload();
-          return;
-        } else {
-          toast({
-            title: "Error",
-            description: response.message || "Failed to update subscription",
-            variant: "destructive",
-          });
-        }
-        return;
-      }
-
-      // Only create new checkout if not subscribed
-      const response = await checkout(billingPeriod, "enterprise");
-      if (typeof response === "string") {
-        window.location.href = response;
+  const handleProCheckout = () => {
+    if (!proPrice) {
+      if (!session) {
+        router.push("/signup");
       } else {
         toast({
           title: "Error",
-          description: response.message || "Failed to process checkout",
+          description: "Product price not found",
           variant: "destructive",
         });
       }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive",
-      });
-    } finally {
-      setLoadingEnterprise(false);
+      return;
     }
+    handleStripeCheckout(proPrice, subscription);
+  };
+
+  const handleEnterpriseCheckout = () => {
+    if (!enterprisePrice) {
+      if (!session) {
+        router.push("/signup");
+      } else {
+        toast({
+          title: "Error",
+          description: "Product price not found",
+          variant: "destructive",
+        });
+      }
+      return;
+    }
+    handleStripeCheckout(enterprisePrice, subscription);
   };
 
   const getProButtonText = () => {
-    if (loadingPro) {
+    if (priceIdLoading && priceIdLoading === proPrice && proPrice?.id) {
       return (
         <span className="flex items-center justify-center gap-2">
           <Loader2 className="w-4 h-4 animate-spin" />
@@ -204,35 +198,15 @@ export default function PricingSection() {
       );
     }
 
-    if (subscriptionLoading) {
-      return (
-        <span className="flex items-center justify-center gap-2">
-          <Loader2 className="w-4 h-4 animate-spin" />
-          Loading...
-        </span>
-      );
-    }
-
-    if (isSubscribed) {
-      if (subscription?.tier === "enterprise") {
-        return "Downgrade to Pro";
-      }
-      if (
-        subscription?.tier === "pro" &&
-        subscription.plan_type !== billingPeriod
-      ) {
-        return `Switch to ${billingPeriod === "monthly" ? "Monthly" : "Annual"} Plan`;
-      }
-      if (subscription?.tier === "pro") {
-        return "Current Plan";
-      }
-    }
-
-    return "Get Started with Pro";
+    return subscription ? "Manage" : "Get Started with Pro";
   };
 
   const getEnterpriseButtonText = () => {
-    if (loadingEnterprise) {
+    if (
+      priceIdLoading &&
+      priceIdLoading === enterprisePrice &&
+      enterprisePrice?.id
+    ) {
       return (
         <span className="flex items-center justify-center gap-2">
           <Loader2 className="w-4 h-4 animate-spin" />
@@ -241,39 +215,7 @@ export default function PricingSection() {
       );
     }
 
-    if (subscriptionLoading) {
-      return (
-        <span className="flex items-center justify-center gap-2">
-          <Loader2 className="w-4 h-4 animate-spin" />
-          Loading...
-        </span>
-      );
-    }
-
-    if (isSubscribed) {
-      if (subscription?.tier === "pro") {
-        return "Upgrade to Enterprise";
-      }
-      if (
-        subscription?.tier === "enterprise" &&
-        subscription.plan_type !== billingPeriod
-      ) {
-        return `Switch to ${billingPeriod === "monthly" ? "Monthly" : "Annual"} Plan`;
-      }
-      if (subscription?.tier === "enterprise") {
-        return "Current Plan";
-      }
-    }
-
-    return "Get Started with Enterprise";
-  };
-  const isButtonDisabled = (tier: "pro" | "enterprise") => {
-    if (loadingPro || loadingEnterprise || subscriptionLoading) return true;
-    if (!isSubscribed) return false;
-
-    return (
-      subscription?.tier === tier && subscription?.plan_type === billingPeriod
-    );
+    return subscription ? "Manage" : "Get Started with Enterprise";
   };
 
   return (
@@ -319,7 +261,7 @@ export default function PricingSection() {
         </div>
 
         <div className="relative mx-auto">
-          <div className="grid md:grid-cols-3 filter blur-sm pointer-events-none gap-8">
+          <div className="grid md:grid-cols-3 gap-8">
             {/* Free Tier */}
             <div className="bg-white/5 rounded-xl p-8">
               <h3 className="text-2xl font-bold text-white mb-2">Free Tier</h3>
@@ -359,18 +301,18 @@ export default function PricingSection() {
               </div>
               <h3 className="text-2xl font-bold text-white mb-2">Pro</h3>
               <div className="text-4xl font-bold text-white mb-2">
-                {billingPeriod === "monthly" ? (
+                {proPrice ? (
                   <>
-                    $8
+                    {formatPrice(proPrice.price_amount)}
                     <span className="text-lg font-normal text-white/70">
-                      /month
+                      /{billingPeriod === "monthly" ? "month" : "year"}
                     </span>
                   </>
                 ) : (
                   <>
-                    $80
+                    {billingPeriod === "monthly" ? "$8" : "$80"}
                     <span className="text-lg font-normal text-white/70">
-                      /year
+                      /{billingPeriod === "monthly" ? "month" : "year"}
                     </span>
                   </>
                 )}
@@ -381,12 +323,8 @@ export default function PricingSection() {
                   <span className="text-[#CCFF00]">Save $16 (17% off)</span>
                 </p>
               )}
-              <p className="text-white/70 mb-6">Perfect for small teams</p>
               <button
-                disabled={isButtonDisabled("pro")}
-                className={`w-full px-6 py-3 rounded-full mb-8 font-medium relative transition-colors bg-[#CCFF00] text-black hover:bg-[#CCFF00]/90 ${
-                  isButtonDisabled("pro") ? "opacity-70 cursor-not-allowed" : ""
-                }`}
+                className={`w-full px-6 py-3 rounded-full mb-8 font-medium relative transition-colors bg-[#CCFF00] text-black hover:bg-[#CCFF00]/90`}
                 onClick={handleProCheckout}
               >
                 {getProButtonText()}
@@ -423,18 +361,18 @@ export default function PricingSection() {
               </div>
               <h3 className="text-2xl font-bold text-white mb-2">Enterprise</h3>
               <div className="text-4xl font-bold text-white mb-2">
-                {billingPeriod === "monthly" ? (
+                {enterprisePrice ? (
                   <>
-                    $12
+                    {formatPrice(enterprisePrice.price_amount)}
                     <span className="text-lg font-normal text-white/70">
-                      /month
+                      /{billingPeriod === "monthly" ? "month" : "year"}
                     </span>
                   </>
                 ) : (
                   <>
-                    $120
+                    {billingPeriod === "monthly" ? "$12" : "$120"}
                     <span className="text-lg font-normal text-white/70">
-                      /year
+                      /{billingPeriod === "monthly" ? "month" : "year"}
                     </span>
                   </>
                 )}
@@ -445,16 +383,8 @@ export default function PricingSection() {
                   <span className="text-[#CCFF00]">Save $24 (17% off)</span>
                 </p>
               )}
-              <p className="text-white/70 mb-6">
-                Increased imported repo size limit
-              </p>
               <button
-                disabled={isButtonDisabled("enterprise")}
-                className={`w-full px-6 py-3 rounded-full mb-8 font-medium relative transition-colors bg-purple-500 text-white hover:bg-purple-600 ${
-                  isButtonDisabled("enterprise")
-                    ? "opacity-70 cursor-not-allowed"
-                    : ""
-                }`}
+                className={`w-full px-6 py-3 rounded-full mb-8 font-medium relative transition-colors bg-purple-500 text-white hover:bg-purple-600`}
                 onClick={handleEnterpriseCheckout}
               >
                 {getEnterpriseButtonText()}
@@ -474,20 +404,6 @@ export default function PricingSection() {
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
-          {/* Coming Soon Overlay */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="bg-[#1a1f1a]/95 backdrop-blur-lg p-8 rounded-2xl border border-white/10 max-w-md w-full text-center">
-              <div className="w-16 h-16 rounded-full bg-[#CCFF00]/20 flex items-center justify-center mx-auto mb-6">
-                <Bell className="w-8 h-8 text-[#CCFF00]" />
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-2">
-                Pricing Coming Soon
-              </h3>
-              <p className="text-white/70 mb-6">
-                We&apos;re finalizing our pricing plans.
-              </p>
             </div>
           </div>
         </div>

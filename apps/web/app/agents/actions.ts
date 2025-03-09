@@ -72,26 +72,6 @@ async function fetchFileContent(file: any, headers: HeadersInit) {
   return file;
 }
 
-// async function saveFilesToSupabase(files: Record<string, any[]>) {
-//   const session = await auth();
-//   const client = await supabaseClient();
-
-//   const { data, error } = await client.from("github_files").upsert(
-//     {
-//       project_overview: files["Project Overview"],
-//       github_access_token: session?.githubAccessToken as string,
-//     },
-//     {
-//       onConflict: "github_access_token",
-//     }
-//   );
-//   if (error) {
-//     console.error("Error inserting files:", error);
-//   } else {
-//     console.log("Files inserted successfully:", data);
-//   }
-// }
-
 export async function fetchGroupedFilesWithContent(
   owner: string,
   repo: string

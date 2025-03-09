@@ -56,7 +56,7 @@ const UserLandingProfile = ({ session }: { session: Session }) => {
           )}
           <div className="border-t border-white/10 my-1" />
           <Link
-            href="/subscription"
+            href="/portal"
             className="px-4 py-3 text-white/90 hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2"
           >
             <Lock className="w-4 h-4 shrink-0" />
