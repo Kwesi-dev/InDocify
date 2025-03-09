@@ -14,7 +14,7 @@ const useRepoLimit = () => {
   const { data: session } = useSession();
   const supabase = useSupabaseClient();
   const queryClient = useQueryClient();
-  const { subscription } = useSubscription();
+  const { tier, subscription } = useSubscription();
 
   const { data, isLoading } = useQuery({
     enabled: !!(supabase && session),
@@ -42,8 +42,8 @@ const useRepoLimit = () => {
       // Free tier: 2 repos total
       // Pro tier: Unlimited public repos, 5 private repos
       // Enterprise: Unlimited all
-      const isFreeTier = !subscription || subscription.tier === "free";
-      const isProTier = subscription?.tier === "pro";
+      const isFreeTier = !subscription;
+      const isProTier = tier?.includes("PRO");
 
       return {
         repoCount,
@@ -57,10 +57,7 @@ const useRepoLimit = () => {
   const updateRepoCounts = async (isPrivate: boolean) => {
     if (!supabase || !session) return;
 
-    if (
-      (subscription?.tier === "pro" && !isPrivate) ||
-      subscription?.tier === "enterprise"
-    ) {
+    if ((tier?.includes("PRO") && !isPrivate) || tier?.includes("ENTERPRISE")) {
       return;
     }
 

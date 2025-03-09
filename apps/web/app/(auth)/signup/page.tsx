@@ -13,7 +13,6 @@ const page = async ({
 }) => {
   const session = await auth();
   const { ["next-repo-url"]: nextRepoUrl, repo, owner } = await searchParams;
-  console.log(nextRepoUrl, repo, "server");
 
   if (session) {
     if (nextRepoUrl && repo) {

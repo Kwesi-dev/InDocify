@@ -23,8 +23,6 @@ export async function GET(req: Request) {
     const data = await res.json();
     const sizeInKb = data.size;
     const sizeInMb = Math.ceil(sizeInKb / 1024);
-
-    console.log("size in mb", sizeInMb);
     return new Response(JSON.stringify(sizeInMb));
   } catch (error) {
     console.log(

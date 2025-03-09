@@ -23,6 +23,8 @@ import { ChatActions } from "./chat-actions";
 import useQuestionLimit from "@/hooks/useQuestionLimit";
 import { useSubscription } from "@/hooks/use-subscription";
 
+export const maxDuration = 60;
+
 const FREE_TIER_LIMIT = 10;
 
 export function ChatInterface() {

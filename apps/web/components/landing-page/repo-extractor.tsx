@@ -78,7 +78,7 @@ const RepoExtractor = ({ className }: { className?: string }) => {
   const [analysingRepo, setAnalysingRepo] = useState(false);
   const supabase = useSupabaseClient();
   const router = useRouter();
-  const { subscription, isSubscribed } = useSubscription();
+  const { isSubscribed, tier } = useSubscription();
   const { updateRepoCounts, repoCounts: repoLimitData } = useRepoLimit();
   const [showLimitDialog, setShowLimitDialog] = useState(false);
   const [showPrivateRepoAccessDialog, setShowPrivateRepoAccessDialog] =
@@ -134,7 +134,7 @@ const RepoExtractor = ({ className }: { className?: string }) => {
         return;
       } else if (
         isSubscribed &&
-        subscription?.tier === "pro" &&
+        tier?.includes("PRO") &&
         size > MAX_SIZE_LIMIT_FOR_PRO_PLAN
       ) {
         setSizeLimitExceeded({
@@ -146,7 +146,7 @@ const RepoExtractor = ({ className }: { className?: string }) => {
         return;
       } else if (
         isSubscribed &&
-        subscription?.tier === "enterprise" &&
+        tier?.includes("ENTERPRISE") &&
         size > MAX_SIZE_LIMIT_FOR_ENTERPRISE_PLAN
       ) {
         setSizeLimitExceeded({
@@ -182,7 +182,7 @@ const RepoExtractor = ({ className }: { className?: string }) => {
 
       if (
         isOrgRepo &&
-        (!isSubscribed || subscription?.tier !== "enterprise") &&
+        (!isSubscribed || !tier?.includes("ENTERPRISE")) &&
         isPrivate
       ) {
         setShowOrgRepoDialog(true);
@@ -363,7 +363,7 @@ const RepoExtractor = ({ className }: { className?: string }) => {
         showRetry={errorDetails.showRetry}
       />
       <>
-        {subscription?.tier === "pro" ? (
+        {tier?.includes("PRO") ? (
           <ProRepoLimitDialog
             isOpen={showLimitDialog}
             onClose={() => setShowLimitDialog(false)}

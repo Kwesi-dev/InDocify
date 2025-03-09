@@ -103,7 +103,6 @@ export async function GET(req: Request) {
       { status: 200 }
     );
   } catch (error) {
-    console.log("error metadata", error);
     return new Response("Error getting repo metadata", { status: 500 });
   }
 }

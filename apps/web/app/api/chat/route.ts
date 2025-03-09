@@ -4,42 +4,8 @@ import { openai } from "@ai-sdk/openai";
 import { streamText, tool } from "ai";
 import { z } from "zod";
 
-// const embeddingModel = openai.embedding("text-embedding-ada-002");
-
-// async function getQueryEmbedding(query: string) {
-//   const { embedding } = await embed({
-//     model: embeddingModel,
-//     value: query,
-//   });
-//   return embedding;
-// }
-
-// async function findRelevantChunks(
-//   repo: string,
-//   queryEmbedding: number[],
-//   topK = 5
-// ) {
-//   const session = await auth();
-//   const supabase = await createSupabaseClient(
-//     session?.supabaseAccessToken as string
-//   );
-//   const { data, error } = await supabase
-//     .rpc("find_similar_chunks", {
-//       repo,
-//       query_embedding: queryEmbedding,
-//       top_k: topK,
-//     })
-//     .select("file_path, content");
-
-//   if (error) {
-//     console.error("Error querying embeddings:", error);
-//     return [];
-//   }
-
-//   return data;
-// }
 // Allow streaming responses up to 30 seconds
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 export async function POST(req: Request) {
   const { messages, repo, currentThread, owner } = await req.json();

@@ -6,8 +6,6 @@ import IndocifyLogo from "@/components/indocify-logo";
 import GoogleIcon from "@/components/google-icon";
 import { googleSignIn } from "@/app/actions";
 import { useSearchParams } from "next/navigation";
-import ParticlesAnimation from "@/components/particles-animation";
-// import ParticlesAnimation from "@/components/particles-animation";
 
 const features = [
   {
@@ -26,7 +24,7 @@ const features = [
     icon: GitBranch,
     title: "Real-Time Codebase Sync",
     description:
-      "Keep your InDocify codebase in sync with your repository. Automatic updates ensure documentation reflects every change or push.",
+      "Keep your InDocify codebase in sync with your repository. Pull repository changes in real-time.",
   },
 ];
 export default function SignupPageContent() {
@@ -48,11 +46,6 @@ export default function SignupPageContent() {
       : repoName && repoUrl
         ? `/login?next-repo-url=${repoUrl}&repo=${repoName}`
         : "/login";
-
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   await sendgridSignIn(email, googleCallbackUrl);
-  // };
 
   return (
     <div className="min-h-screen bg-[#1a1f1a] flex flex-col">
@@ -76,41 +69,6 @@ export default function SignupPageContent() {
                 </Link>
               </p>
             </div>
-
-            {/* <form onSubmit={handleSubmit} className="space-y-6"> */}
-            {/* <div>
-                <label htmlFor="email" className="sr-only">
-                  Email address
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#CCFF00] focus:border-transparent"
-                  placeholder="name@email.com"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-[#CCFF00] text-black px-6 py-3 rounded-lg hover:bg-[#CCFF00]/90 transition-colors font-medium"
-              >
-                Continue
-              </button>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-white/10"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-[#1a1f1a] text-white/50">OR</span>
-                </div>
-              </div> */}
-            {/* </form> */}
             <button
               type="button"
               className="w-full bg-white/5 border border-white/10 text-white px-6 py-3 rounded-lg hover:bg-white/10 transition-colors flex items-center justify-center gap-2"

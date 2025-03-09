@@ -23,7 +23,7 @@ export function QuestionLimitDialog({
   const router = useRouter();
 
   const handleUpgrade = () => {
-    router.push("/subscription");
+    router.push("/portal");
     onClose();
   };
 
