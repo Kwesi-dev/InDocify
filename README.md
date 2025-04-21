@@ -17,6 +17,19 @@ InDocify is an AI-powered tool that enables developers to explore and understand
 - No local setup or cloning required
 - Secure: No sensitive data is stored or shared
 
+## 🛠️ Tech Stack
+- Next.js
+- TypeScript
+- Tailwind CSS
+- pnpm
+- polar.sh
+- motion
+- ai-sdk
+- supabase
+- next-auth
+- tanstack-query
+- turborepo
+
 ## 📦 Getting Started
 ### Prerequisites
 - Node.js (v18 or newer recommended)
@@ -39,7 +52,17 @@ InDocify is an AI-powered tool that enables developers to explore and understand
    ```bash
    pnpm dev
    ```
-   The app should now be running at `http://localhost:3000`.
+   The app should now be running at `http://localhost:3000`.ß
+
+## 🗄️ Database Setup
+This project uses Supabase (PostgreSQL) for data storage.
+
+### Required Tables
+You will need to create the following tables in your Supabase project. You can use the Supabase dashboard or run the SQL below:
+
+- Adjust columns as needed for your use case.
+- Reference `.env.example` for required environment variables.
+- For additional tables or migrations, see [docs/database.md](docs/database.md) (if available) or set them up manually in the Supabase dashboard.
 
 ### Usage
 - Visit the web UI and enter the URL of a public repository to analyze its features.
