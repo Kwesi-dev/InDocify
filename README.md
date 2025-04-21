@@ -1,6 +1,17 @@
 # InDocify
 
+<div align="center">
+  <img src="apps/web/public/home.png" alt="InDocify Home" width="800"/>
+</div>
+
 InDocify helps developers instantly understand how features are implemented in any online repository using AI—no cloning, no manual digging.
+
+<div align="center">
+  <h3>📺 Watch the Demo</h3>
+  <a href="apps/web/public/demo.mp4">
+    <img src="https://img.shields.io/badge/Watch-Demo%20Video-blue?style=for-the-badge&logo=video" alt="Watch Demo Video"/>
+  </a>
+</div>
 
 ## 🚀 What is InDocify?
 InDocify is an AI-powered tool that enables developers to explore and understand the implementation details of any public code repository instantly. Using advanced AI, InDocify analyzes repositories and provides clear, actionable explanations of how features work—saving you hours of manual code reading and onboarding time.
